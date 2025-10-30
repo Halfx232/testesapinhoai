@@ -3,41 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="description" content="Entre em contato com a equipe do Jogo do Sapinho.">
+  <meta name="keywords" content="jogo, sapinho, contato, suporte">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contato - Jogo do Sapinho</title>
   <link rel="icon" href="https://em-content.zobj.net/thumbs/160/twitter/322/frog_1f438.png" type="image/png">
-  <link rel="stylesheet" href="styles.css">
+  <!-- Meta tags Open Graph -->
+  <meta property="og:title" content="Contato - Jogo do Sapinho">
+  <meta property="og:description" content="Entre em contato com a equipe do Jogo do Sapinho!">
+  <meta property="og:image" content="https://sapinho-ai.vercel.app/thumbnail.jpg">
+  <meta property="og:url" content="https://sapinho-ai.vercel.app/contato.html">
+  <meta property="og:type" content="website">
+  <!-- Meta tags Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://sapinho-ai.vercel.app/thumbnail.jpg">
+  <!-- Estilo inline inicial como fallback -->
+  <style>
+    html:not(.loaded) body { margin: 0; padding: 0; font-family: sans-serif; background: linear-gradient(180deg, #1a1a1a, #2e2e2e); color: #fff; visibility: hidden; }
+    #top-bar, #contact-section, #footer { display: none; }
+    a { color: white; text-decoration: none; }
+
+    /* Estilos base */
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    #contact-section {
+      padding: 20px;
+      background: #fff;
+      color: #000;
+      text-align: center;
+      margin: 10px auto;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 2;
+    }
+
+    #contact-section h2 {
+      font-size: 20px;
+      color: #00ff00;
+      margin: 0 0 10px;
+    }
+
+    #contact-section a {
+      color: #00ff00;
+      text-decoration: underline;
+    }
+
+    /* Desktop: Expandir para largura total */
+    @media only screen and (min-width: 1024px) {
+      #contact-section {
+        padding: 40px;
+        margin: 30px auto;
+        max-width: 1800px;
+        width: 100%;
+        max-width: 1800px;
+      }
+
+      #contact-section h2 {
+        font-size: 28px;
+      }
+
+      #contact-section p {
+        font-size: 18px;
+        line-height: 1.6;
+      }
+    }
+  </style>
+  <!-- Pré-carregar fontes e CSS -->
+  <link rel="preload" href="styles-mobile.css?v=23" as="style" media="screen and (max-width: 1023px)" onload="this.rel='stylesheet'">
+  <link rel="preload" href="styles-desktop.css?v=6" as="style" media="screen and (min-width: 1024px)" onload="this.rel='stylesheet'">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles-mobile.css?v=23" media="screen and (max-width: 1023px)">
+  <link rel="stylesheet" href="styles-desktop.css?v=6" media="screen and (min-width: 1024px)">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-SEU-ID" crossorigin="anonymous"></script>
 </head>
 <body>
   <div id="top-bar">
-    <nav>
+    <button id="menu-toggle" class="fa fa-bars"></button>
+    <div class="weather-clock">
+      <div id="weather">Previsão do Tempo</div>
+      <div id="clock">Relógio</div>
+    </div>
+    <nav id="nav-menu">
       <ul>
-        <li><a href="/">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="sobre.html">Sobre</a></li>
         <li><a href="contato.html">Contato</a></li>
         <li><a href="politicas.html">Políticas</a></li>
       </ul>
-      <div id="weather">Previsão do Tempo</div>
-      <div id="clock">Relógio</div>
     </nav>
   </div>
-  <div id="about-section">
+
+  <div id="contact-section">
     <h2>Contato</h2>
-    <p>Entre em contato conosco pelo e-mail: <a href="mailto:contato@sapinhoai.com">contato@sapinhoai.com</a></p>
+    <p>Entre em contato com a equipe do Jogo do Sapinho por e-mail: <a href="mailto:sapinhoai@example.com">sapinhoai@example.com</a>. Estamos abertos a sugestões e feedback!</p>
   </div>
+
   <div id="footer">Siga o Sapinho nas redes sociais! <a href="#">Instagram</a> | <a href="#">YouTube</a> | <a href="#">TikTok</a></div>
+
   <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
-    window.addEventListener("load", function(){
+    document.addEventListener('DOMContentLoaded', () => {
+      document.documentElement.classList.add('loaded');
+      document.getElementById('top-bar').style.display = 'flex';
+      document.getElementById('contact-section').style.display = 'block';
+      document.getElementById('footer').style.display = 'block';
+
+      // Removido o forçamento manual de estilos via JS para evitar conflitos
+    });
+
+    window.addEventListener('load', () => {
       window.cookieconsent.initialise({
         "palette": { "popup": { "background": "#1b5e20" }, "button": { "background": "#00ff00" } },
         "content": { "message": "Este site usa cookies para melhorar sua experiência.", "dismiss": "Entendido", "link": "Saiba mais", "href": "/politicas.html" }
       });
+
+      const menuToggle = document.getElementById('menu-toggle');
+      const navMenu = document.getElementById('nav-menu');
+
+      function toggleMenu() {
+        navMenu.classList.toggle('open');
+      }
+
+      if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', toggleMenu);
+        navMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => navMenu.classList.remove('open'));
+        });
+      }
+
+      // APIs com cache
+      let lastWeatherData = null, lastWeatherFetch = 0;
+      const CACHE_DURATION = 10 * 60 * 1000;
+      let lastTimeData = null, lastTimeFetch = 0;
+      const TIME_CACHE_DURATION = 60 * 1000;
+
+      async function fetchWeather() {
+        try {
+          const now = Date.now();
+          if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
+            document.getElementById('weather').textContent = lastWeatherData;
+            return;
+          }
+          const API_KEY = "b8a0cd03c689322da2746720be31d534";
+          const city = "São Paulo";
+          const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=pt_br&units=metric`;
+          const response = await fetch(url, { mode: 'cors' });
+          if (!response.ok) throw new Error("API error");
+          const data = await response.json();
+          const temp = Math.round(data.main.temp);
+          const description = data.weather[0].description;
+          lastWeatherData = ` ${city}: ${temp}°C, ${description}`;
+          lastWeatherFetch = now;
+          document.getElementById('weather').textContent = lastWeatherData;
+        } catch (error) {
+          document.getElementById('weather').textContent = "Clima indisponível";
+        }
+      }
+
+      async function atualizarHora() {
+        try {
+          const now = Date.now();
+          if (lastTimeData && now - lastTimeFetch < TIME_CACHE_DURATION) {
+            document.getElementById('clock').textContent = lastTimeData;
+            return;
+          }
+          const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
+          if (!response.ok) throw new Error("API error");
+          const data = await response.json();
+          const dateTime = new Date(data.datetime);
+          lastTimeData = ` ${dateTime.toLocaleDateString('pt-BR')} - ${dateTime.toLocaleTimeString('pt-BR')}`;
+          lastTimeFetch = now;
+          document.getElementById('clock').textContent = lastTimeData;
+        } catch (error) {
+          const now = new Date();
+          lastTimeData = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
+          document.getElementById('clock').textContent = lastTimeData;
+        }
+      }
+
+      fetchWeather();
+      atualizarHora();
+      setInterval(fetchWeather, 10 * 60 * 1000);
+      setInterval(atualizarHora, 60 * 1000);
     });
   </script>
 </body>
 </html>
-
