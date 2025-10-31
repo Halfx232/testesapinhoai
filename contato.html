@@ -30,7 +30,7 @@
     #top-bar, #contact-section, #footer { display: none; }
     a { color: white; text-decoration: none; }
 
-    /* Estilos base - CORRIGIDO: removido align-items: center */
+    /* Estilos base - SEM align-items: center */
     body {
       margin: 0;
       padding: 0;
@@ -40,16 +40,14 @@
       min-height: 100vh;
     }
 
-    /* Seção de contato - mobile */
+    /* Seção de contato - SÓ O QUE É ÚNICO */
     #contact-section {
       padding: 20px;
       background: #fff;
       color: #000;
       text-align: center;
-      margin: 10px auto;
+      margin: 20px auto;
       border-radius: 8px;
-      width: 100%;
-      max-width: 400px;
       box-sizing: border-box;
       position: relative;
       z-index: 2;
@@ -66,14 +64,11 @@
       text-decoration: underline;
     }
 
-    /* Desktop: deixa o styles-desktop.css cuidar da largura total */
+    /* Desktop: SÓ ajusta fontes e padding - o resto vem do styles-desktop.css */
     @media only screen and (min-width: 1024px) {
       #contact-section {
         padding: 40px;
         margin: 30px auto;
-        max-width: 1800px;
-        width: 100%;
-        box-sizing: border-box;
       }
 
       #contact-section h2 {
@@ -87,7 +82,7 @@
     }
   </style>
 
-  <!-- Pré-carregar fontes e CSS -->
+  <!-- Pré-carregar CSS -->
   <link rel="preload" href="styles-mobile.css?v=23" as="style" media="screen and (max-width: 1023px)" onload="this.rel='stylesheet'">
   <link rel="preload" href="styles-desktop.css?v=6" as="style" media="screen and (min-width: 1024px)" onload="this.rel='stylesheet'">
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
@@ -116,6 +111,7 @@
     </nav>
   </div>
 
+  <!-- O styles-desktop.css vai esticar isso 100% -->
   <div id="contact-section">
     <h2>Contato</h2>
     <p>Entre em contato com a equipe do Jogo do Sapinho por e-mail: <a href="mailto:sapinhoai@example.com">sapinhoai@example.com</a>. Estamos abertos a sugestões e feedback!</p>
