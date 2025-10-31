@@ -7,32 +7,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contato - Jogo do Sapinho</title>
   <link rel="icon" href="https://em-content.zobj.net/thumbs/160/twitter/322/frog_1f438.png" type="image/png">
+  
   <!-- Meta tags Open Graph -->
   <meta property="og:title" content="Contato - Jogo do Sapinho">
   <meta property="og:description" content="Entre em contato com a equipe do Jogo do Sapinho!">
   <meta property="og:image" content="https://sapinho-ai.vercel.app/thumbnail.jpg">
   <meta property="og:url" content="https://sapinho-ai.vercel.app/contato.html">
   <meta property="og:type" content="website">
+  
   <!-- Meta tags Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://sapinho-ai.vercel.app/thumbnail.jpg">
+
   <!-- Estilo inline inicial como fallback -->
   <style>
-    html:not(.loaded) body { margin: 0; padding: 0; font-family: sans-serif; background: linear-gradient(180deg, #1a1a1a, #2e2e2e); color: #fff; visibility: hidden; }
+    /* Fallback antes do CSS carregar */
+    html:not(.loaded) body { 
+      margin: 0; padding: 0; font-family: sans-serif; 
+      background: linear-gradient(180deg, #1a1a1a, #2e2e2e); 
+      color: #fff; visibility: hidden; 
+    }
     #top-bar, #contact-section, #footer { display: none; }
     a { color: white; text-decoration: none; }
 
-    /* Estilos base */
+    /* Estilos base - CORRIGIDO: removido align-items: center */
     body {
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
       width: 100%;
       min-height: 100vh;
     }
 
+    /* Seção de contato - mobile */
     #contact-section {
       padding: 20px;
       background: #fff;
@@ -58,14 +66,14 @@
       text-decoration: underline;
     }
 
-    /* Desktop: Expandir para largura total */
+    /* Desktop: deixa o styles-desktop.css cuidar da largura total */
     @media only screen and (min-width: 1024px) {
       #contact-section {
         padding: 40px;
         margin: 30px auto;
         max-width: 1800px;
         width: 100%;
-        max-width: 1800px;
+        box-sizing: border-box;
       }
 
       #contact-section h2 {
@@ -78,14 +86,17 @@
       }
     }
   </style>
+
   <!-- Pré-carregar fontes e CSS -->
   <link rel="preload" href="styles-mobile.css?v=23" as="style" media="screen and (max-width: 1023px)" onload="this.rel='stylesheet'">
   <link rel="preload" href="styles-desktop.css?v=6" as="style" media="screen and (min-width: 1024px)" onload="this.rel='stylesheet'">
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+  
   <link rel="stylesheet" href="styles-mobile.css?v=23" media="screen and (max-width: 1023px)">
   <link rel="stylesheet" href="styles-desktop.css?v=6" media="screen and (min-width: 1024px)">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+  
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-SEU-ID" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -119,8 +130,6 @@
       document.getElementById('top-bar').style.display = 'flex';
       document.getElementById('contact-section').style.display = 'block';
       document.getElementById('footer').style.display = 'block';
-
-      // Removido o forçamento manual de estilos via JS para evitar conflitos
     });
 
     window.addEventListener('load', () => {
