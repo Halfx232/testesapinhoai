@@ -349,9 +349,8 @@
  50% { opacity: 0; }
  }
 }
-/* Correção específica para a lista da página de Políticas – Desktop */
-#about-section ul,
-#about-section li {
+/* Força TODAS as listas do site a ficarem alinhadas à esquerda no desktop */
+ul, li {
     text-align: left !important;
     list-style-position: outside !important;
     margin-left: 25px !important;
