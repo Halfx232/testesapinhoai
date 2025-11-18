@@ -355,12 +355,3 @@ ul, li {
     list-style-position: outside !important;
     margin-left: 25px !important;
 }
-/* Alinha as listas, subtítulos e parágrafos das Políticas de Privacidade à esquerda */
-#about-section ul,
-#about-section li,
-#about-section h3,
-#about-section p,
-#about-section h2,
-#about-section strong {
-    text-align: left !important;
-}
