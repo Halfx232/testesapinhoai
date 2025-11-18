@@ -349,9 +349,36 @@
  50% { opacity: 0; }
  }
 }
-/* Força TODAS as listas do site a ficarem alinhadas à esquerda no desktop */
-ul, li {
+/* Força alinhamento à esquerda na página de políticas - apenas desktop */
+@media screen and (min-width: 1024px) {
+  #contact-section {
     text-align: left !important;
-    list-style-position: outside !important;
-    margin-left: 25px !important;
+  }
+
+  /* Garante que todos os parágrafos, headings e listas dentro da seção também sigam à esquerda */
+  #contact-section h2,
+  #contact-section h3,
+  #contact-section h4,
+  #contact-section p,
+  #contact-section ul,
+  #contact-section li {
+    text-align: left !important;
+  }
+
+  /* Se você usa justify em algum lugar e quer garantir que só o texto fique left */
+  #contact-section p {
+    text-align: left !important;
+  }
+
+  /* Opcional: centralizar novamente o título principal se quiser deixar ele bonito */
+  #contact-section h2 {
+    text-align: center; /* mantém o título "Políticas de Privacidade" centralizado */
+  }
+
+  /* Opcional: manter a data embaixo do título centralizada também */
+  #contact-section p + p { /* o parágrafo que vem logo depois do <h2> */
+    text-align: center;
+    margin-bottom: 2rem;
+  }
 }
+
