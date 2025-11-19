@@ -349,30 +349,27 @@
  50% { opacity: 0; }
  }
 }
-/* Alinhamento à esquerda SOMENTE na página de políticas - desktop */
+/* ===== ALINHAMENTO À ESQUERDA SÓ NA PÁGINA DE POLÍTICAS - DESKTOP ===== */
 @media screen and (min-width: 1024px) {
-  /* Detecta a página de políticas pelo título principal */
-  #contact-section h2:first-child:is(h2, h3) {
-    /* Título principal da política continua centralizado */
+  .pagina-politicas #contact-section {
+    text-align: left !important;
+  }
+
+  .pagina-politicas #contact-section h2,
+  .pagina-politicas #contact-section h3,
+  .pagina-politicas #contact-section h4,
+  .pagina-politicas #contact-section p,
+  .pagina-politicas #contact-section ul,
+  .pagina-politicas #contact-section li {
+    text-align: left !important;
+  }
+
+  /* Exceções: título principal e data ficam centralizados na política */
+  .pagina-politicas #contact-section h2 {
     text-align: center !important;
   }
 
-  /* Aplica alinhamento à esquerda só se o título for "Políticas de Privacidade" */
-  #contact-section h2:first-child:is(h2, h3) ~ * {
-    text-align: left !important;
-  }
-
-  /* Garante que parágrafos, headings e listas sigam à esquerda */
-  #contact-section h3,
-  #contact-section h4,
-  #contact-section p,
-  #contact-section ul,
-  #contact-section ul li {
-    text-align: left !important;
-  }
-
-  /* Mantém a data centralizada (logo abaixo do título) */
-  #contact-section p:nth-of-type(1) {
+  .pagina-politicas #contact-section > p:first-of-type {
     text-align: center !important;
     margin-bottom: 2rem;
   }
