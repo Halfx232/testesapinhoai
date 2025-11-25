@@ -374,9 +374,7 @@
     margin-bottom: 2rem;
   }
 }
-/* ==================================================================
-   BLOQUEIO HORIZONTAL – VERSÃO FINAL (FUNCIONA EM QUALQUER CELULAR)
-   ================================================================== */
+/* BLOQUEIO HORIZONTAL – VERSÃO IMBATÍVEL */
 #landscape-blocker {
   display: none !important;
   position: fixed !important;
@@ -385,57 +383,30 @@
   width: 100vw !important;
   height: 100vh !important;
   background: #000 !important;
-  z-index: 99999 !important;          /* z-index bem alto */
+  z-index: 999999 !important;
   justify-content: center !important;
   align-items: center !important;
   flex-direction: column !important;
   text-align: center !important;
   color: #fff !important;
-  padding: 20px !important;
-  box-sizing: border-box !important;
-  pointer-events: auto !important;
-}
-
-#landscape-blocker .landscape-message {
-  max-width: 300px;
 }
 
 #landscape-blocker svg {
-  width: 70px !important;
-  height: 70px !important;
-  margin-bottom: 25px !important;
-  animation: girar 3s linear infinite !important;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  animation: g 3s linear infinite;
+  stroke: #00ff00;
 }
 
 #landscape-blocker h2 {
-  font-size: 28px !important;
-  margin: 0 0 15px 0 !important;
-  color: #00ff00 !important;
+  font-size: 28px;
+  color: #00ff00;
+  margin: 0 0 10px 0;
 }
 
 #landscape-blocker p {
-  font-size: 18px !important;
-  opacity: 0.9;
+  font-size: 18px;
 }
 
-@keyframes girar {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* ATIVA SÓ NO MOBILE + HORIZONTAL */
-@media only screen and (max-width: 1023px) and (orientation: landscape) {
-  #landscape-blocker {
-    display: flex !important;   /* aparece */
-  }
-  
-  /* Esconde tudo atrás com força bruta */
-  body * {
-    visibility: hidden !important;
-  }
-  
-  #landscape-blocker,
-  #landscape-blocker * {
-    visibility: visible !important;
-  }
-}
+@keyframes g { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
