@@ -410,3 +410,28 @@
 }
 
 @keyframes g { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Garante que nunca apareça no desktop */
+#landscape-blocker svg {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  animation: girar 3s linear infinite;
+  stroke: #00ff00;
+  stroke-width: 2.5;
+}
+
+#landscape-blocker h2 {
+  font-size: 28px;
+  color: #00ff00;
+  margin: 0 0 12px 0;
+}
+
+#landscape-blocker p {
+  font-size: 18px;
+  max-width: 280px;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
