@@ -37,20 +37,6 @@
 
 </head>
 <body>
-  <!-- BLOQUEIO DE MODO HORIZONTAL - SÓ MOBILE -->
-<div id="landscape-blocker">
-  <div class="landscape-message">
-    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#00ff00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-      <line x1="8" y1="3" x2="8" y2="8"></line>
-      <line x1="16" y1="3" x2="16" y2="8"></line>
-      <path d="M12 16v5"></path>
-      <path d="M8 16h8"></path>
-    </svg>
-    <h2>Gire o celular</h2>
-    <p>Para uma melhor experiência, use o modo vertical</p>
-  </div>
-</div>
   <div id="top-bar">
     <button id="menu-toggle" class="fa fa-bars"></button>
     <div class="weather-clock">
@@ -721,8 +707,63 @@
     restartButton.addEventListener("click", resetGame);
     playAgainButton.addEventListener("click", resetGame);
   </script>
+  <!-- BLOQUEIO HORIZONTAL – VERSÃO QUE NUNCA FALHA (JS + CSS) -->
+<style>
+  #force-portrait {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #000;
+    z-index: 999999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    color: #fff;
+    font-family: sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  #force-portrait svg {
+    width: 80px; height: 80px;
+    margin-bottom: 20px;
+    animation: girar 3s linear infinite;
+    stroke: #00ff00;
+    stroke-width: 2.5;
+  }
+  #force-portrait h2 { font-size: 28px; color: #00ff00; margin: 0 0 10px; }
+  #force-portrait p { font-size: 18px; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+</style>
+
+<div id="force-portrait">
+  <svg viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+    <line x1="8" y1="3" x2="8" y2="8"></line>
+    <line x1="16" y1="3" x2="16" y2="8"></line>
+    <path d="M12 16v5"></path>
+    <path d="M8 16h8"></path>
+  </svg>
+  <h2>Gire o celular</h2>
+  <p>Para jogar, use o modo vertical</p>
+</div>
+
+<script>
+  function verificaOrientacao() {
+    if (window.innerWidth > window.innerHeight && window.innerWidth <= 1023) {
+      // celular deitado → mostra a tela preta
+      document.getElementById('force-portrait').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // celular em pé ou desktop → esconde tudo
+      document.getElementById('force-portrait').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+  window.addEventListener('resize', verificaOrientacao);
+  window.addEventListener('orientationchange', verificaOrientacao);
+  verificaOrientacao(); // roda logo quando abre
+</script>
 </body>
 </html>
-
-
-
