@@ -750,28 +750,30 @@
 </div>
 <script>
   function verificaOrientacao() {
-    // Correção 100% confiável: usa screen.width/height (nunca falha)
-    const isMobile = window.screen.width <= 1023 || window.screen.height <= 1023;
-    const isLandscape = window.screen.width > window.screen.height;
+    // Técnica 100% confiável usada em Flappy Bird, Subway Surfers, etc.
+    const portrait = window.matchMedia("(orientation: portrait)").matches;
+    const isMobile = window.innerWidth <= 1023;
 
-    if (isMobile && isLandscape) {
-      // celular deitado → mostra a tela preta
+    if (!portrait && isMobile) {
+      // está horizontal no celular
       document.getElementById('force-portrait').style.display = 'flex';
       document.body.style.overflow = 'hidden';
     } else {
-      // celular em pé ou desktop → esconde tudo
+      // está vertical OU é desktop
       document.getElementById('force-portrait').style.display = 'none';
       document.body.style.overflow = '';
     }
   }
 
-  // Executa imediatamente e sempre que mudar
-  window.addEventListener('resize', verificaOrientacao);
-  window.addEventListener('orientationchange', verificaOrientacao);
-  window.addEventListener('load', verificaOrientacao);
+  // Escuta a mudança oficial de orientação
+  window.matchMedia("(orientation: portrait)").addEventListener("change", verificaOrientacao);
   
-  // Roda logo agora (importante!)
+  // Também escuta resize por segurança
+  window.addEventListener("resize", verificaOrientacao);
+  
+  // Roda imediatamente
   verificaOrientacao();
 </script>
 </body>
 </html>
+
