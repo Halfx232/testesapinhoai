@@ -748,10 +748,13 @@
   <h2>Gire o celular</h2>
   <p>Para jogar, use o modo vertical</p>
 </div>
-
 <script>
   function verificaOrientacao() {
-    if (window.innerWidth > window.innerHeight && window.innerWidth <= 1023) {
+    // Correção 100% confiável: usa screen.width/height (nunca falha)
+    const isMobile = window.screen.width <= 1023 || window.screen.height <= 1023;
+    const isLandscape = window.screen.width > window.screen.height;
+
+    if (isMobile && isLandscape) {
       // celular deitado → mostra a tela preta
       document.getElementById('force-portrait').style.display = 'flex';
       document.body.style.overflow = 'hidden';
@@ -761,9 +764,14 @@
       document.body.style.overflow = '';
     }
   }
+
+  // Executa imediatamente e sempre que mudar
   window.addEventListener('resize', verificaOrientacao);
   window.addEventListener('orientationchange', verificaOrientacao);
-  verificaOrientacao(); // roda logo quando abre
+  window.addEventListener('load', verificaOrientacao);
+  
+  // Roda logo agora (importante!)
+  verificaOrientacao();
 </script>
 </body>
 </html>
