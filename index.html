@@ -707,71 +707,59 @@
     restartButton.addEventListener("click", resetGame);
     playAgainButton.addEventListener("click", resetGame);
   </script>
-  <!-- BLOQUEIO HORIZONTAL – VERSÃO QUE NUNCA FALHA (JS + CSS) -->
-<style>
-  #force-portrait {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: #000;
-    z-index: 999999;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    text-align: center;
-    color: #fff;
-    font-family: sans-serif;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-  #force-portrait svg {
-    width: 80px; height: 80px;
-    margin-bottom: 20px;
-    animation: girar 3s linear infinite;
-    stroke: #00ff00;
-    stroke-width: 2.5;
-  }
-  #force-portrait h2 { font-size: 28px; color: #00ff00; margin: 0 0 10px; }
-  #force-portrait p { font-size: 18px; }
-  @keyframes girar { to { transform: rotate(360deg); } }
-</style>
+    <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
+  <style>
+    #force-portrait{visibility:hidden;opacity:0;transition:opacity .3s}
+    #force-portrait.active{visibility:visible;opacity:1}
+    #force-portrait{
+      position:fixed;top:0;left:0;width:100vw;height:100vh;
+      background:#000;z-index:999999;display:flex;
+      justify-content:center;align-items:center;flex-direction:column;
+      text-align:center;color:#fff;font-family:sans-serif;padding:20px;
+      box-sizing:border-box;transition:opacity .3s;
+    }
+    #force-portrait svg{width:80px;height:80px;margin-bottom:20px;
+      animation:g 3s linear infinite;stroke:#00ff00;stroke-width:2.5}
+    #force-portrait h2{font-size:28px;color:#00ff00;margin:0 0 10px}
+    #force-portrait p{font-size:18px}
+    @keyframes g{to{transform:rotate(360deg)}}
+  </style>
 
-<div id="force-portrait">
-  <svg viewBox="0 0 24 24" fill="none">
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-    <line x1="8" y1="3" x2="8" y2="8"></line>
-    <line x1="16" y1="3" x2="16" y2="8"></line>
-    <path d="M12 16v5"></path>
-    <path d="M8 16h8"></path>
-  </svg>
-  <h2>Gire o celular</h2>
-  <p>Para jogar, use o modo vertical</p>
-</div>
-<script>
-  function verificaOrientacao() {
-    // Delay pra garantir que o navegador já entendeu a orientação
-    setTimeout(function() {
-      const largura = window.innerWidth;
-      const altura = window.innerHeight;
+  <div id="force-portrait">
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="8" y1="3" x2="8" y2="8"></line>
+      <line x1="16" y1="3" x2="16" y2="8"></line>
+      <path d="M12 16v5"></path>
+      <path d="M8 16h8"></path>
+    </svg>
+    <h2>Gire o celular</h2>
+    <p>Para jogar, use o modo vertical</p>
+  </div>
 
-      // Se largura > altura E for mobile → está deitado
-      if (largura > altura && largura <= 1023) {
-        document.getElementById('force-portrait').style.display = 'flex';
+  <script>
+    const blocker = document.getElementById('force-portrait');
+    function check() {
+      // A lógica mais confiável que existe no planeta Terra
+      const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+      if (w > h && w <= 1023) {
+        blocker.classList.add('active');
         document.body.style.overflow = 'hidden';
       } else {
-        document.getElementById('force-portrait').style.display = 'none';
+        blocker.classList.remove('active');
         document.body.style.overflow = '';
       }
-    }, 300);
-  }
-
-  // Roda em TODOS os eventos possíveis
-  window.addEventListener('load', verificaOrientacao);
-  window.addEventListener('resize', verificaOrientacao);
-  window.addEventListener('orientationchange', verificaOrientacao);
-
-  // Roda agora + a cada 1 segundo por segurança (só enquanto estiver errado)
-  verificaOrientacao();
-  setInterval(verificaOrientacao, 1000);
-</script>
+    }
+    // Roda em tudo que existe
+    window.addEventListener('load', check);
+    window.addEventListener('resize', check);
+    window.addEventListener('orientationchange', check);
+    // Força checagem a cada 500ms por 5 segundos (mata qualquer bug de carregamento)
+    let i = 0;
+    const force = setInterval(() => { check(); if (++i === 10) clearInterval(force); }, 500);
+    // Primeira checagem imediata
+    check();
+  </script>
+</body>
+</html>
