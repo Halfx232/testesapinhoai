@@ -225,8 +225,40 @@
     position: relative !important;
     z-index: 2 !important;
   }
+/* POLÍTICAS – MOBILE: texto à esquerda, títulos centralizados */
+body.pagina-politicas #contact-section {
+  max-width: 400px !important;
+  margin: 20px auto !important;
+  padding: 20px 20px !important;
+  text-align: left !important;important;
+  line-height: 1.5 !important;
+}
 
+/* Títulos centralizados */
+body.pagina-politicas #contact-section h2,
+body.pagina-politicas #contact-section h3 {
+  text-align: center !important;
+  color: #00ff00 !important;
+}
+
+/* Subtítulos numerados (1.1, 1.2…) também à esquerda */
+body.pagina-politicas #contact-section h4 {
+  text-align: left !important;
+  margin: 20px 0 8px 0 !important;
+  color: #00ff00 !important;
+}
+
+/* Garante que as listas mantenham os bullets normais */
+body.pagina-politicas #contact-section ul {
+  padding-left: 25px !important;
+  margin: 10px 0 !important;
+}
+body.pagina-politicas #contact-section li {
+  margin-bottom: 6px !important;
+  text-align: left !important;
+}
   #footer a {
     color: #00ff00 !important;
     margin: 0 5px !important;
   }
+
