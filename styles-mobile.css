@@ -231,38 +231,32 @@
     margin: 0 5px !important;
   }
 /* ============================================= */
-/* POLÍTICAS DE PRIVACIDADE – MODO MOBILE        */
-/* Texto alinhado à esquerda | Títulos centralizados */
+/* POLÍTICAS DE PRIVACIDADE – MODO MOBILE (CORRIGIDO) */
 /* ============================================= */
 
 body.pagina-politicas #contact-section {
-  text-align: left !important;        /* força tudo à esquerda */
-  padding: 20px 15px !important;     /* dá uma margem lateral confortável */
+  text-align: left !important;
+  padding: 20px 15px !important;
 }
 
+/* Títulos e subtítulos centralizados */
 body.pagina-politicas #contact-section h2,
 body.pagina-politicas #contact-section h3,
 body.pagina-politicas #contact-section h4 {
-  text-align: center !important;     /* títulos e subtítulos centralizados */
+  text-align: center !important;
   margin: 25px 0 15px 0 !important;
   color: #00ff00 !important;
 }
 
-body.pagina-politicas #contact-section h2 {
-  font-size: 24px !important;
-  margin-top: 10px !important;
-}
-
-body.pagina-politicas #contact-section h3 {
-  font-size: 20px !important;
-}
-
+/* FORÇA os itens 1.1, 1.2, etc. a ficarem à esquerda junto com suas listas */
 body.pagina-politicas #contact-section h4 {
+  text-align: left !important;        /* <--- ESSA LINHA É A NOVA */
   font-size: 18px !important;
-  margin-top: 20px !important;
+  margin: 22px 0 10px 0 !important;
+  color: #00ff00 !important;
 }
 
-/* Parágrafos, listas e links ficam à esquerda */
+/* Parágrafos, listas e links à esquerda */
 body.pagina-politicas #contact-section p,
 body.pagina-politicas #contact-section ul,
 body.pagina-politicas #contact-section li,
@@ -271,7 +265,6 @@ body.pagina-politicas #contact-section a {
   margin-bottom: 12px !important;
 }
 
-/* Deixa as listas com espaçamento bonito */
 body.pagina-politicas #contact-section ul {
   padding-left: 20px !important;
   margin: 12px 0 !important;
@@ -281,7 +274,7 @@ body.pagina-politicas #contact-section li {
   margin-bottom: 8px !important;
 }
 
-/* Data abaixo do título principal também centralizada */
+/* Data abaixo do título principal */
 body.pagina-politicas #contact-section > p:first-of-type {
   text-align: center !important;
   font-size: 14px !important;
@@ -289,4 +282,3 @@ body.pagina-politicas #contact-section > p:first-of-type {
   margin: 8px 0 25px 0 !important;
 }
 
-/* Rodapé continua centralizado (já está no CSS geral) */
