@@ -261,4 +261,28 @@ body.pagina-politicas #contact-section li {
     color: #00ff00 !important;
     margin: 0 5px !important;
   }
+/* ============= FORÇA TUDO À ESQUERDA NA PÁGINA DE POLÍTICAS (MOBILE) ============= */
+body.pagina-politicas #contact-section *,
+body.pagina-politicas #contact-section p,
+body.pagina-politicas #contact-section ul,
+body.pagina-politicas #contact-section li,
+body.pagina-politicas #contact-section h4,
+body.pagina-politicas #contact-section strong {
+  text-align: left !important;
+}
+
+/* Só os títulos principais ficam centralizados */
+body.pagina-politicas #contact-section h2,
+body.pagina-politicas #contact-section h3 {
+  text-align: center !important;
+}
+
+/* Garante que os bullets apareçam */
+body.pagina-politicas #contact-section ul {
+  padding-left: 30px !important;
+  list-style-type: disc !important;
+}
+body.pagina-politicas #contact-section li {
+  display: list-item !important;
+}
 
