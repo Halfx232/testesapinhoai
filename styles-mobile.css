@@ -231,7 +231,7 @@
     margin: 0 5px !important;
   }
 /* ============================================= */
-/* POLÍTICAS DE PRIVACIDADE – MODO MOBILE (CORRIGIDO) */
+/* POLÍTICAS DE PRIVACIDADE – MODO MOBILE (VERSÃO IMORTAL) */
 /* ============================================= */
 
 body.pagina-politicas #contact-section {
@@ -239,39 +239,44 @@ body.pagina-politicas #contact-section {
   padding: 20px 15px !important;
 }
 
-/* Títulos e subtítulos centralizados */
+/* Título principal e subtítulos h3 centralizados */
 body.pagina-politicas #contact-section h2,
-body.pagina-politicas #contact-section h3,
-body.pagina-politicas #contact-section h4 {
+body.pagina-politicas #contact-section h3 {
   text-align: center !important;
+  color: #00ff00 !important;
   margin: 25px 0 15px 0 !important;
-  color: #00ff00 !important;
 }
 
-/* FORÇA os itens 1.1, 1.2, etc. a ficarem à esquerda junto com suas listas */
+body.pagina-politicas #contact-section h2 { font-size: 24px !important; }
+body.pagina-politicas #contact-section h3 { font-size: 20px !important; }
+
+/* FORÇA OS 1.1, 1.2, 1.3 etc. À ESQUERDA COM PRIORIDADE MÁXIMA */
 body.pagina-politicas #contact-section h4 {
-  text-align: left !important;        /* <--- ESSA LINHA É A NOVA */
+  text-align: left !important;
   font-size: 18px !important;
-  margin: 22px 0 10px 0 !important;
   color: #00ff00 !important;
+  margin: 22px 0 8px 0 !important;
+  display: block !important;
 }
 
-/* Parágrafos, listas e links à esquerda */
+/* Tudo que for texto normal, parágrafo, lista e link → esquerda */
 body.pagina-politicas #contact-section p,
 body.pagina-politicas #contact-section ul,
 body.pagina-politicas #contact-section li,
-body.pagina-politicas #contact-section a {
+body.pagina-politicas #contact-section a,
+body.pagina-politicas #contact-section strong {
   text-align: left !important;
-  margin-bottom: 12px !important;
+  display: block !important;
 }
 
+/* Listas bonitinhas */
 body.pagina-politicas #contact-section ul {
-  padding-left: 20px !important;
-  margin: 12px 0 !important;
+  padding-left: 25px !important;
+  margin: 10px 0 !important;
 }
 
 body.pagina-politicas #contact-section li {
-  margin-bottom: 8px !important;
+  margin-bottom: 6px !important;
 }
 
 /* Data abaixo do título principal */
@@ -279,6 +284,5 @@ body.pagina-politicas #contact-section > p:first-of-type {
   text-align: center !important;
   font-size: 14px !important;
   opacity: 0.8;
-  margin: 8px 0 25px 0 !important;
+  margin: 8px 0 30px 0 !important;
 }
-
