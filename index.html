@@ -68,6 +68,8 @@
 <div id="start-banner" class="active">
   <h1>Sejam bem-vindos ao Jogo do Sapinho!</h1>
   <p>Pressione qualquer tecla ou toque para iniciar o jogo</p>
+   <!-- ADICIONE ESTA LINHA -->
+  <button id="start-button" style="position:absolute;inset:0;width:100%;height:100%;border:none;background:transparent;cursor:pointer;opacity:0;z-index:999;"></button>
 </div>
 
 <div id="game-over-banner">
@@ -244,6 +246,7 @@
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [];
     let animationFrameId;
+    let audioUnlocked = false;
 
     function positionBanners() {
       const banners = [startBanner, gameOverBanner, victoryBanner];
@@ -374,7 +377,7 @@
         handleJump();
       }
     };
-
+    
     const startGameHandler = (e) => {
       e.preventDefault();
       if (!gameStarted && startBanner.classList.contains('active')) {
@@ -384,45 +387,38 @@
       }
     };
 
-    function resetGame() {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
-      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
-      obstaculos = [];
-      poeira = [];
-      tempo = 0;
-      intervaloObstaculo = 120;
-      faseAtual = 0;
-      pontuacao = 0;
-      gameOverBanner.classList.remove('active');
-      victoryBanner.classList.remove('active');
-      startBanner.classList.add('active');
-      gameStarted = false;
+   function resetGame() {
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
+  // Reset das variáveis
+  sapo = { 
+    x: BASE_WIDTH * 0.2 * scaleX, 
+    y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
+    width: 40 * scaleX, 
+    height: ALTURA_SAPO * scaleY, 
+    vy: 0, 
+    jumping: false 
+  };
+  obstaculos = []; poeira = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
+  gameOverBanner.classList.remove('active');
+  victoryBanner.classList.remove('active');
+  startBanner.classList.add('active');
+  gameStarted = false;
+  backgroundMusic.pause();
+  backgroundMusic.currentTime = 0;
 
-      document.removeEventListener('keydown', handleKeyJump);
-      document.removeEventListener('keydown', startGameHandler);
-      document.removeEventListener('touchstart', startGameHandler);
-      canvas.removeEventListener('touchstart', handleJump);
+  // REMOVE TODOS OS LISTENERS ANTIGOS
+  document.removeEventListener('keydown', handleKeyJump);
+  document.removeEventListener('keydown', startGameHandler);
+  canvas.removeEventListener('touchstart', handleJump);
 
-      startBanner.addEventListener('click', startGameHandler);
-      startBanner.addEventListener('touchstart', startGameHandler);
-      document.addEventListener('keydown', startGameHandler);
-      canvas.addEventListener('touchstart', (e) => {
-        console.log('Toque no canvas');
-        e.preventDefault();
-        if (gameStarted && !sapo.jumping) {
-          handleJump();
-        }
-      });
+  // RECOLOCA OS LISTENERS CORRETOS PARA INICIAR O JOGO
+  const startBtn = document.getElementById('start-button');
+  startBtn.onclick = startBtn.ontouchstart = iniciarJogoComDesbloqueio;
 
-      resizeCanvas();
-      positionBanners();
-    }
+  resizeCanvas();
+  positionBanners();
+}
 
     function getFaseAtual() {
       return fases[faseAtual % fases.length];
@@ -583,6 +579,30 @@
       backgroundMusic.play().catch(e => console.log("Erro ao tocar música de fundo:", e));
       animationFrameId = requestAnimationFrame(gameLoop);
     }
+    
+    function iniciarJogoComDesbloqueio() {
+  if (gameStarted) return;
+
+  // DESBLOQUEIO DE ÁUDIO NO MOBILE (obrigatório pro Chrome/Safari)
+  if (!audioUnlocked) {
+    backgroundMusic.play().catch(() => {});
+    jumpSound.play().catch(() => {});
+    audioUnlocked = true;
+  }
+
+  startBanner.classList.remove('active');
+  gameStarted = true;
+
+  // Agora coloca os listeners de pulo
+  document.addEventListener('keydown', handleKeyJump);
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleJump();
+  }, { passive: false });
+
+  backgroundMusic.play().catch(() => {});
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
 
     function gameLoop() {
       if (!gameStarted) {
@@ -763,3 +783,4 @@
   </script>
 </body>
 </html>
+
