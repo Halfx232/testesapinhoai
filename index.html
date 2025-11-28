@@ -387,10 +387,10 @@
       }
     };
 
-   function resetGame() {
+ function resetGame() {
   if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-  // Reset das variáveis
+  // Reset do estado
   sapo = { 
     x: BASE_WIDTH * 0.2 * scaleX, 
     y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
@@ -407,14 +407,16 @@
   backgroundMusic.pause();
   backgroundMusic.currentTime = 0;
 
-  // REMOVE TODOS OS LISTENERS ANTIGOS
+  // REMOVE TODOS OS LISTENERS POSSÍVEIS
   document.removeEventListener('keydown', handleKeyJump);
-  document.removeEventListener('keydown', startGameHandler);
+  document.removeEventListener('keydown', iniciarComTecla);
   canvas.removeEventListener('touchstart', handleJump);
+  canvas.removeEventListener('click', iniciarComClick);
 
-  // RECOLOCA OS LISTENERS CORRETOS PARA INICIAR O JOGO
-  const startBtn = document.getElementById('start-button');
-  startBtn.onclick = startBtn.ontouchstart = iniciarJogoComDesbloqueio;
+  // RECOLOCA OS LISTENERS CERTOS PARA INICIAR O JOGO
+  document.addEventListener('keydown', iniciarComTecla);
+  canvas.addEventListener('click', iniciarComClick);
+  canvas.addEventListener('touchstart', iniciarComClick, { passive: false });
 
   resizeCanvas();
   positionBanners();
@@ -565,20 +567,52 @@
       return false;
     }
 
-    function iniciarJogo() {
-      if (gameStarted) return;
-      gameStarted = true;
-      document.addEventListener('keydown', handleKeyJump);
-      canvas.addEventListener('touchstart', (e) => {
-        console.log('Toque no canvas');
-        e.preventDefault();
-        if (gameStarted && !sapo.jumping) {
-          handleJump();
-        }
-      });
-      backgroundMusic.play().catch(e => console.log("Erro ao tocar música de fundo:", e));
-      animationFrameId = requestAnimationFrame(gameLoop);
-    }
+  function iniciarJogoDefinitivo() {
+  if (gameStarted) return;
+
+  // Desbloqueia áudio no mobile (só na primeira vez)
+  if (!audioJaDesbloqueado) {
+    const sons = [backgroundMusic, jumpSound, failSound, victorySound];
+    sons.forEach(som => {
+      som.play().catch(() => {});
+    });
+    audioJaDesbloqueado = true;
+  }
+
+  startBanner.classList.remove('active');
+  gameStarted = true;
+
+  // Remove os listeners de início (pra não iniciar duas vezes)
+  document.removeEventListener('keydown', iniciarComTecla);
+  canvas.removeEventListener('click', iniciarComClick);
+  canvas.removeEventListener('touchstart', iniciarComClick);
+
+  // Coloca os listeners de pulo
+  document.addEventListener('keydown', handleKeyJump);
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    handleJump();
+  }, { passive: false });
+
+  backgroundMusic.play().catch(() => {});
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
+    
+    let audioJaDesbloqueado = false;
+
+function iniciarComTecla(e) {
+  if (gameStarted) return;
+  if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp') {
+    e.preventDefault();
+    iniciarJogoDefinitivo();
+  }
+}
+
+function iniciarComClick(e) {
+  if (e) e.preventDefault();
+  if (gameStarted) return;
+  iniciarJogoDefinitivo();
+}
     
     function iniciarJogoComDesbloqueio() {
   if (gameStarted) return;
@@ -714,13 +748,6 @@
       setInterval(fetchWeather, 10 * 60 * 1000);
       setInterval(atualizarHora, 60 * 1000);
 
-      document.body.addEventListener('touchstart', () => {
-        jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
-        failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
-        victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
-        backgroundMusic.play().then(() => backgroundMusic.pause()).catch(e => console.log("Erro ao desbloquear backgroundMusic:", e));
-      }, { once: true });
-
       positionBanners();
     });
 
@@ -783,4 +810,5 @@
   </script>
 </body>
 </html>
+
 
