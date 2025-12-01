@@ -68,8 +68,6 @@
 <div id="start-banner" class="active">
   <h1>Sejam bem-vindos ao Jogo do Sapinho!</h1>
   <p>Pressione qualquer tecla ou toque para iniciar o jogo</p>
-   <!-- ADICIONE ESTA LINHA -->
-  <button id="start-button" style="position:absolute;inset:0;width:100%;height:100%;border:none;background:transparent;cursor:pointer;opacity:0;z-index:999;"></button>
 </div>
 
 <div id="game-over-banner">
@@ -246,7 +244,6 @@
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [];
     let animationFrameId;
-    let audioUnlocked = false;
 
     function positionBanners() {
       const banners = [startBanner, gameOverBanner, victoryBanner];
@@ -377,7 +374,7 @@
         handleJump();
       }
     };
-    
+
     const startGameHandler = (e) => {
       e.preventDefault();
       if (!gameStarted && startBanner.classList.contains('active')) {
@@ -387,40 +384,45 @@
       }
     };
 
- function resetGame() {
-  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    function resetGame() {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
+      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
+      obstaculos = [];
+      poeira = [];
+      tempo = 0;
+      intervaloObstaculo = 120;
+      faseAtual = 0;
+      pontuacao = 0;
+      gameOverBanner.classList.remove('active');
+      victoryBanner.classList.remove('active');
+      startBanner.classList.add('active');
+      gameStarted = false;
 
-  // Reset do estado
-  sapo = { 
-    x: BASE_WIDTH * 0.2 * scaleX, 
-    y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
-    width: 40 * scaleX, 
-    height: ALTURA_SAPO * scaleY, 
-    vy: 0, 
-    jumping: false 
-  };
-  obstaculos = []; poeira = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
-  gameOverBanner.classList.remove('active');
-  victoryBanner.classList.remove('active');
-  startBanner.classList.add('active');
-  gameStarted = false;
-  backgroundMusic.pause();
-  backgroundMusic.currentTime = 0;
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
 
-  // REMOVE TODOS OS LISTENERS POSSÍVEIS
-  document.removeEventListener('keydown', handleKeyJump);
-  document.removeEventListener('keydown', iniciarComTecla);
-  canvas.removeEventListener('touchstart', handleJump);
-  canvas.removeEventListener('click', iniciarComClick);
+      document.removeEventListener('keydown', handleKeyJump);
+      document.removeEventListener('keydown', startGameHandler);
+      document.removeEventListener('touchstart', startGameHandler);
+      canvas.removeEventListener('touchstart', handleJump);
 
-  // RECOLOCA OS LISTENERS CERTOS PARA INICIAR O JOGO
-  document.addEventListener('keydown', iniciarComTecla);
-  canvas.addEventListener('click', iniciarComClick);
-  canvas.addEventListener('touchstart', iniciarComClick, { passive: false });
+      startBanner.addEventListener('click', startGameHandler);
+      startBanner.addEventListener('touchstart', startGameHandler);
+      document.addEventListener('keydown', startGameHandler);
+      canvas.addEventListener('touchstart', (e) => {
+        console.log('Toque no canvas');
+        e.preventDefault();
+        if (gameStarted && !sapo.jumping) {
+          handleJump();
+        }
+      });
 
-  resizeCanvas();
-  positionBanners();
-}
+      resizeCanvas();
+      positionBanners();
+    }
 
     function getFaseAtual() {
       return fases[faseAtual % fases.length];
@@ -567,76 +569,20 @@
       return false;
     }
 
-  function iniciarJogoDefinitivo() {
-  if (gameStarted) return;
-
-  // Desbloqueia áudio no mobile (só na primeira vez)
-  if (!audioJaDesbloqueado) {
-    const sons = [backgroundMusic, jumpSound, failSound, victorySound];
-    sons.forEach(som => {
-      som.play().catch(() => {});
-    });
-    audioJaDesbloqueado = true;
-  }
-
-  startBanner.classList.remove('active');
-  gameStarted = true;
-
-  // Remove os listeners de início (pra não iniciar duas vezes)
-  document.removeEventListener('keydown', iniciarComTecla);
-  canvas.removeEventListener('click', iniciarComClick);
-  canvas.removeEventListener('touchstart', iniciarComClick);
-
-  // Coloca os listeners de pulo
-  document.addEventListener('keydown', handleKeyJump);
-  canvas.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    handleJump();
-  }, { passive: false });
-
-  backgroundMusic.play().catch(() => {});
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
-    
-    let audioJaDesbloqueado = false;
-
-function iniciarComTecla(e) {
-  if (gameStarted) return;
-  if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp') {
-    e.preventDefault();
-    iniciarJogoDefinitivo();
-  }
-}
-
-function iniciarComClick(e) {
-  if (e) e.preventDefault();
-  if (gameStarted) return;
-  iniciarJogoDefinitivo();
-}
-    
-    function iniciarJogoComDesbloqueio() {
-  if (gameStarted) return;
-
-  // DESBLOQUEIO DE ÁUDIO NO MOBILE (obrigatório pro Chrome/Safari)
-  if (!audioUnlocked) {
-    backgroundMusic.play().catch(() => {});
-    jumpSound.play().catch(() => {});
-    audioUnlocked = true;
-  }
-
-  startBanner.classList.remove('active');
-  gameStarted = true;
-
-  // Agora coloca os listeners de pulo
-  document.addEventListener('keydown', handleKeyJump);
-  canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleJump();
-  }, { passive: false });
-
-  backgroundMusic.play().catch(() => {});
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
+    function iniciarJogo() {
+      if (gameStarted) return;
+      gameStarted = true;
+      document.addEventListener('keydown', handleKeyJump);
+      canvas.addEventListener('touchstart', (e) => {
+        console.log('Toque no canvas');
+        e.preventDefault();
+        if (gameStarted && !sapo.jumping) {
+          handleJump();
+        }
+      });
+      backgroundMusic.play().catch(e => console.log("Erro ao tocar música de fundo:", e));
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
 
     function gameLoop() {
       if (!gameStarted) {
@@ -748,6 +694,13 @@ function iniciarComClick(e) {
       setInterval(fetchWeather, 10 * 60 * 1000);
       setInterval(atualizarHora, 60 * 1000);
 
+      document.body.addEventListener('touchstart', () => {
+        jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
+        failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
+        victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
+        backgroundMusic.play().then(() => backgroundMusic.pause()).catch(e => console.log("Erro ao desbloquear backgroundMusic:", e));
+      }, { once: true });
+
       positionBanners();
     });
 
@@ -810,5 +763,3 @@ function iniciarComClick(e) {
   </script>
 </body>
 </html>
-
-
