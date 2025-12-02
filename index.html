@@ -213,6 +213,10 @@
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
 
+    // ← AQUI, LOGO DEPOIS DA LINHA DE CIMA:
+    backgroundMusic.muted = false;   // ← linha 1 (essencial)
+    let audioUnlocked = false;       // ← linha 2 (controle)
+
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
     const finalScore = document.getElementById("final-score");
@@ -580,7 +584,10 @@
           handleJump();
         }
       });
-      backgroundMusic.play().catch(e => console.log("Erro ao tocar música de fundo:", e));
+          backgroundMusic.volume = 0.5;
+      backgroundMusic.play().catch(() => {
+        setTimeout(() => backgroundMusic.play(), 400); // tenta de novo se ainda bloqueado
+      });
       animationFrameId = requestAnimationFrame(gameLoop);
     }
 
@@ -679,7 +686,7 @@
       }
     }
 
-    window.addEventListener('load', () => {
+      window.addEventListener('load', () => {
       handleOrientation();
       resizeCanvas();
       window.addEventListener('resize', debounce(() => {
@@ -694,12 +701,33 @@
       setInterval(fetchWeather, 10 * 60 * 1000);
       setInterval(atualizarHora, 60 * 1000);
 
-      document.body.addEventListener('touchstart', () => {
-        jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
-        failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
-        victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
-        backgroundMusic.play().then(() => backgroundMusic.pause()).catch(e => console.log("Erro ao desbloquear backgroundMusic:", e));
-      }, { once: true });
+      // === DESBLOQUEIO DE ÁUDIO PERFEITO (FUNCIONA EM QUALQUER CELULAR 2025) ===
+      const unlockAudio = () => {
+        if (audioUnlocked) return;
+        audioUnlocked = true;
+
+        const sounds = [jumpSound, failSound, victorySound, backgroundMusic];
+        sounds.forEach(sound => {
+          sound.volume = 0;
+          sound.play().then(() => {
+            sound.pause();
+            sound.currentTime = 0;
+            sound.volume = sound === backgroundMusic ? 0.5 : (sound === jumpSound ? 0.8 : 0.3);
+          }).catch(() => {});
+        });
+
+        // Remove os listeners pra não duplicar
+        document.removeEventListener('touchstart', unlockAudio);
+        document.removeEventListener('touchend', unlockAudio);
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('keydown', unlockAudio);
+      };
+
+      document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+      document.addEventListener('touchend', unlockAudio, { once: true });
+      document.addEventListener('click', unlockAudio, { once: true });
+      document.addEventListener('keydown', unlockAudio, { once: true });
+      // =========================================================================
 
       positionBanners();
     });
@@ -763,3 +791,4 @@
   </script>
 </body>
 </html>
+
