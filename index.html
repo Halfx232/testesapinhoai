@@ -212,6 +212,8 @@
     const backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
+    failSound.volume = 0.6;      // ← adiciona essa
+    victorySound.volume = 0.6;   // ← adiciona essa
 
     // ← AQUI, LOGO DEPOIS DA LINHA DE CIMA:
     backgroundMusic.muted = false;   // ← linha 1 (essencial)
@@ -584,10 +586,9 @@
           handleJump();
         }
       });
-          backgroundMusic.volume = 0.5;
-      backgroundMusic.play().catch(() => {
-        setTimeout(() => backgroundMusic.play(), 400); // tenta de novo se ainda bloqueado
-      });
+     backgroundMusic.volume = 0.5;
+backgroundMusic.muted = false;
+backgroundMusic.play().catch(() => backgroundMusic.play());
       animationFrameId = requestAnimationFrame(gameLoop);
     }
 
@@ -708,7 +709,7 @@
 
         const sounds = [jumpSound, failSound, victorySound, backgroundMusic];
         sounds.forEach(sound => {
-          sound.volume = 0;
+          sound.volume = 0.01;
           sound.play().then(() => {
             sound.pause();
             sound.currentTime = 0;
@@ -791,4 +792,5 @@
   </script>
 </body>
 </html>
+
 
