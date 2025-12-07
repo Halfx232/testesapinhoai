@@ -217,6 +217,11 @@
     // ← AQUI, LOGO DEPOIS DA LINHA DE CIMA:
     backgroundMusic.muted = false;   // ← linha 1 (essencial)
     let audioUnlocked = false;       // ← linha 2 (controle)
+   
+// FORÇA O DESBLOQUEIO NO DESKTOP TAMBÉM (sem precisar de toque)
+if (!/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
+  unlockAudio(); // roda automaticamente no desktop
+}
 
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
@@ -720,7 +725,7 @@ function iniciarJogo() {
           sound.play().then(() => {
             sound.pause();
             sound.currentTime = 0;
-            sound.volume = sound === backgroundMusic ? 0.5 : (sound === jumpSound ? 0.8 : 0.3);
+            sound.volume = sound === backgroundMusic ? 0.5 : (sound === jumpSound ? 1.0 : 0.6);
           }).catch(() => {});
         });
 
@@ -799,6 +804,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
