@@ -204,11 +204,12 @@
     const ctx = canvas.getContext("2d");
     const jumpSound = document.getElementById("jumpSound");
     jumpSound.preload = 'auto';
-    jumpSound.volume = 0.8;
+    jumpSound.volume = 1.0;        // ← pula alto
     const failSound = document.getElementById("failSound");
+    failSound.volume = 0.9;        // ← game over alto
     const victorySound = document.getElementById("victorySound");
     victorySound.preload = 'auto';
-    victorySound.volume = 0.3;
+    victorySound.volume = 0.9;     // ← vitória alto
     const backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
@@ -217,12 +218,7 @@
     // ← AQUI, LOGO DEPOIS DA LINHA DE CIMA:
     backgroundMusic.muted = false;   // ← linha 1 (essencial)
     let audioUnlocked = false;       // ← linha 2 (controle)
-   
-// FORÇA O DESBLOQUEIO NO DESKTOP TAMBÉM (sem precisar de toque)
-if (!/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
-  unlockAudio(); // roda automaticamente no desktop
-}
-
+  
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
     const finalScore = document.getElementById("final-score");
@@ -740,6 +736,10 @@ function iniciarJogo() {
       document.addEventListener('touchend', unlockAudio, { once: true });
       document.addEventListener('click', unlockAudio, { once: true });
       document.addEventListener('keydown', unlockAudio, { once: true });
+        // FORÇA O DESBLOQUEIO NO DESKTOP TAMBÉM (sem precisar de toque)
+if (!/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
+  unlockAudio(); // roda automaticamente no desktop
+}
       // =========================================================================
 
       positionBanners();
@@ -804,6 +804,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
