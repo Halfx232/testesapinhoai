@@ -711,7 +711,7 @@ function iniciarJogo() {
       setInterval(fetchWeather, 10 * 60 * 1000);
       setInterval(atualizarHora, 60 * 1000);
 
-      // === DESBLOQUEIO DE ÁUDIO PERFEITO (FUNCIONA EM QUALQUER CELULAR 2025) ===
+          // === DESBLOQUEIO DE ÁUDIO FINAL — VOLUME ALTO EM TODOS OS SONS (MOBILE + DESKTOP) ===
       const unlockAudio = () => {
         if (audioUnlocked) return;
         audioUnlocked = true;
@@ -722,11 +722,18 @@ function iniciarJogo() {
           sound.play().then(() => {
             sound.pause();
             sound.currentTime = 0;
-           sound.volume = sound === backgroundMusic ? 0.5 : 1.0;   // ← TODOS OS SONS NO MÁXIMO (menos música)
+            // Música de fundo = 0.5, todos os outros sons = 1.0
+            sound.volume = sound === backgroundMusic ? 0.5 : 1.0;
           }).catch(() => {});
         });
 
-        // Remove os listeners pra não duplicar
+        // FORÇA VOLUME MÁXIMO NOS SONS DE EFEITO (mata qualquer sobrescrita antiga)
+        setTimeout(() => {
+          jumpSound.volume = 1.0;
+          failSound.volume = 1.0;
+          victorySound.volume = 1.0;
+        }, 200);
+
         document.removeEventListener('touchstart', unlockAudio);
         document.removeEventListener('touchend', unlockAudio);
         document.removeEventListener('click', unlockAudio);
@@ -805,6 +812,7 @@ if (!/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
   </script>
 </body>
 </html>
+
 
 
 
