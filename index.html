@@ -206,10 +206,10 @@
     jumpSound.preload = 'auto';
     jumpSound.volume = 1.0;        // ← pula alto
     const failSound = document.getElementById("failSound");
-    failSound.volume = 0.9;        // ← game over alto
+    failSound.volume = 1.0;        // ← game over alto
     const victorySound = document.getElementById("victorySound");
     victorySound.preload = 'auto';
-    victorySound.volume = 0.9;     // ← vitória alto
+    victorySound.volume = 1.0;     // ← vitória alto
     const backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
@@ -360,6 +360,7 @@
         sapo.vy = -20 * scaleY;
         sapo.jumping = true;
         jumpSound.currentTime = 0;
+        jumpSound.volume = 1.0;
         jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
         console.log('Sapo pulou!');
         for (let i = 0; i < 10; i++) {
@@ -721,7 +722,7 @@ function iniciarJogo() {
           sound.play().then(() => {
             sound.pause();
             sound.currentTime = 0;
-            sound.volume = sound === backgroundMusic ? 0.5 : (sound === jumpSound ? 1.0 : 0.6);
+           sound.volume = sound === backgroundMusic ? 0.5 : 1.0;   // ← TODOS OS SONS NO MÁXIMO (menos música)
           }).catch(() => {});
         });
 
@@ -804,6 +805,7 @@ if (!/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
   </script>
 </body>
 </html>
+
 
 
 
