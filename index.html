@@ -614,22 +614,27 @@ function iniciarJogo() {
   if (gameStarted) return;
   gameStarted = true;
 
+  // Remove o banner
+  startBanner.classList.remove('active');
+
+  // Ativa controles
   document.addEventListener('keydown', handleKeyJump);
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    if (gameStarted && !sapo.jumping) {
-      handleJump();
-    }
+    if (gameStarted && !sapo.jumping) handleJump();
   }, { passive: false });
 
-  // FORÇA A MÚSICA A TOCAR NA PRIMEIRA VEZ (DESKTOP + MOBILE)
+  // FORÇA O DESBLOQUEIO ANTES DE TENTAR TOCAR A MÚSICA
+  unlockAudio();
+
+  // Agora tenta tocar a música com garantia total
   backgroundMusic.volume = 0.5;
   backgroundMusic.muted = false;
   backgroundMusic.play().catch(() => {
     setTimeout(() => {
       backgroundMusic.volume = 0.5;
       backgroundMusic.play();
-    }, 300);
+    }, 400);
   });
 
   animationFrameId = requestAnimationFrame(gameLoop);
@@ -808,5 +813,6 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
