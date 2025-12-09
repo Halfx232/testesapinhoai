@@ -216,13 +216,11 @@
 
     // ← AQUI, LOGO DEPOIS DA LINHA DE CIMA:
     backgroundMusic.muted = false;   // ← linha 1 (essencial)
-    let audioUnlocked = false;       // ← linha 2 (controle)
+ 
     
     // === DESBLOQUEIO DE ÁUDIO QUE FUNCIONA MESMO VOLTANDO PRA HOME (VERSÃO FINAL) ===
     const unlockAudio = () => {
-      if (audioUnlocked) return;
-      audioUnlocked = true;
-
+      
       const sounds = [jumpSound, failSound, victorySound, backgroundMusic];
       sounds.forEach(sound => {
         sound.volume = 0.1;
@@ -813,6 +811,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
