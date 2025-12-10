@@ -93,10 +93,10 @@
 
   <div id="footer">Siga o Sapinho nas redes sociais! <a href="#">Instagram</a> | <a href="#">YouTube</a> | <a href="#">TikTok</a></div>
 
-  <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
+<audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
 <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
-<audio id="victorySound" src="https://freesound.org/data/previews/321/321552_3248244-lq.mp3" preload="auto"></audio>
-<audio id="backgroundMusic" src="https://freesound.org/data/previews/612/612683_5674468-lq.mp3" loop preload="auto"></audio> 
+<audio id="victorySound" src="Victory.mp3" preload="auto"></audio>
+<audio id="backgroundMusic" src="Musicgame.mp3" loop preload="auto"></audio>
   <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -210,35 +210,48 @@ const backgroundMusic = document.getElementById("backgroundMusic");
 
 let audioUnlocked = false;
 
-// Função única e infalível de desbloqueio
 function unlockAudioContext() {
   if (audioUnlocked) return;
-  
-  // Toca um som quase inaudível só para destravar o contexto
+
+  // Dummy sound para destravar o contexto de áudio (obrigatório em mobile)
   const dummy = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
   dummy.play().then(() => {
     audioUnlocked = true;
     console.log("Áudio desbloqueado com sucesso!");
-    
-    // Agora inicia a música de fundo
-    backgroundMusic.volume = 0.5;
-    backgroundMusic.play().catch(e => console.log("Música ainda não iniciou:", e));
-    
-    // Garante volume nos efeitos
+
+    // Volume padrão
     jumpSound.volume = 1.0;
     failSound.volume = 1.0;
     victorySound.volume = 1.0;
-  }).catch(() => {});
+
+    // Função que tenta tocar a música várias vezes até conseguir
+    function tentarTocarMusica(tentativas = 0) {
+      backgroundMusic.volume = 0.5;
+      backgroundMusic.play().then(() => {
+        console.log("Musicgame.mp3 tocando perfeitamente! 🎶🐸");
+      }).catch(err => {
+        console.log("Tentativa " + (tentativas + 1) + " falhou, tentando novamente...", err);
+        if (tentativas < 15) { // tenta até 15 vezes (cerca de 15 segundos)
+          setTimeout(() => tentarTocarMusica(tentativas + 1), 1000);
+        }
+      });
+    }
+
+    // Começa a tentar tocar a música
+    tentarTocarMusica();
+  }).catch(err => {
+    console.log("Dummy falhou, mas vamos tentar mesmo assim", err);
+  });
 }
 
-// Escuta TODAS as interações possíveis do usuário (só uma vez)
+// Desbloqueia com qualquer interação do usuário
 document.addEventListener('touchstart', unlockAudioContext, { once: true, passive: true });
 document.addEventListener('touchend', unlockAudioContext, { once: true });
 document.addEventListener('click', unlockAudioContext, { once: true });
 document.addEventListener('keydown', unlockAudioContext, { once: true });
 
-// Desktop: tenta desbloquear automaticamente
-setTimeout(unlockAudioContext, 1000);
+// No desktop tenta destravar automático
+setTimeout(unlockAudioContext, 800);
     // =========================================================================
   
     const startBanner = document.getElementById("start-banner");
@@ -789,6 +802,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
