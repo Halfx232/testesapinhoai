@@ -464,16 +464,13 @@ setTimeout(unlockAudioContext, 800);
       
       resizeCanvas();
       positionBanners();
-        // Reinicia a música de fundo automaticamente após reset (se já desbloqueado)
-   // === CORRIGIDO: Reinicia a música após reset (agora no lugar certo!) ===
-        if (audioUnlocked) {
+        // Reinicia a música se o áudio já estiver desbloqueado
+      if (audioUnlocked) {
         backgroundMusic.currentTime = 0;
         backgroundMusic.volume = 0.5;
-        backgroundMusic.play().catch(e => {
-          console.log("Tentando reiniciar música após reset...", e);
-        });
+        backgroundMusic.play().catch(e => console.log("Música voltou após reset!", e));
       }
-    }
+    }  // ← fecha a função resetGame()
 
     function getFaseAtual() {
       return fases[faseAtual % fases.length];
@@ -816,6 +813,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
