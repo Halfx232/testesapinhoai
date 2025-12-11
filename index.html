@@ -210,47 +210,42 @@ const backgroundMusic = document.getElementById("backgroundMusic");
 
 let audioUnlocked = false;
 
-function unlockAudioContext() {
-  if (audioUnlocked) return;
+// Função para tocar a música de fundo (só depois de desbloqueado)
+function playBackgroundMusic() {
+  if (!audioUnlocked) return; // segurança extra
 
-  // Dummy sound para destravar o contexto de áudio (obrigatório em mobile)
-  const dummy = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
-  dummy.play().then(() => {
-    audioUnlocked = true;
-    console.log("Áudio desbloqueado com sucesso!");
-
-    // Volume padrão
-    jumpSound.volume = 1.0;
-    failSound.volume = 1.0;
-    victorySound.volume = 1.0;
-
-    // Função que tenta tocar a música várias vezes até conseguir
-    function tentarTocarMusica(tentativas = 0) {
-      backgroundMusic.volume = 0.5;
-      backgroundMusic.play().then(() => {
-        console.log("Musicgame.mp3 tocando perfeitamente! 🎶🐸");
-      }).catch(err => {
-        console.log("Tentativa " + (tentativas + 1) + " falhou, tentando novamente...", err);
-        if (tentativas < 15) { // tenta até 15 vezes (cerca de 15 segundos)
-          setTimeout(() => tentarTocarMusica(tentativas + 1), 1000);
-        }
-      });
-    }
-
-    // Começa a tentar tocar a música
-    tentarTocarMusica();
-  }).catch(err => {
-    console.log("Dummy falhou, mas vamos tentar mesmo assim", err);
+  backgroundMusic.currentTime = 0;
+  backgroundMusic.volume = 0.5;
+  backgroundMusic.play().catch(e => {
+    console.log("Erro ao tocar música (raro após desbloqueio):", e);
   });
 }
 
-// Desbloqueia com qualquer interação do usuário
+// Desbloqueia o contexto de áudio na primeira interação (só destrava, NÃO toca música ainda!)
+function unlockAudioContext() {
+  if (audioUnlocked) return;
+
+  const dummy = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+  dummy.play().then(() => {
+    audioUnlocked = true;
+    console.log("Áudio desbloqueado! Agora pode tocar efeitos e música.");
+
+    // Volume dos efeitos
+    jumpSound.volume = 1.0;
+    failSound.volume = 1.0;
+    victorySound.volume = 1.0;
+  }).catch(() => {
+    audioUnlocked = true; // força desbloqueio
+  });
+}
+
+// Eventos de interação (só desbloqueia, não toca nada)
 document.addEventListener('touchstart', unlockAudioContext, { once: true, passive: true });
 document.addEventListener('touchend', unlockAudioContext, { once: true });
 document.addEventListener('click', unlockAudioContext, { once: true });
 document.addEventListener('keydown', unlockAudioContext, { once: true });
 
-// No desktop tenta destravar automático
+// Desktop: tenta desbloquear automático (efeitos tocam, música não)
 setTimeout(unlockAudioContext, 800);
     // =========================================================================
   
@@ -464,6 +459,9 @@ setTimeout(unlockAudioContext, 800);
       
       resizeCanvas();
       positionBanners();
+      // Música volta automática após reiniciar
+      playBackgroundMusic();
+    }
     // === CORREÇÃO FINAL: Música volta após reset (DENTRO da função!) ===
       if (audioUnlocked) {
         backgroundMusic.currentTime = 0;
@@ -619,6 +617,25 @@ setTimeout(unlockAudioContext, 800);
 function iniciarJogo() {
   if (gameStarted) return;
   gameStarted = true;
+  function iniciarJogo() {
+  if (gameStarted) return;
+  gameStarted = true;
+
+  // Agora sim: toca a música quando o jogo começa de verdade
+  playBackgroundMusic();
+
+  // Remove o banner
+  startBanner.classList.remove('active');
+
+  // Ativa controles
+  document.addEventListener('keydown', handleKeyJump);
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (gameStarted && !sapo.jumping) handleJump();
+  }, { passive: false });
+
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
   // Garante que a música esteja tocando quando o jogo começa
   if (audioUnlocked) {
     backgroundMusic.currentTime = 0;
@@ -812,6 +829,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
