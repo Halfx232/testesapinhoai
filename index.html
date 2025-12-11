@@ -464,17 +464,16 @@ setTimeout(unlockAudioContext, 800);
       
       resizeCanvas();
       positionBanners();
-        // Reinicia a música se o áudio já estiver desbloqueado
+    // === CORREÇÃO FINAL: Música volta após reset (DENTRO da função!) ===
       if (audioUnlocked) {
         backgroundMusic.currentTime = 0;
         backgroundMusic.volume = 0.5;
-        backgroundMusic.play().catch(e => console.log("Música voltou após reset!", e));
+        backgroundMusic.play().catch(e => {
+          console.log("Música reiniciada com sucesso após reset!");
+        });
       }
-    }  // ← fecha a função resetGame()
-
-    function getFaseAtual() {
-      return fases[faseAtual % fases.length];
-    }
+      // =================================================================
+    }  // ← Agora sim, fecha a função DEPOIS do play da música
 
     function drawChao() {
       ctx.fillStyle = coresFase[getFaseAtual()].chao;
@@ -813,6 +812,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
