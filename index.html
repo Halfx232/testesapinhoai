@@ -623,6 +623,11 @@ setTimeout(unlockAudioContext, 800);
 function iniciarJogo() {
   if (gameStarted) return;
   gameStarted = true;
+  // Garante que a música esteja tocando quando o jogo começa
+  if (audioUnlocked) {
+    backgroundMusic.currentTime = 0;
+    backgroundMusic.play().catch(() => {});
+  }
 
   // Remove o banner
   startBanner.classList.remove('active');
@@ -811,6 +816,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
