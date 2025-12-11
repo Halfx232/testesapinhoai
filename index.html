@@ -459,10 +459,10 @@ setTimeout(unlockAudioContext, 800);
       
       resizeCanvas();
       positionBanners();
-      / Música volta automática após reiniciar (só se desbloqueado)
+    // Música volta automática após reiniciar (só se desbloqueado)
       playBackgroundMusic();
     }  // ← fecha a função resetGame()
-      // =================================================================
+
     function drawChao() {
       ctx.fillStyle = coresFase[getFaseAtual()].chao;
       ctx.clearRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
@@ -798,6 +798,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
