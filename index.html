@@ -461,9 +461,17 @@ setTimeout(unlockAudioContext, 800);
           handleJump();
         }
       });
-
+      
       resizeCanvas();
       positionBanners();
+        // Reinicia a música de fundo automaticamente após reset (se já desbloqueado)
+  if (audioUnlocked) {
+    backgroundMusic.currentTime = 0;
+    backgroundMusic.volume = 0.5;
+    backgroundMusic.play().catch(e => {
+      console.log("Erro ao reiniciar música no reset (raro):", e);
+    });
+  }
     }
 
     function getFaseAtual() {
@@ -802,6 +810,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
