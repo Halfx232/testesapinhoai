@@ -459,20 +459,10 @@ setTimeout(unlockAudioContext, 800);
       
       resizeCanvas();
       positionBanners();
-      // Música volta automática após reiniciar
+      / Música volta automática após reiniciar (só se desbloqueado)
       playBackgroundMusic();
-    }
-    // === CORREÇÃO FINAL: Música volta após reset (DENTRO da função!) ===
-      if (audioUnlocked) {
-        backgroundMusic.currentTime = 0;
-        backgroundMusic.volume = 0.5;
-        backgroundMusic.play().catch(e => {
-          console.log("Música reiniciada com sucesso após reset!");
-        });
-      }
+    }  // ← fecha a função resetGame()
       // =================================================================
-    }  // ← Agora sim, fecha a função DEPOIS do play da música
-
     function drawChao() {
       ctx.fillStyle = coresFase[getFaseAtual()].chao;
       ctx.clearRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
@@ -617,39 +607,21 @@ setTimeout(unlockAudioContext, 800);
 function iniciarJogo() {
   if (gameStarted) return;
   gameStarted = true;
-  
-  // Agora sim: toca a música quando o jogo começa de verdade
+
+  // Toca a música quando o jogo realmente começa
   playBackgroundMusic();
 
-  // Remove o banner
+  // Remove o banner de start
   startBanner.classList.remove('active');
 
-  // Ativa controles
+  // Ativa os controles do jogo
   document.addEventListener('keydown', handleKeyJump);
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     if (gameStarted && !sapo.jumping) handleJump();
   }, { passive: false });
 
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
-  // Garante que a música esteja tocando quando o jogo começa
-  if (audioUnlocked) {
-    backgroundMusic.currentTime = 0;
-    backgroundMusic.play().catch(() => {});
-  }
-
-  // Remove o banner
-  startBanner.classList.remove('active');
-
-  // Ativa controles
-  document.addEventListener('keydown', handleKeyJump);
-  canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if (gameStarted && !sapo.jumping) handleJump();
-  }, { passive: false });
-
-
+  // Inicia o loop do jogo
   animationFrameId = requestAnimationFrame(gameLoop);
 }
 
@@ -826,6 +798,7 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
+
 
 
 
