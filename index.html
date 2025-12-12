@@ -60,7 +60,7 @@
     <div id="left-ad">
       <ins class="adsbygoogle" style="display:block; width:300px; height:400px; max-width:300px; max-height:400px; min-width:300px; min-height:400px;" data-ad-client="ca-pub-SEU-ID" data-ad-slot="SEU-SLOT-ID-DESKTOP" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
     </div>
-    <canvas id="gameCanvas" class="ready"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <div id="right-ad">
       <ins class="adsbygoogle" style="display:block; width:300px; height:400px; max-width:300px; max-height:400px; min-width:300px; min-height:400px;" data-ad-client="ca-pub-SEU-ID" data-ad-slot="SEU-SLOT-ID-DESKTOP" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
     </div>
@@ -93,16 +93,15 @@
 
   <div id="footer">Siga o Sapinho nas redes sociais! <a href="#">Instagram</a> | <a href="#">YouTube</a> | <a href="#">TikTok</a></div>
 
-<audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
-<audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
-<audio id="victorySound" src="Victory.mp3" preload="auto"></audio>
-<audio id="backgroundMusic" src="Musicgame.mp3" loop preload="auto"></audio>
-  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
+  <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
+  <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="victorySound" src="Victory.mp3"></audio>
+  <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('loaded');
-      //const canvas = document.getElementById('gameCanvas');
-      //canvas.classList.add('ready');
+      const canvas = document.getElementById('gameCanvas');
+      canvas.classList.add('ready');
       document.getElementById('top-bar').style.display = 'flex';
       document.getElementById('game-container').style.display = 'flex';
       document.getElementById('test-version').style.display = 'block';
@@ -203,52 +202,17 @@
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-const jumpSound = document.getElementById("jumpSound");
-const failSound = document.getElementById("failSound");
-const victorySound = document.getElementById("victorySound");
-const backgroundMusic = document.getElementById("backgroundMusic");
+    const jumpSound = document.getElementById("jumpSound");
+    jumpSound.preload = 'auto';
+    jumpSound.volume = 0.8;
+    const failSound = document.getElementById("failSound");
+    const victorySound = document.getElementById("victorySound");
+    victorySound.preload = 'auto';
+    victorySound.volume = 0.3;
+    const backgroundMusic = document.getElementById("backgroundMusic");
+    backgroundMusic.preload = 'auto';
+    backgroundMusic.volume = 0.5;
 
-let audioUnlocked = false;
-
-// Função para tocar a música de fundo (só depois de desbloqueado)
-function playBackgroundMusic() {
-  if (!audioUnlocked) return; // segurança extra
-
-  backgroundMusic.currentTime = 0;
-  backgroundMusic.volume = 0.5;
-  backgroundMusic.play().catch(e => {
-    console.log("Erro ao tocar música (raro após desbloqueio):", e);
-  });
-}
-
-// Desbloqueia o contexto de áudio na primeira interação (só destrava, NÃO toca música ainda!)
-function unlockAudioContext() {
-  if (audioUnlocked) return;
-
-  const dummy = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
-  dummy.play().then(() => {
-    audioUnlocked = true;
-    console.log("Áudio desbloqueado! Agora pode tocar efeitos e música.");
-
-    // Volume dos efeitos
-    jumpSound.volume = 1.0;
-    failSound.volume = 1.0;
-    victorySound.volume = 1.0;
-  }).catch(() => {
-    audioUnlocked = true; // força desbloqueio
-  });
-}
-
-// Eventos de interação (só desbloqueia, não toca nada)
-document.addEventListener('touchstart', unlockAudioContext, { once: true, passive: true });
-document.addEventListener('touchend', unlockAudioContext, { once: true });
-document.addEventListener('click', unlockAudioContext, { once: true });
-document.addEventListener('keydown', unlockAudioContext, { once: true });
-
-// Desktop: tenta desbloquear automático (efeitos tocam, música não)
-setTimeout(unlockAudioContext, 800);
-    // =========================================================================
-  
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
     const finalScore = document.getElementById("final-score");
@@ -265,7 +229,7 @@ setTimeout(unlockAudioContext, 800);
       inverno: { fundo: "#e0f7fa", chao: "#4dd0e1" }
     };
 
-    const PONTUACAO_VITORIA = 1000;
+    const PONTUACAO_VITORIA = 5000;
     const GRAVIDADE = 1.5;
     const BASE_WIDTH = 800;
     const BASE_HEIGHT = 400;
@@ -352,7 +316,6 @@ setTimeout(unlockAudioContext, 800);
       }
       positionBanners();
       console.log('Canvas:', canvas.width, canvas.height, 'Scale:', scaleX, scaleY);
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Força redraw imediato
     }
 
     function handleOrientation() {
@@ -391,7 +354,6 @@ setTimeout(unlockAudioContext, 800);
         sapo.vy = -20 * scaleY;
         sapo.jumping = true;
         jumpSound.currentTime = 0;
-        jumpSound.volume = 1.0;
         jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
         console.log('Sapo pulou!');
         for (let i = 0; i < 10; i++) {
@@ -457,11 +419,15 @@ setTimeout(unlockAudioContext, 800);
           handleJump();
         }
       });
-      
+
       resizeCanvas();
       positionBanners();
-      playBackgroundMusic();
-    } 
+    }
+
+    function getFaseAtual() {
+      return fases[faseAtual % fases.length];
+    }
+
     function drawChao() {
       ctx.fillStyle = coresFase[getFaseAtual()].chao;
       ctx.clearRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
@@ -603,26 +569,20 @@ setTimeout(unlockAudioContext, 800);
       return false;
     }
 
-function iniciarJogo() {
-  if (gameStarted) return;
-  gameStarted = true;
-
-  // Toca a música quando o jogo realmente começa
-  playBackgroundMusic();
-
-  // Remove o banner de start
-  startBanner.classList.remove('active');
-
-  // Ativa os controles do jogo
-  document.addEventListener('keydown', handleKeyJump);
-  canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if (gameStarted && !sapo.jumping) handleJump();
-  }, { passive: false });
-
-  // Inicia o loop do jogo
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
+    function iniciarJogo() {
+      if (gameStarted) return;
+      gameStarted = true;
+      document.addEventListener('keydown', handleKeyJump);
+      canvas.addEventListener('touchstart', (e) => {
+        console.log('Toque no canvas');
+        e.preventDefault();
+        if (gameStarted && !sapo.jumping) {
+          handleJump();
+        }
+      });
+      backgroundMusic.play().catch(e => console.log("Erro ao tocar música de fundo:", e));
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
 
     function gameLoop() {
       if (!gameStarted) {
@@ -719,7 +679,7 @@ function iniciarJogo() {
       }
     }
 
-      window.addEventListener('load', () => {
+    window.addEventListener('load', () => {
       handleOrientation();
       resizeCanvas();
       window.addEventListener('resize', debounce(() => {
@@ -734,6 +694,12 @@ function iniciarJogo() {
       setInterval(fetchWeather, 10 * 60 * 1000);
       setInterval(atualizarHora, 60 * 1000);
 
+      document.body.addEventListener('touchstart', () => {
+        jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
+        failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
+        victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
+        backgroundMusic.play().then(() => backgroundMusic.pause()).catch(e => console.log("Erro ao desbloquear backgroundMusic:", e));
+      }, { once: true });
 
       positionBanners();
     });
@@ -797,19 +763,3 @@ function iniciarJogo() {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
