@@ -376,13 +376,24 @@
     };
 
     const startGameHandler = (e) => {
-      e.preventDefault();
-      if (!gameStarted && startBanner.classList.contains('active')) {
+    if (e) e.preventDefault();
+
+    // 1. FORÇA O DESBLOQUEIO DO ÁUDIO
+    const sons = [backgroundMusic, jumpSound, failSound, victorySound];
+    sons.forEach(s => {
+        s.play().then(() => {
+            s.pause();
+            s.currentTime = 0;
+        }).catch(err => console.log("Aguardando interação para áudio"));
+    });
+
+    // 2. INICIA O JOGO
+    if (!gameStarted && startBanner.classList.contains('active')) {
         startBanner.classList.remove('active');
         iniciarJogo();
-        console.log("Jogo iniciado!");
-      }
-    };
+        console.log("Jogo e Áudio iniciados via Banner!");
+    }
+};
 
     function resetGame() {
       if (animationFrameId) {
@@ -679,33 +690,35 @@
       }
     }
 
-    window.addEventListener('load', () => {
-      handleOrientation();
-      resizeCanvas();
-      window.addEventListener('resize', debounce(() => {
+window.addEventListener('load', () => {
+    handleOrientation();
+    resizeCanvas();
+    
+    window.addEventListener('resize', debounce(() => {
         resizeCanvas();
         positionBanners();
-      }, 100));
-      resetGame();
+    }, 100));
 
-      fetchWeather();
-      atualizarHora();
+    resetGame(); // Isso prepara o estado inicial
 
-      setInterval(fetchWeather, 10 * 60 * 1000);
-      setInterval(atualizarHora, 60 * 1000);
+    fetchWeather();
+    atualizarHora();
 
-      document.body.addEventListener('touchstart', () => {
-        jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
-        failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
-        victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
-        backgroundMusic.play().then(() => backgroundMusic.pause()).catch(e => console.log("Erro ao desbloquear backgroundMusic:", e));
-      }, { once: true });
+    setInterval(fetchWeather, 10 * 60 * 1000);
+    setInterval(atualizarHora, 60 * 1000);
 
-      positionBanners();
-    });
+    // --- AS LINHAS ESSENCIAIS QUE FALTAVAM AQUI: ---
+    
+    // 1. Ouvir o clique no banner de início para disparar o som e o jogo
+    startBanner.addEventListener('click', startGameHandler);
+    startBanner.addEventListener('touchstart', startGameHandler, {passive: false});
 
+    // 2. Os botões de reiniciar
     restartButton.addEventListener("click", resetGame);
     playAgainButton.addEventListener("click", resetGame);
+
+    positionBanners(); 
+});
   </script>
     <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
   <style>
@@ -763,3 +776,4 @@
   </script>
 </body>
 </html>
+
