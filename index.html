@@ -113,20 +113,17 @@
       const invalidLinks = document.body.querySelectorAll('link[rel="stylesheet"]');
       invalidLinks.forEach(link => link.remove());
     });
-
-    // --- VARIÁVEIS E CONFIGURAÇÕES ---
- // --- 1. CONFIGURAÇÕES E SELEÇÃO DE ELEMENTOS ---
+    
+  // --- 1. CONFIGURAÇÕES E SELEÇÃO DE ELEMENTOS ---
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
-    // Sons
     const jumpSound = document.getElementById("jumpSound");
     const failSound = document.getElementById("failSound");
     const victorySound = document.getElementById("victorySound");
     const backgroundMusic = document.getElementById("backgroundMusic");
 
-    // Banners e Botões
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
     const finalScore = document.getElementById("final-score");
@@ -137,7 +134,6 @@
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
 
-    // Variáveis de Jogo
     const PONTUACAO_VITORIA = 5000;
     const GRAVIDADE = 1.5;
     const BASE_WIDTH = 800;
@@ -157,147 +153,117 @@
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [], animationFrameId, scaleX = 1, scaleY = 1, ALTURA_CHAO;
 
-    // --- 2. FUNÇÕES DO MENU E INTERFACE ---
+    // --- 2. MENU HAMBÚRGUER ---
     if (menuToggle && navMenu) {
       menuToggle.onclick = (e) => {
         e.stopPropagation();
         navMenu.classList.toggle('open');
       };
-      // Fecha o menu ao clicar em um link ou fora dele
       document.addEventListener('click', () => navMenu.classList.remove('open'));
     }
 
-    function positionBanners() {
-      const banners = [startBanner, gameOverBanner, victoryBanner];
-      const canvasRect = canvas.getBoundingClientRect();
-      const gameContainer = document.getElementById('game-container');
-      banners.forEach(banner => {
-        if (banner.classList.contains('active')) {
-          banner.style.position = 'absolute';
-          const containerRect = gameContainer.getBoundingClientRect();
-          banner.style.left = `${(canvasRect.left - containerRect.left) + canvasRect.width / 2}px`;
-          banner.style.top = `${(canvasRect.top - containerRect.top) + canvasRect.height / 2}px`;
-          banner.style.transform = 'translate(-50%, -50%)';
-        }
-      });
-    }
-
-    function resizeCanvas() {
-      if (isMobile) {
-        canvas.width = Math.min(window.innerWidth - 20, 400);
-        canvas.height = canvas.width / 2;
-      } else {
-        canvas.width = BASE_WIDTH;
-        canvas.height = BASE_HEIGHT;
-      }
-      scaleX = canvas.width / BASE_WIDTH;
-      scaleY = canvas.height / BASE_HEIGHT;
-      ALTURA_CHAO = canvas.height;
-      positionBanners();
-    }
-
-    // --- 3. LÓGICA DE ÁUDIO E INÍCIO ---
-    const startGameHandler = (e) => {
-      if (e) e.preventDefault();
-      
-      // LIBERAÇÃO GLOBAL DE ÁUDIO
-      [backgroundMusic, jumpSound, failSound, victorySound].forEach(s => {
-          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(err => console.log("Erro som:", err));
-      });
-
-      if (!gameStarted && startBanner.classList.contains('active')) {
-        startBanner.classList.remove('active');
-        gameStarted = true;
-        backgroundMusic.play().catch(() => {});
-        animationFrameId = requestAnimationFrame(gameLoop);
-      }
-    };
-
-    function resetGame() {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      resizeCanvas();
-      sapo = { 
-        x: BASE_WIDTH * 0.2 * scaleX, 
-        y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
-        width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false 
-      };
-      obstaculos = []; poeira = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
-      gameOverBanner.classList.remove('active');
-      victoryBanner.classList.remove('active');
-      startBanner.classList.add('active');
-      gameStarted = false;
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
-      positionBanners();
-    }
-
-    function handleJump() {
-      if (gameStarted && !sapo.jumping) {
-        sapo.vy = -20 * scaleY;
-        sapo.jumping = true;
-        jumpSound.currentTime = 0;
-        jumpSound.play().catch(() => {});
-      }
-    }
-
-    // --- 4. DESENHO E LOOP (SEU SAPINHO ORIGINAL) ---
+    // --- 3. DESENHO DO SAPO (COM BRAÇOS QUE ABREM) ---
     function drawSapo() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
       const { x, y, jumping } = sapo;
+      
+      // Corpo
       ctx.fillStyle = "green";
       ctx.beginPath();
       ctx.ellipse(x / scaleX + 25, y / scaleY + 18, 22, 15, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Olhos Amarelos
+
+      // Braços articulados (O que estava faltando!)
+      ctx.strokeStyle = "green";
+      ctx.lineWidth = 3 / scaleX;
+      const armAngle = jumping ? Math.PI/2 : Math.PI/4; // Abre quando pula
+      
+      // Braço Esquerdo
+      ctx.beginPath();
+      ctx.moveTo(x / scaleX + 18, y / scaleY + 20);
+      ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
+      ctx.lineTo(x / scaleX + 5 - Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
+      ctx.stroke();
+
+      // Braço Direito
+      ctx.beginPath();
+      ctx.moveTo(x / scaleX + 32, y / scaleY + 20);
+      ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
+      ctx.lineTo(x / scaleX + 45 + Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
+      ctx.stroke();
+
+      // Olhos e Boca (Originais)
       ctx.fillStyle = "yellow"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 6, 0, Math.PI * 2);
-      ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2);
-      ctx.fill();
-      // Pupilas
+      ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "black"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 2, 0, Math.PI * 2);
-      ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2);
-      ctx.fill();
-      // Pernas e Braços (Lógica Original)
+      ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2); ctx.fill();
+      
+      ctx.strokeStyle = "black"; ctx.lineWidth = 2 / scaleX; ctx.beginPath();
+      ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3); ctx.stroke();
+
+      // Pernas
       ctx.strokeStyle = "green"; ctx.lineWidth = 4 / scaleX;
       const legAngle = jumping ? Math.PI/2 : Math.PI/4;
       ctx.beginPath();
       ctx.moveTo(x / scaleX + 15, y / scaleY + 30); ctx.lineTo(x / scaleX + 5 - Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
       ctx.moveTo(x / scaleX + 35, y / scaleY + 30); ctx.lineTo(x / scaleX + 45 + Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
       ctx.stroke();
+      
       ctx.restore();
     }
 
+    // --- 4. ÁUDIO E INÍCIO ---
+    const startGameHandler = (e) => {
+      if (e) e.preventDefault();
+      
+      // Tenta tocar a música imediatamente ao clicar
+      backgroundMusic.play().then(() => {
+          console.log("Música iniciada!");
+      }).catch(err => {
+          console.log("Aguardando interação para áudio");
+      });
+
+      // Destrava os outros sons
+      [jumpSound, failSound, victorySound].forEach(s => {
+          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(() => {});
+      });
+
+      if (!gameStarted && startBanner.classList.contains('active')) {
+        startBanner.classList.remove('active');
+        gameStarted = true;
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
+    };
+
+    // --- 5. LOOP E FÍSICA (MANTIDOS) ---
     function gameLoop() {
       if (!gameStarted) return;
       const fase = fases[faseAtual % fases.length];
       canvas.style.background = coresFase[fase].fundo;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Chão
       ctx.fillStyle = coresFase[fase].chao;
       ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
 
-      // Física
       sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
-      const chaoY = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-      if (sapo.y > chaoY) { sapo.y = chaoY; sapo.vy = 0; sapo.jumping = false; }
+      const chaoLimit = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+      if (sapo.y > chaoLimit) { sapo.y = chaoLimit; sapo.vy = 0; sapo.jumping = false; }
 
       drawSapo();
 
-      // Obstáculos
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
         let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
         obstaculos.push({ x: canvas.width, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY, color: cores[Math.floor(Math.random()*4)] });
       }
       
-      obstaculos.forEach((obs, i) => {
+      obstaculos.forEach((obs) => {
         obs.x -= 5 * scaleX;
         ctx.fillStyle = obs.color;
         ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-        // Colisão Hitbox Original
         const sapoHitboxY = sapo.y + 7 * scaleY;
         if (sapo.x < obs.x + obs.width && sapo.x + 40 * scaleX > obs.x &&
             sapoHitboxY < obs.y + obs.height && sapoHitboxY + ALTURA_SAPO * scaleY > obs.y) {
@@ -312,6 +278,7 @@
 
       ctx.fillStyle = "#000"; ctx.font = "bold 16px Arial";
       ctx.fillText("Score: " + pontuacao, 10, 25);
+      
       if (gameStarted) animationFrameId = requestAnimationFrame(gameLoop);
     }
 
@@ -319,48 +286,67 @@
       gameStarted = false;
       cancelAnimationFrame(animationFrameId);
       backgroundMusic.pause();
-      if (vitoria) {
-        victorySound.play().catch(() => {});
-        victoryScore.textContent = pontuacao;
-        victoryBanner.classList.add('active');
-      } else {
-        failSound.play().catch(() => {});
-        finalScore.textContent = pontuacao;
-        gameOverBanner.classList.add('active');
-      }
+      if (vitoria) { victorySound.play().catch(() => {}); victoryBanner.classList.add('active'); }
+      else { failSound.play().catch(() => {}); finalScore.textContent = pontuacao; gameOverBanner.classList.add('active'); }
       positionBanners();
     }
 
-    // --- 5. CLIMA E INICIALIZAÇÃO ---
-    async function fetchWeather() {
-      try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=b8a0cd03c689322da2746720be31d534&lang=pt_br&units=metric`);
-        const data = await res.json();
-        document.getElementById("weather").textContent = `SP: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`;
-      } catch { document.getElementById("weather").textContent = "Clima indisponível"; }
+    function resetGame() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      resizeCanvas();
+      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
+      obstaculos = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
+      gameOverBanner.classList.remove('active'); victoryBanner.classList.remove('active'); startBanner.classList.add('active');
+      gameStarted = false; backgroundMusic.pause(); backgroundMusic.currentTime = 0;
+      positionBanners();
+    }
+
+    function resizeCanvas() {
+      if (isMobile) { canvas.width = Math.min(window.innerWidth - 20, 400); canvas.height = canvas.width / 2; }
+      else { canvas.width = BASE_WIDTH; canvas.height = BASE_HEIGHT; }
+      scaleX = canvas.width / BASE_WIDTH; scaleY = canvas.height / BASE_HEIGHT;
+      ALTURA_CHAO = canvas.height;
+    }
+
+    function positionBanners() {
+      const banners = [startBanner, gameOverBanner, victoryBanner];
+      const canvasRect = canvas.getBoundingClientRect();
+      const gameContainer = document.getElementById('game-container').getBoundingClientRect();
+      banners.forEach(banner => {
+        if (banner.classList.contains('active')) {
+          banner.style.position = 'absolute';
+          banner.style.left = `${(canvasRect.left - gameContainer.left) + canvasRect.width / 2}px`;
+          banner.style.top = `${(canvasRect.top - gameContainer.top) + canvasRect.height / 2}px`;
+          banner.style.transform = 'translate(-50%, -50%)';
+        }
+      });
     }
 
     window.onload = () => {
       resetGame();
-      fetchWeather();
-      setInterval(fetchWeather, 600000);
       setInterval(() => {
         const d = new Date();
         document.getElementById("clock").textContent = `${d.toLocaleDateString('pt-BR')} - ${d.toLocaleTimeString('pt-BR')}`;
       }, 1000);
 
-      // Eventos de início (Desktop e Mobile)
-      startBanner.addEventListener('click', startGameHandler);
-      startBanner.addEventListener('touchstart', startGameHandler, {passive: false});
-      document.addEventListener('keydown', (e) => { if(!gameStarted) startGameHandler(e); });
-
-      // Eventos de Pulo
+      startBanner.onclick = startGameHandler;
+      startBanner.ontouchstart = startGameHandler;
+      
       document.addEventListener('keydown', (e) => {
-        if (gameStarted && (e.code === 'Space' || e.code === 'ArrowUp')) handleJump();
+        if (!gameStarted) startGameHandler(e);
+        else if (e.code === 'Space' || e.code === 'ArrowUp') {
+            if (gameStarted && !sapo.jumping) {
+                sapo.vy = -20 * scaleY;
+                sapo.jumping = true;
+                jumpSound.currentTime = 0;
+                jumpSound.play().catch(() => {});
+            }
+        }
       });
-      canvas.addEventListener('touchstart', (e) => {
-        if (gameStarted) { e.preventDefault(); handleJump(); }
-      }, {passive: false});
+
+      canvas.ontouchstart = (e) => {
+        if (gameStarted) { e.preventDefault(); if (!sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.currentTime = 0; jumpSound.play(); } }
+      };
 
       restartButton.onclick = resetGame;
       playAgainButton.onclick = resetGame;
@@ -423,3 +409,4 @@
   </script>
 </body>
 </html>
+
