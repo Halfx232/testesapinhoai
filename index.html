@@ -98,121 +98,38 @@
   <audio id="victorySound" src="Victory.mp3"></audio>
   <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('loaded');
-      const canvas = document.getElementById('gameCanvas');
-      canvas.classList.add('ready');
+      const canvasElement = document.getElementById('gameCanvas');
+      canvasElement.classList.add('ready');
       document.getElementById('top-bar').style.display = 'flex';
       document.getElementById('game-container').style.display = 'flex';
       document.getElementById('test-version').style.display = 'block';
       document.getElementById('about-section').style.display = 'block';
       document.getElementById('footer').style.display = 'block';
-      // Remover qualquer link de stylesheet no body
+      
       const invalidLinks = document.body.querySelectorAll('link[rel="stylesheet"]');
-      invalidLinks.forEach(link => {
-        console.warn('Link de stylesheet encontrado no body, removendo:', link);
-        link.remove();
-      });
+      invalidLinks.forEach(link => link.remove());
     });
 
-    window.addEventListener('load', () => {
-      window.cookieconsent.initialise({
-        "palette": { "popup": { "background": "#1b5e20" }, "button": { "background": "#00ff00" } },
-        "content": { "message": "Este site usa cookies para melhorar sua experiência.", "dismiss": "Entendido", "link": "Saiba mais", "href": "/politicas.html" }
-      });
-
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (!isMobile) {
-        const ads = document.querySelectorAll('#left-ad > ins, #right-ad > ins');
-        ads.forEach(ad => {
-          if (!ad.closest('#left-ad, #right-ad').classList.contains('loaded')) {
-            ad.style.width = '300px';
-            ad.style.height = '400px';
-            ad.style.maxWidth = '300px';
-            ad.style.maxHeight = '400px';
-            ad.style.minWidth = '300px';
-            ad.style.minHeight = '400px';
-            ad.style.overflow = 'hidden';
-            (adsbygoogle = window.adsbygoogle || []).push({});
-            ad.closest('#left-ad, #right-ad').classList.add('loaded');
-          }
-        });
-        console.log('Banners laterais forçados para 300x400px no load (desktop)');
-      } else {
-        const ads = document.querySelectorAll('#top-ad > ins');
-        ads.forEach(ad => {
-          if (!ad.closest('#top-ad').classList.contains('loaded')) {
-            ad.style.width = '100%';
-            ad.style.maxWidth = '400px';
-            ad.style.height = '100px';
-            ad.style.background = '#ccc';
-            try {
-              (adsbygoogle = window.adsbygoogle || []).push({});
-              console.log('Anúncio superior inicializado com sucesso');
-              setTimeout(() => {
-                if (ad.getAttribute('data-ad-status') === 'filled') {
-                  console.log('Anúncio superior carregado com sucesso');
-                } else {
-                  console.warn('Anúncio superior não carregado, status:', ad.getAttribute('data-ad-status'));
-                  // Opcional: Ocultar #top-ad se não houver anúncio
-                  // ad.closest('#top-ad').style.display = 'none';
-                }
-              }, 2000);
-            } catch (e) {
-              console.error('Erro ao inicializar anúncio superior:', e);
-              // Opcional: Ocultar #top-ad em caso de erro
-              // ad.closest('#top-ad').style.display = 'none';
-            }
-            ad.closest('#top-ad').classList.add('loaded');
-          }
-        });
-        console.log('Banner superior forçado para max-width 400x100px no load (mobile)');
-      }
-    });
-
-    const menuToggle = document.getElementById('menu-toggle');
-    const navMenu = document.getElementById('nav-menu');
-
-    function toggleMenu() {
-      navMenu.classList.toggle('open');
-    }
-
-    if (menuToggle && navMenu) {
-      menuToggle.addEventListener('click', toggleMenu);
-      const menuLinks = navMenu.querySelectorAll('a');
-      menuLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          navMenu.classList.remove('open');
-        });
-      });
-    }
-
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
-
+    // --- VARIÁVEIS E CONFIGURAÇÕES ---
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+    
+    // Sons
     const jumpSound = document.getElementById("jumpSound");
-    jumpSound.preload = 'auto';
-    jumpSound.volume = 0.8;
     const failSound = document.getElementById("failSound");
     const victorySound = document.getElementById("victorySound");
-    victorySound.preload = 'auto';
-    victorySound.volume = 0.3;
     const backgroundMusic = document.getElementById("backgroundMusic");
-    backgroundMusic.preload = 'auto';
+    [jumpSound, failSound, victorySound, backgroundMusic].forEach(s => s.preload = 'auto');
+    jumpSound.volume = 0.8;
+    victorySound.volume = 0.3;
     backgroundMusic.volume = 0.5;
 
+    // Banners e Botões
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
     const finalScore = document.getElementById("final-score");
@@ -242,120 +159,16 @@
 
     let gameStarted = false;
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
-    let poeira = [];
-    let animationFrameId;
+    let poeira = [], animationFrameId;
 
-    function positionBanners() {
-      const banners = [startBanner, gameOverBanner, victoryBanner];
-      const canvas = document.getElementById('gameCanvas');
-      const canvasRect = canvas.getBoundingClientRect();
-      const gameContainer = document.getElementById('game-container');
-
-      banners.forEach(banner => {
-        if (banner.classList.contains('active')) {
-          banner.style.position = 'absolute';
-          const canvasCenterX = canvasRect.left - gameContainer.getBoundingClientRect().left + canvasRect.width / 2;
-          const canvasCenterY = canvasRect.top - gameContainer.getBoundingClientRect().top + canvasRect.height / 2;
-          banner.style.left = `${canvasCenterX}px`;
-          banner.style.top = `${canvasCenterY}px`;
-          banner.style.transform = 'translate(-50%, -50%)';
-          banner.style.zIndex = '1000';
-          console.log(`Banner ${banner.id} visível, posicionado no centro do canvas: left=${canvasCenterX}px, top=${canvasCenterY}px`);
-          console.log(`Banner ${banner.id} dimensions:`, banner.getBoundingClientRect());
-        }
-      });
-
-      console.log('Canvas dimensions:', canvasRect);
-      if (!isMobile) {
-        console.log('Left Ad:', document.getElementById('left-ad').getBoundingClientRect());
-        console.log('Right Ad:', document.getElementById('right-ad').getBoundingClientRect());
-      } else {
-        console.log('Top Ad:', document.getElementById('top-ad').getBoundingClientRect());
-      }
-
-      const testVersion = document.getElementById('test-version');
-      const aboutSection = document.getElementById('about-section');
-      const topAd = document.getElementById('top-ad');
-      testVersion.style.position = 'relative';
-      testVersion.style.zIndex = '2';
-      aboutSection.style.position = 'relative';
-      aboutSection.style.zIndex = '2';
-      topAd.style.width = '100%';
-      topAd.style.maxWidth = '400px';
-      topAd.style.height = '100px';
-      const adIns = topAd.querySelector('ins.adsbygoogle');
-      if (adIns) {
-        adIns.style.width = '100%';
-        adIns.style.maxWidth = '400px';
-        adIns.style.height = '100px';
-      }
-    }
-
-    function resizeCanvas() {
-      console.log('resizeCanvas chamado');
-      if (isMobile) {
-        const maxWidth = Math.min(window.innerWidth - 20, 400);
-        canvas.width = maxWidth;
-        canvas.height = maxWidth / 2;
-        scaleX = canvas.width / BASE_WIDTH;
-        scaleY = canvas.height / BASE_HEIGHT;
-        ALTURA_CHAO = canvas.height;
-        canvas.style.margin = '15px auto';
-        document.body.style.overflowY = 'auto';
-      } else {
-        canvas.width = BASE_WIDTH;
-        canvas.height = BASE_HEIGHT;
-        scaleX = 1;
-        scaleY = 1;
-        ALTURA_CHAO = BASE_HEIGHT;
-        canvas.style.margin = '20px auto';
-      }
-      if (sapo) {
-        sapo.x = BASE_WIDTH * 0.2 * scaleX;
-        sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-      }
-      positionBanners();
-      console.log('Canvas:', canvas.width, canvas.height, 'Scale:', scaleX, scaleY);
-    }
-
-    function handleOrientation() {
-      const gameContainer = document.getElementById('game-container');
-      gameContainer.style.display = 'flex';
-      gameContainer.style.flexDirection = 'column';
-      gameContainer.style.alignItems = 'center';
-      resizeCanvas();
-      window.addEventListener('resize', debounce(() => {
-        resizeCanvas();
-        positionBanners();
-      }, 100));
-      window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-          resizeCanvas();
-          positionBanners();
-          window.scrollTo(0, 0);
-          document.body.style.overflowY = 'auto';
-          document.getElementById('game-container').style.minHeight = 'auto';
-          const topAd = document.getElementById('top-ad');
-          topAd.style.width = '100%';
-          topAd.style.maxWidth = '400px';
-          topAd.style.height = '100px';
-          const adIns = topAd.querySelector('ins.adsbygoogle');
-          if (adIns) {
-            adIns.style.width = '100%';
-            adIns.style.maxWidth = '400px';
-            adIns.style.height = '100px';
-          }
-        }, 200);
-      });
-    }
+    // --- FUNÇÕES DE INTERAÇÃO ---
 
     function handleJump() {
       if (gameStarted && !sapo.jumping) {
         sapo.vy = -20 * scaleY;
         sapo.jumping = true;
         jumpSound.currentTime = 0;
-        jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
-        console.log('Sapo pulou!');
+        jumpSound.play().catch(() => {});
         for (let i = 0; i < 10; i++) {
           poeira.push({
             x: sapo.x + 15 * scaleX + Math.random() * 10 * scaleX,
@@ -369,70 +182,28 @@
       }
     }
 
-    const handleKeyJump = (e) => {
-      if ((e.code === 'Space' || e.code === 'ArrowUp') && gameStarted && !sapo.jumping) {
-        handleJump();
-      }
-    };
-
     const startGameHandler = (e) => {
-      e.preventDefault();
+      if (e) e.preventDefault();
+      
+      // DESTRAVA O ÁUDIO NO MOBILE
+      [backgroundMusic, jumpSound, failSound, victorySound].forEach(s => {
+          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(() => {});
+      });
+
       if (!gameStarted && startBanner.classList.contains('active')) {
         startBanner.classList.remove('active');
         iniciarJogo();
-        console.log("Jogo iniciado!");
       }
     };
 
-    function resetGame() {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
-      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
-      obstaculos = [];
-      poeira = [];
-      tempo = 0;
-      intervaloObstaculo = 120;
-      faseAtual = 0;
-      pontuacao = 0;
-      gameOverBanner.classList.remove('active');
-      victoryBanner.classList.remove('active');
-      startBanner.classList.add('active');
-      gameStarted = false;
-
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
-
-      document.removeEventListener('keydown', handleKeyJump);
-      document.removeEventListener('keydown', startGameHandler);
-      document.removeEventListener('touchstart', startGameHandler);
-      canvas.removeEventListener('touchstart', handleJump);
-
-      startBanner.addEventListener('click', startGameHandler);
-      startBanner.addEventListener('touchstart', startGameHandler);
-      document.addEventListener('keydown', startGameHandler);
-      canvas.addEventListener('touchstart', (e) => {
-        console.log('Toque no canvas');
-        e.preventDefault();
-        if (gameStarted && !sapo.jumping) {
-          handleJump();
-        }
-      });
-
-      resizeCanvas();
-      positionBanners();
+    function iniciarJogo() {
+      if (gameStarted) return;
+      gameStarted = true;
+      backgroundMusic.play().catch(() => {});
+      animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-    function getFaseAtual() {
-      return fases[faseAtual % fases.length];
-    }
-
-    function drawChao() {
-      ctx.fillStyle = coresFase[getFaseAtual()].chao;
-      ctx.clearRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
-      ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
-    }
+    // --- LÓGICA DO JOGO (MANTIDA ORIGINAL) ---
 
     function drawSapo() {
       ctx.save();
@@ -447,265 +218,199 @@
       ctx.lineWidth = 3 / scaleX;
       const armAngle = jumping ? Math.PI/2 : Math.PI/4;
       ctx.beginPath();
-      ctx.moveTo(x / scaleX + 18, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
+      ctx.moveTo(x / scaleX + 18, y / scaleY + 20); ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
       ctx.lineTo(x / scaleX + 5 - Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
       ctx.stroke();
 
       ctx.beginPath();
-      ctx.moveTo(x / scaleX + 32, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
+      ctx.moveTo(x / scaleX + 32, y / scaleY + 20); ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
       ctx.lineTo(x / scaleX + 45 + Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
       ctx.stroke();
 
-      ctx.fillStyle = "yellow";
-      ctx.beginPath();
+      ctx.fillStyle = "yellow"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 6, 0, Math.PI * 2);
       ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = "black";
-      ctx.beginPath();
+      ctx.fillStyle = "black"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 2, 0, Math.PI * 2);
       ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 2 / scaleX;
-      ctx.beginPath();
-      ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3);
-      ctx.stroke();
+      ctx.strokeStyle = "black"; ctx.lineWidth = 2 / scaleX; ctx.beginPath();
+      ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3); ctx.stroke();
 
-      ctx.strokeStyle = "green";
-      ctx.lineWidth = 4 / scaleX;
+      ctx.strokeStyle = "green"; ctx.lineWidth = 4 / scaleX;
       const legAngle = jumping ? Math.PI/2 : Math.PI/4;
       ctx.beginPath();
-      ctx.moveTo(x / scaleX + 15, y / scaleY + 30);
-      ctx.lineTo(x / scaleX + 5 - Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
-      ctx.moveTo(x / scaleX + 35, y / scaleY + 30);
-      ctx.lineTo(x / scaleX + 45 + Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
+      ctx.moveTo(x / scaleX + 15, y / scaleY + 30); ctx.lineTo(x / scaleX + 5 - Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
+      ctx.moveTo(x / scaleX + 35, y / scaleY + 30); ctx.lineTo(x / scaleX + 45 + Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
       ctx.stroke();
       ctx.restore();
-    }
-
-    function drawObstaculo(obs) {
-      ctx.save();
-      ctx.scale(scaleX, scaleY);
-      ctx.fillStyle = obs.color;
-      ctx.fillRect(obs.x / scaleX, obs.y / scaleY, obs.width / scaleX, obs.height / scaleY);
-      ctx.restore();
-    }
-
-    function atualizarPoeira() {
-      ctx.save();
-      ctx.scale(scaleX, scaleY);
-      for (let i = 0; i < poeira.length; i++) {
-        const p = poeira[i];
-        ctx.fillStyle = `rgba(143, 188, 143, ${p.alpha})`;
-        ctx.beginPath();
-        ctx.arc(p.x / scaleX, p.y / scaleY, p.raio / scaleX, 0, Math.PI * 2);
-        ctx.fill();
-        p.x += p.vx;
-        p.y += p.vy;
-        p.raio -= 0.1 * scaleX;
-        p.alpha -= 0.02;
-        p.vy *= 0.98;
-      }
-      ctx.restore();
-      poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0.05);
-    }
-
-    function atualizarJogo() {
-      if (!gameStarted) return;
-      const fase = getFaseAtual();
-      canvas.style.background = coresFase[fase].fundo;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawChao();
-      sapo.vy += GRAVIDADE * scaleY;
-      sapo.y += sapo.vy;
-      if (sapo.y > ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY) {
-        sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-        sapo.vy = 0;
-        sapo.jumping = false;
-      }
-      drawSapo();
-      atualizarPoeira();
-      if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
-        let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
-        let cor = cores[Math.floor(Math.random() * cores.length)];
-        obstaculos.push({ x: BASE_WIDTH * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY, color: cor });
-      }
-      for (let i = 0; i < obstaculos.length; i++) {
-        let obs = obstaculos[i];
-        obs.x -= 5 * scaleX;
-        drawObstaculo(obs);
-      }
-      obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
-      tempo++;
-      pontuacao++;
-      if (tempo % 1500 === 0) {
-        faseAtual++;
-        intervaloObstaculo = Math.max(60, intervaloObstaculo - 10);
-      }
-      ctx.save();
-      ctx.font = isMobile ? "bold 16px Arial" : "bold 18px Arial";
-      ctx.fillStyle = "#000";
-      ctx.fillText("Score: " + pontuacao, 10, isMobile ? 20 : 25);
-      ctx.restore();
-    }
-
-    function verificarColisao() {
-      for (let obs of obstaculos) {
-        const sapoHitboxY = sapo.y + 7 * scaleY;
-        if (
-          sapo.x < obs.x + obs.width &&
-          sapo.x + sapo.width > obs.x &&
-          sapoHitboxY < obs.y + obs.height &&
-          sapoHitboxY + ALTURA_SAPO * scaleY > obs.y
-        ) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function iniciarJogo() {
-      if (gameStarted) return;
-      gameStarted = true;
-      document.addEventListener('keydown', handleKeyJump);
-      canvas.addEventListener('touchstart', (e) => {
-        console.log('Toque no canvas');
-        e.preventDefault();
-        if (gameStarted && !sapo.jumping) {
-          handleJump();
-        }
-      });
-      backgroundMusic.play().catch(e => console.log("Erro ao tocar música de fundo:", e));
-      animationFrameId = requestAnimationFrame(gameLoop);
     }
 
     function gameLoop() {
-      if (!gameStarted) {
-        return;
+      if (!gameStarted) return;
+      
+      const fase = fases[faseAtual % fases.length];
+      canvas.style.background = coresFase[fase].fundo;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Chão
+      ctx.fillStyle = coresFase[fase].chao;
+      ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
+
+      // Física Sapo
+      sapo.vy += GRAVIDADE * scaleY;
+      sapo.y += sapo.vy;
+      const chaoLimit = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+      if (sapo.y > chaoLimit) { sapo.y = chaoLimit; sapo.vy = 0; sapo.jumping = false; }
+
+      drawSapo();
+
+      // Poeira
+      ctx.save(); ctx.scale(scaleX, scaleY);
+      poeira.forEach(p => {
+        ctx.fillStyle = `rgba(143, 188, 143, ${p.alpha})`;
+        ctx.beginPath(); ctx.arc(p.x / scaleX, p.y / scaleY, p.raio / scaleX, 0, Math.PI * 2); ctx.fill();
+        p.x += p.vx; p.y += p.vy; p.raio -= 0.1 * scaleX; p.alpha -= 0.02;
+      });
+      ctx.restore();
+      poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0);
+
+      // Obstáculos
+      if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
+        let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
+        obstaculos.push({ x: canvas.width, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY, color: cores[Math.floor(Math.random()*4)] });
       }
-      atualizarJogo();
-      if (verificarColisao()) {
-        gameStarted = false;
-        cancelAnimationFrame(animationFrameId);
-        failSound.play().catch(e => console.log("Erro ao tocar som:", e));
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-        finalScore.textContent = pontuacao;
-        gameOverBanner.classList.add('active');
-        positionBanners();
-        document.removeEventListener('keydown', handleKeyJump);
-        document.removeEventListener('keydown', startGameHandler);
-        document.removeEventListener('touchstart', startGameHandler);
-        canvas.removeEventListener('touchstart', handleJump);
-        return;
-      }
-      if (pontuacao >= PONTUACAO_VITORIA) {
-        gameStarted = false;
-        cancelAnimationFrame(animationFrameId);
-        victorySound.play().catch(e => console.log("Erro ao tocar som:", e));
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-        victoryScore.textContent = pontuacao;
-        victoryBanner.classList.add('active');
-        positionBanners();
-        document.removeEventListener('keydown', handleKeyJump);
-        document.removeEventListener('keydown', startGameHandler);
-        document.removeEventListener('touchstart', startGameHandler);
-        canvas.removeEventListener('touchstart', handleJump);
-        return;
-      }
+      
+      obstaculos.forEach(obs => {
+        obs.x -= 5 * scaleX;
+        ctx.fillStyle = obs.color;
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+        // Colisão Hitbox
+        const sapoHitboxY = sapo.y + 7 * scaleY;
+        if (sapo.x < obs.x + obs.width && sapo.x + 40 * scaleX > obs.x &&
+            sapoHitboxY < obs.y + obs.height && sapoHitboxY + ALTURA_SAPO * scaleY > obs.y) {
+          gameStarted = false;
+        }
+      });
+      obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
+
+      if (!gameStarted) { finalizarJogo(false); return; }
+
+      tempo++; pontuacao++;
+      if (tempo % 1500 === 0) { faseAtual++; intervaloObstaculo = Math.max(60, intervaloObstaculo - 10); }
+      if (pontuacao >= PONTUACAO_VITORIA) { finalizarJogo(true); return; }
+
+      ctx.fillStyle = "#000"; ctx.font = "bold 16px Arial";
+      ctx.fillText("Score: " + pontuacao, 10, isMobile ? 20 : 25);
+      
       animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-    const weatherElement = document.getElementById("weather");
-    const clockElement = document.getElementById("clock");
-
-    let lastWeatherData = null;
-    let lastWeatherFetch = 0;
-    const CACHE_DURATION = 10 * 60 * 1000;
-
-    let lastTimeData = null;
-    let lastTimeFetch = 0;
-    const TIME_CACHE_DURATION = 60 * 1000;
-
-    async function fetchWeather() {
-      try {
-        const now = Date.now();
-        if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
-          weatherElement.textContent = lastWeatherData;
-          return;
-        }
-        const API_KEY = "b8a0cd03c689322da2746720be31d534";
-        const city = "São Paulo";
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=pt_br&units=metric`, { mode: 'cors' });
-        if (!response.ok) throw new Error(`Falha na API OpenWeatherMap: ${response.status}`);
-        const data = await response.json();
-        const temp = Math.round(data.main.temp);
-        const description = data.weather[0].description;
-        lastWeatherData = ` ${city}: ${temp}°C, ${description}`;
-        lastWeatherFetch = now;
-        weatherElement.textContent = lastWeatherData;
-      } catch (error) {
-        console.error("Erro ao buscar previsão do tempo:", error);
-        weatherElement.textContent = "Clima indisponível";
+    function finalizarJogo(vitoria) {
+      cancelAnimationFrame(animationFrameId);
+      backgroundMusic.pause();
+      if (vitoria) {
+        victorySound.play().catch(() => {});
+        victoryScore.textContent = pontuacao;
+        victoryBanner.classList.add('active');
+      } else {
+        failSound.play().catch(() => {});
+        finalScore.textContent = pontuacao;
+        gameOverBanner.classList.add('active');
       }
+      positionBanners();
     }
 
-    async function atualizarHora() {
+    function resetGame() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      resizeCanvas();
+      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
+      obstaculos = []; poeira = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
+      gameOverBanner.classList.remove('active'); victoryBanner.classList.remove('active'); startBanner.classList.add('active');
+      gameStarted = false;
+      backgroundMusic.pause(); backgroundMusic.currentTime = 0;
+      positionBanners();
+    }
+
+    // --- UTILITÁRIOS (WEATHER/CLOCK) ---
+    async function fetchWeather() {
       try {
-        const now = Date.now();
-        if (lastTimeData && now - lastTimeFetch < TIME_CACHE_DURATION) {
-          clockElement.textContent = lastTimeData;
-          return;
-        }
-        const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
-        if (!response.ok) throw new Error(`Falha na API WorldTimeAPI: ${response.status}`);
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=b8a0cd03c689322da2746720be31d534&lang=pt_br&units=metric`);
         const data = await response.json();
-        const dateTime = new Date(data.datetime);
-        lastTimeData = ` ${dateTime.toLocaleDateString('pt-BR')} - ${dateTime.toLocaleTimeString('pt-BR')}`;
-        lastTimeFetch = now;
-        clockElement.textContent = lastTimeData;
-      } catch (error) {
-        console.error("Erro ao buscar hora:", error);
-        setTimeout(atualizarHora, 2000);
-        const now = new Date();
-        lastTimeData = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-        clockElement.textContent = lastTimeData;
-      }
+        document.getElementById("weather").textContent = ` SP: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`;
+      } catch (e) { document.getElementById("weather").textContent = "Clima indisponível"; }
+    }
+
+    function atualizarHora() {
+      const now = new Date();
+      document.getElementById("clock").textContent = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
+    }
+
+    // --- EVENTOS INICIAIS ---
+    function positionBanners() {
+        const banners = [startBanner, gameOverBanner, victoryBanner];
+        const canvasRect = canvas.getBoundingClientRect();
+        const gameContainer = document.getElementById('game-container');
+        banners.forEach(banner => {
+            if (banner.classList.contains('active')) {
+                banner.style.position = 'absolute';
+                const canvasCenterX = canvasRect.left - gameContainer.getBoundingClientRect().left + canvasRect.width / 2;
+                const canvasCenterY = canvasRect.top - gameContainer.getBoundingClientRect().top + canvasRect.height / 2;
+                banner.style.left = `${canvasCenterX}px`;
+                banner.style.top = `${canvasCenterY}px`;
+                banner.style.transform = 'translate(-50%, -50%)';
+                banner.style.zIndex = '1000';
+            }
+        });
+    }
+
+    function resizeCanvas() {
+        if (isMobile) {
+            canvas.width = Math.min(window.innerWidth - 20, 400);
+            canvas.height = canvas.width / 2;
+        } else {
+            canvas.width = BASE_WIDTH;
+            canvas.height = BASE_HEIGHT;
+        }
+        scaleX = canvas.width / BASE_WIDTH;
+        scaleY = canvas.height / BASE_HEIGHT;
+        ALTURA_CHAO = canvas.height;
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
     }
 
     window.addEventListener('load', () => {
-      handleOrientation();
-      resizeCanvas();
-      window.addEventListener('resize', debounce(() => {
-        resizeCanvas();
-        positionBanners();
-      }, 100));
       resetGame();
-
       fetchWeather();
       atualizarHora();
+      setInterval(fetchWeather, 600000);
+      setInterval(atualizarHora, 1000);
 
-      setInterval(fetchWeather, 10 * 60 * 1000);
-      setInterval(atualizarHora, 60 * 1000);
+      window.addEventListener('resize', debounce(() => { resizeCanvas(); positionBanners(); }, 100));
+      
+      // EVENTOS DE PULO E START
+      startBanner.addEventListener('click', startGameHandler);
+      startBanner.addEventListener('touchstart', startGameHandler, {passive: false});
+      
+      document.addEventListener('keydown', (e) => {
+        if (!gameStarted) startGameHandler(e);
+        else if (e.code === 'Space' || e.code === 'ArrowUp') handleJump();
+      });
 
-      document.body.addEventListener('touchstart', () => {
-        jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
-        failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
-        victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
-        backgroundMusic.play().then(() => backgroundMusic.pause()).catch(e => console.log("Erro ao desbloquear backgroundMusic:", e));
-      }, { once: true });
+      canvas.addEventListener('touchstart', (e) => {
+        if (gameStarted) { e.preventDefault(); handleJump(); }
+      }, {passive: false});
 
-      positionBanners();
+      restartButton.addEventListener("click", resetGame);
+      playAgainButton.addEventListener("click", resetGame);
     });
-
-    restartButton.addEventListener("click", resetGame);
-    playAgainButton.addEventListener("click", resetGame);
   </script>
     <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
   <style>
@@ -763,3 +468,4 @@
   </script>
 </body>
 </html>
+
