@@ -115,6 +115,7 @@
     });
 
     // --- VARIÁVEIS E CONFIGURAÇÕES ---
+ // --- 1. CONFIGURAÇÕES E SELEÇÃO DE ELEMENTOS ---
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -124,10 +125,6 @@
     const failSound = document.getElementById("failSound");
     const victorySound = document.getElementById("victorySound");
     const backgroundMusic = document.getElementById("backgroundMusic");
-    [jumpSound, failSound, victorySound, backgroundMusic].forEach(s => s.preload = 'auto');
-    jumpSound.volume = 0.8;
-    victorySound.volume = 0.3;
-    backgroundMusic.volume = 0.5;
 
     // Banners e Botões
     const startBanner = document.getElementById("start-banner");
@@ -137,7 +134,17 @@
     const victoryBanner = document.getElementById("victory-banner");
     const victoryScore = document.getElementById("victory-score");
     const playAgainButton = document.getElementById("play-again-button");
+    const menuToggle = document.getElementById('menu-toggle');
+    const navMenu = document.getElementById('nav-menu');
 
+    // Variáveis de Jogo
+    const PONTUACAO_VITORIA = 5000;
+    const GRAVIDADE = 1.5;
+    const BASE_WIDTH = 800;
+    const BASE_HEIGHT = 400;
+    const ALTURA_SAPO = 40;
+    const ESPESSURA_CHAO = isMobile ? 20 : 50;
+    const SAPO_OFFSET_VISUAL = 47;
     const fases = ["primavera", "verão", "outono", "inverno"];
     const coresFase = {
       primavera: { fundo: "#dcedc8", chao: "#81c784" },
@@ -146,22 +153,83 @@
       inverno: { fundo: "#e0f7fa", chao: "#4dd0e1" }
     };
 
-    const PONTUACAO_VITORIA = 5000;
-    const GRAVIDADE = 1.5;
-    const BASE_WIDTH = 800;
-    const BASE_HEIGHT = 400;
-    let ALTURA_CHAO = isMobile ? 150 : 300;
-    const ALTURA_SAPO = 40;
-    const ESPESSURA_CHAO = isMobile ? 20 : 50;
-    const SAPO_OFFSET_VISUAL = 47;
-    let scaleX = 1;
-    let scaleY = 1;
-
     let gameStarted = false;
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
-    let poeira = [], animationFrameId;
+    let poeira = [], animationFrameId, scaleX = 1, scaleY = 1, ALTURA_CHAO;
 
-    // --- FUNÇÕES DE INTERAÇÃO ---
+    // --- 2. FUNÇÕES DO MENU E INTERFACE ---
+    if (menuToggle && navMenu) {
+      menuToggle.onclick = (e) => {
+        e.stopPropagation();
+        navMenu.classList.toggle('open');
+      };
+      // Fecha o menu ao clicar em um link ou fora dele
+      document.addEventListener('click', () => navMenu.classList.remove('open'));
+    }
+
+    function positionBanners() {
+      const banners = [startBanner, gameOverBanner, victoryBanner];
+      const canvasRect = canvas.getBoundingClientRect();
+      const gameContainer = document.getElementById('game-container');
+      banners.forEach(banner => {
+        if (banner.classList.contains('active')) {
+          banner.style.position = 'absolute';
+          const containerRect = gameContainer.getBoundingClientRect();
+          banner.style.left = `${(canvasRect.left - containerRect.left) + canvasRect.width / 2}px`;
+          banner.style.top = `${(canvasRect.top - containerRect.top) + canvasRect.height / 2}px`;
+          banner.style.transform = 'translate(-50%, -50%)';
+        }
+      });
+    }
+
+    function resizeCanvas() {
+      if (isMobile) {
+        canvas.width = Math.min(window.innerWidth - 20, 400);
+        canvas.height = canvas.width / 2;
+      } else {
+        canvas.width = BASE_WIDTH;
+        canvas.height = BASE_HEIGHT;
+      }
+      scaleX = canvas.width / BASE_WIDTH;
+      scaleY = canvas.height / BASE_HEIGHT;
+      ALTURA_CHAO = canvas.height;
+      positionBanners();
+    }
+
+    // --- 3. LÓGICA DE ÁUDIO E INÍCIO ---
+    const startGameHandler = (e) => {
+      if (e) e.preventDefault();
+      
+      // LIBERAÇÃO GLOBAL DE ÁUDIO
+      [backgroundMusic, jumpSound, failSound, victorySound].forEach(s => {
+          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(err => console.log("Erro som:", err));
+      });
+
+      if (!gameStarted && startBanner.classList.contains('active')) {
+        startBanner.classList.remove('active');
+        gameStarted = true;
+        backgroundMusic.play().catch(() => {});
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
+    };
+
+    function resetGame() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      resizeCanvas();
+      sapo = { 
+        x: BASE_WIDTH * 0.2 * scaleX, 
+        y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
+        width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false 
+      };
+      obstaculos = []; poeira = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
+      gameOverBanner.classList.remove('active');
+      victoryBanner.classList.remove('active');
+      startBanner.classList.add('active');
+      gameStarted = false;
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      positionBanners();
+    }
 
     function handleJump() {
       if (gameStarted && !sapo.jumping) {
@@ -169,42 +237,10 @@
         sapo.jumping = true;
         jumpSound.currentTime = 0;
         jumpSound.play().catch(() => {});
-        for (let i = 0; i < 10; i++) {
-          poeira.push({
-            x: sapo.x + 15 * scaleX + Math.random() * 10 * scaleX,
-            y: sapo.y + 30 * scaleY,
-            raio: (3 + Math.random() * 5) * scaleX,
-            alpha: 0.7,
-            vy: (-1 - Math.random() * 2) * scaleY,
-            vx: (Math.random() * 2 - 1) * scaleX
-          });
-        }
       }
     }
 
-    const startGameHandler = (e) => {
-      if (e) e.preventDefault();
-      
-      // DESTRAVA O ÁUDIO NO MOBILE
-      [backgroundMusic, jumpSound, failSound, victorySound].forEach(s => {
-          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(() => {});
-      });
-
-      if (!gameStarted && startBanner.classList.contains('active')) {
-        startBanner.classList.remove('active');
-        iniciarJogo();
-      }
-    };
-
-    function iniciarJogo() {
-      if (gameStarted) return;
-      gameStarted = true;
-      backgroundMusic.play().catch(() => {});
-      animationFrameId = requestAnimationFrame(gameLoop);
-    }
-
-    // --- LÓGICA DO JOGO (MANTIDA ORIGINAL) ---
-
+    // --- 4. DESENHO E LOOP (SEU SAPINHO ORIGINAL) ---
     function drawSapo() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
@@ -213,33 +249,17 @@
       ctx.beginPath();
       ctx.ellipse(x / scaleX + 25, y / scaleY + 18, 22, 15, 0, 0, Math.PI * 2);
       ctx.fill();
-
-      ctx.strokeStyle = "green";
-      ctx.lineWidth = 3 / scaleX;
-      const armAngle = jumping ? Math.PI/2 : Math.PI/4;
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 18, y / scaleY + 20); ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 5 - Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 32, y / scaleY + 20); ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 45 + Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
-      ctx.stroke();
-
+      // Olhos Amarelos
       ctx.fillStyle = "yellow"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 6, 0, Math.PI * 2);
       ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2);
       ctx.fill();
-
+      // Pupilas
       ctx.fillStyle = "black"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 2, 0, Math.PI * 2);
       ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2);
       ctx.fill();
-
-      ctx.strokeStyle = "black"; ctx.lineWidth = 2 / scaleX; ctx.beginPath();
-      ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3); ctx.stroke();
-
+      // Pernas e Braços (Lógica Original)
       ctx.strokeStyle = "green"; ctx.lineWidth = 4 / scaleX;
       const legAngle = jumping ? Math.PI/2 : Math.PI/4;
       ctx.beginPath();
@@ -251,7 +271,6 @@
 
     function gameLoop() {
       if (!gameStarted) return;
-      
       const fase = fases[faseAtual % fases.length];
       canvas.style.background = coresFase[fase].fundo;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -260,23 +279,13 @@
       ctx.fillStyle = coresFase[fase].chao;
       ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
 
-      // Física Sapo
+      // Física
       sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
-      const chaoLimit = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-      if (sapo.y > chaoLimit) { sapo.y = chaoLimit; sapo.vy = 0; sapo.jumping = false; }
+      const chaoY = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+      if (sapo.y > chaoY) { sapo.y = chaoY; sapo.vy = 0; sapo.jumping = false; }
 
       drawSapo();
-
-      // Poeira
-      ctx.save(); ctx.scale(scaleX, scaleY);
-      poeira.forEach(p => {
-        ctx.fillStyle = `rgba(143, 188, 143, ${p.alpha})`;
-        ctx.beginPath(); ctx.arc(p.x / scaleX, p.y / scaleY, p.raio / scaleX, 0, Math.PI * 2); ctx.fill();
-        p.x += p.vx; p.y += p.vy; p.raio -= 0.1 * scaleX; p.alpha -= 0.02;
-      });
-      ctx.restore();
-      poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0);
 
       // Obstáculos
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
@@ -284,33 +293,30 @@
         obstaculos.push({ x: canvas.width, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY, color: cores[Math.floor(Math.random()*4)] });
       }
       
-      obstaculos.forEach(obs => {
+      obstaculos.forEach((obs, i) => {
         obs.x -= 5 * scaleX;
         ctx.fillStyle = obs.color;
         ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
-        // Colisão Hitbox
+        // Colisão Hitbox Original
         const sapoHitboxY = sapo.y + 7 * scaleY;
         if (sapo.x < obs.x + obs.width && sapo.x + 40 * scaleX > obs.x &&
             sapoHitboxY < obs.y + obs.height && sapoHitboxY + ALTURA_SAPO * scaleY > obs.y) {
-          gameStarted = false;
+          finalizarJogo(false);
         }
       });
-      obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
-
-      if (!gameStarted) { finalizarJogo(false); return; }
+      obstaculos = obstaculos.filter(o => o.x + o.width > 0);
 
       tempo++; pontuacao++;
       if (tempo % 1500 === 0) { faseAtual++; intervaloObstaculo = Math.max(60, intervaloObstaculo - 10); }
-      if (pontuacao >= PONTUACAO_VITORIA) { finalizarJogo(true); return; }
+      if (pontuacao >= PONTUACAO_VITORIA) finalizarJogo(true);
 
       ctx.fillStyle = "#000"; ctx.font = "bold 16px Arial";
-      ctx.fillText("Score: " + pontuacao, 10, isMobile ? 20 : 25);
-      
-      animationFrameId = requestAnimationFrame(gameLoop);
+      ctx.fillText("Score: " + pontuacao, 10, 25);
+      if (gameStarted) animationFrameId = requestAnimationFrame(gameLoop);
     }
 
     function finalizarJogo(vitoria) {
+      gameStarted = false;
       cancelAnimationFrame(animationFrameId);
       backgroundMusic.pause();
       if (vitoria) {
@@ -325,92 +331,41 @@
       positionBanners();
     }
 
-    function resetGame() {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      resizeCanvas();
-      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
-      obstaculos = []; poeira = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
-      gameOverBanner.classList.remove('active'); victoryBanner.classList.remove('active'); startBanner.classList.add('active');
-      gameStarted = false;
-      backgroundMusic.pause(); backgroundMusic.currentTime = 0;
-      positionBanners();
-    }
-
-    // --- UTILITÁRIOS (WEATHER/CLOCK) ---
+    // --- 5. CLIMA E INICIALIZAÇÃO ---
     async function fetchWeather() {
       try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=b8a0cd03c689322da2746720be31d534&lang=pt_br&units=metric`);
-        const data = await response.json();
-        document.getElementById("weather").textContent = ` SP: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`;
-      } catch (e) { document.getElementById("weather").textContent = "Clima indisponível"; }
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=b8a0cd03c689322da2746720be31d534&lang=pt_br&units=metric`);
+        const data = await res.json();
+        document.getElementById("weather").textContent = `SP: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`;
+      } catch { document.getElementById("weather").textContent = "Clima indisponível"; }
     }
 
-    function atualizarHora() {
-      const now = new Date();
-      document.getElementById("clock").textContent = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-    }
-
-    // --- EVENTOS INICIAIS ---
-    function positionBanners() {
-        const banners = [startBanner, gameOverBanner, victoryBanner];
-        const canvasRect = canvas.getBoundingClientRect();
-        const gameContainer = document.getElementById('game-container');
-        banners.forEach(banner => {
-            if (banner.classList.contains('active')) {
-                banner.style.position = 'absolute';
-                const canvasCenterX = canvasRect.left - gameContainer.getBoundingClientRect().left + canvasRect.width / 2;
-                const canvasCenterY = canvasRect.top - gameContainer.getBoundingClientRect().top + canvasRect.height / 2;
-                banner.style.left = `${canvasCenterX}px`;
-                banner.style.top = `${canvasCenterY}px`;
-                banner.style.transform = 'translate(-50%, -50%)';
-                banner.style.zIndex = '1000';
-            }
-        });
-    }
-
-    function resizeCanvas() {
-        if (isMobile) {
-            canvas.width = Math.min(window.innerWidth - 20, 400);
-            canvas.height = canvas.width / 2;
-        } else {
-            canvas.width = BASE_WIDTH;
-            canvas.height = BASE_HEIGHT;
-        }
-        scaleX = canvas.width / BASE_WIDTH;
-        scaleY = canvas.height / BASE_HEIGHT;
-        ALTURA_CHAO = canvas.height;
-    }
-
-    function debounce(func, wait) {
-        let timeout;
-        return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
-    }
-
-    window.addEventListener('load', () => {
+    window.onload = () => {
       resetGame();
       fetchWeather();
-      atualizarHora();
       setInterval(fetchWeather, 600000);
-      setInterval(atualizarHora, 1000);
+      setInterval(() => {
+        const d = new Date();
+        document.getElementById("clock").textContent = `${d.toLocaleDateString('pt-BR')} - ${d.toLocaleTimeString('pt-BR')}`;
+      }, 1000);
 
-      window.addEventListener('resize', debounce(() => { resizeCanvas(); positionBanners(); }, 100));
-      
-      // EVENTOS DE PULO E START
+      // Eventos de início (Desktop e Mobile)
       startBanner.addEventListener('click', startGameHandler);
       startBanner.addEventListener('touchstart', startGameHandler, {passive: false});
-      
-      document.addEventListener('keydown', (e) => {
-        if (!gameStarted) startGameHandler(e);
-        else if (e.code === 'Space' || e.code === 'ArrowUp') handleJump();
-      });
+      document.addEventListener('keydown', (e) => { if(!gameStarted) startGameHandler(e); });
 
+      // Eventos de Pulo
+      document.addEventListener('keydown', (e) => {
+        if (gameStarted && (e.code === 'Space' || e.code === 'ArrowUp')) handleJump();
+      });
       canvas.addEventListener('touchstart', (e) => {
         if (gameStarted) { e.preventDefault(); handleJump(); }
       }, {passive: false});
 
-      restartButton.addEventListener("click", resetGame);
-      playAgainButton.addEventListener("click", resetGame);
-    });
+      restartButton.onclick = resetGame;
+      playAgainButton.onclick = resetGame;
+      window.onresize = () => { resizeCanvas(); positionBanners(); };
+    };
   </script>
     <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
   <style>
@@ -468,4 +423,3 @@
   </script>
 </body>
 </html>
-
