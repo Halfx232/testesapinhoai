@@ -114,7 +114,7 @@
       invalidLinks.forEach(link => link.remove());
     });
     
-  // --- 1. CONFIGURAÇÕES E SELEÇÃO DE ELEMENTOS ---
+  // --- 1. CONFIGURAÇÕES E SELEÇÃO ---
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -162,45 +162,54 @@
       document.addEventListener('click', () => navMenu.classList.remove('open'));
     }
 
-    // --- 3. DESENHO DO SAPO (COM BRAÇOS QUE ABREM) ---
+    // --- 3. PREVISÃO DO TEMPO E RELÓGIO (RESTAURADOS) ---
+    async function fetchWeather() {
+      try {
+        const API_KEY = "b8a0cd03c689322da2746720be31d534";
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=${API_KEY}&lang=pt_br&units=metric`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        document.getElementById("weather").textContent = `SP: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`;
+      } catch {
+        document.getElementById("weather").textContent = "Clima indisponível";
+      }
+    }
+
+    function atualizarHora() {
+      const d = new Date();
+      document.getElementById("clock").textContent = `${d.toLocaleDateString('pt-BR')} - ${d.toLocaleTimeString('pt-BR')}`;
+    }
+
+    // --- 4. DESENHO DO SAPO (COMPLETO) ---
     function drawSapo() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
       const { x, y, jumping } = sapo;
-      
-      // Corpo
       ctx.fillStyle = "green";
       ctx.beginPath();
       ctx.ellipse(x / scaleX + 25, y / scaleY + 18, 22, 15, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Braços articulados (O que estava faltando!)
+      // Braços que abrem
       ctx.strokeStyle = "green";
       ctx.lineWidth = 3 / scaleX;
-      const armAngle = jumping ? Math.PI/2 : Math.PI/4; // Abre quando pula
-      
-      // Braço Esquerdo
+      const armAngle = jumping ? Math.PI/2 : Math.PI/4;
       ctx.beginPath();
-      ctx.moveTo(x / scaleX + 18, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
+      ctx.moveTo(x / scaleX + 18, y / scaleY + 20); ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
       ctx.lineTo(x / scaleX + 5 - Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
       ctx.stroke();
-
-      // Braço Direito
       ctx.beginPath();
-      ctx.moveTo(x / scaleX + 32, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
+      ctx.moveTo(x / scaleX + 32, y / scaleY + 20); ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
       ctx.lineTo(x / scaleX + 45 + Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
       ctx.stroke();
 
-      // Olhos e Boca (Originais)
+      // Olhos e Rosto
       ctx.fillStyle = "yellow"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 6, 0, Math.PI * 2);
       ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "black"; ctx.beginPath();
       ctx.arc(x / scaleX + 15, y / scaleY + 8, 2, 0, Math.PI * 2);
       ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2); ctx.fill();
-      
       ctx.strokeStyle = "black"; ctx.lineWidth = 2 / scaleX; ctx.beginPath();
       ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3); ctx.stroke();
 
@@ -211,47 +220,39 @@
       ctx.moveTo(x / scaleX + 15, y / scaleY + 30); ctx.lineTo(x / scaleX + 5 - Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
       ctx.moveTo(x / scaleX + 35, y / scaleY + 30); ctx.lineTo(x / scaleX + 45 + Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
       ctx.stroke();
-      
       ctx.restore();
     }
 
-    // --- 4. ÁUDIO E INÍCIO ---
+    // --- 5. LÓGICA DE ÁUDIO E INÍCIO ---
     const startGameHandler = (e) => {
       if (e) e.preventDefault();
       
-      // Tenta tocar a música imediatamente ao clicar
-      backgroundMusic.play().then(() => {
-          console.log("Música iniciada!");
-      }).catch(err => {
-          console.log("Aguardando interação para áudio");
-      });
-
-      // Destrava os outros sons
+      // DESTRAVA TUDO NA PRIMEIRA VEZ
+      backgroundMusic.play(); 
       [jumpSound, failSound, victorySound].forEach(s => {
-          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(() => {});
+          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(()=>{});
       });
 
-      if (!gameStarted && startBanner.classList.contains('active')) {
+      if (!gameStarted) {
         startBanner.classList.remove('active');
         gameStarted = true;
         animationFrameId = requestAnimationFrame(gameLoop);
       }
     };
 
-    // --- 5. LOOP E FÍSICA (MANTIDOS) ---
+    // --- 6. LOOP, COLISÃO E RESET (MANTIDOS) ---
     function gameLoop() {
       if (!gameStarted) return;
       const fase = fases[faseAtual % fases.length];
       canvas.style.background = coresFase[fase].fundo;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
       ctx.fillStyle = coresFase[fase].chao;
       ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
 
       sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
-      const chaoLimit = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-      if (sapo.y > chaoLimit) { sapo.y = chaoLimit; sapo.vy = 0; sapo.jumping = false; }
+      const chaoY = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+      if (sapo.y > chaoY) { sapo.y = chaoY; sapo.vy = 0; sapo.jumping = false; }
 
       drawSapo();
 
@@ -262,8 +263,7 @@
       
       obstaculos.forEach((obs) => {
         obs.x -= 5 * scaleX;
-        ctx.fillStyle = obs.color;
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+        ctx.fillStyle = obs.color; ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
         const sapoHitboxY = sapo.y + 7 * scaleY;
         if (sapo.x < obs.x + obs.width && sapo.x + 40 * scaleX > obs.x &&
             sapoHitboxY < obs.y + obs.height && sapoHitboxY + ALTURA_SAPO * scaleY > obs.y) {
@@ -278,23 +278,23 @@
 
       ctx.fillStyle = "#000"; ctx.font = "bold 16px Arial";
       ctx.fillText("Score: " + pontuacao, 10, 25);
-      
-      if (gameStarted) animationFrameId = requestAnimationFrame(gameLoop);
+      animationFrameId = requestAnimationFrame(gameLoop);
     }
 
     function finalizarJogo(vitoria) {
       gameStarted = false;
       cancelAnimationFrame(animationFrameId);
       backgroundMusic.pause();
-      if (vitoria) { victorySound.play().catch(() => {}); victoryBanner.classList.add('active'); }
-      else { failSound.play().catch(() => {}); finalScore.textContent = pontuacao; gameOverBanner.classList.add('active'); }
+      if (vitoria) { victorySound.play(); victoryBanner.classList.add('active'); }
+      else { failSound.play(); finalScore.textContent = pontuacao; gameOverBanner.classList.add('active'); }
       positionBanners();
     }
 
     function resetGame() {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       resizeCanvas();
-      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
+      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: 0, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
+      sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
       obstaculos = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
       gameOverBanner.classList.remove('active'); victoryBanner.classList.remove('active'); startBanner.classList.add('active');
       gameStarted = false; backgroundMusic.pause(); backgroundMusic.currentTime = 0;
@@ -302,8 +302,9 @@
     }
 
     function resizeCanvas() {
-      if (isMobile) { canvas.width = Math.min(window.innerWidth - 20, 400); canvas.height = canvas.width / 2; }
-      else { canvas.width = BASE_WIDTH; canvas.height = BASE_HEIGHT; }
+      const containerWidth = window.innerWidth - 20;
+      canvas.width = isMobile ? Math.min(containerWidth, 400) : BASE_WIDTH;
+      canvas.height = isMobile ? canvas.width / 2 : BASE_HEIGHT;
       scaleX = canvas.width / BASE_WIDTH; scaleY = canvas.height / BASE_HEIGHT;
       ALTURA_CHAO = canvas.height;
     }
@@ -311,41 +312,41 @@
     function positionBanners() {
       const banners = [startBanner, gameOverBanner, victoryBanner];
       const canvasRect = canvas.getBoundingClientRect();
-      const gameContainer = document.getElementById('game-container').getBoundingClientRect();
+      const containerRect = document.getElementById('game-container').getBoundingClientRect();
       banners.forEach(banner => {
         if (banner.classList.contains('active')) {
           banner.style.position = 'absolute';
-          banner.style.left = `${(canvasRect.left - gameContainer.left) + canvasRect.width / 2}px`;
-          banner.style.top = `${(canvasRect.top - gameContainer.top) + canvasRect.height / 2}px`;
+          banner.style.left = `${(canvasRect.left - containerRect.left) + canvasRect.width / 2}px`;
+          banner.style.top = `${(canvasRect.top - containerRect.top) + canvasRect.height / 2}px`;
           banner.style.transform = 'translate(-50%, -50%)';
         }
       });
     }
 
+    // --- 7. EVENTOS ---
     window.onload = () => {
       resetGame();
-      setInterval(() => {
-        const d = new Date();
-        document.getElementById("clock").textContent = `${d.toLocaleDateString('pt-BR')} - ${d.toLocaleTimeString('pt-BR')}`;
-      }, 1000);
+      fetchWeather();
+      atualizarHora();
+      setInterval(atualizarHora, 1000);
+      setInterval(fetchWeather, 600000);
 
+      // Listener unificado para Start
       startBanner.onclick = startGameHandler;
       startBanner.ontouchstart = startGameHandler;
       
       document.addEventListener('keydown', (e) => {
         if (!gameStarted) startGameHandler(e);
         else if (e.code === 'Space' || e.code === 'ArrowUp') {
-            if (gameStarted && !sapo.jumping) {
-                sapo.vy = -20 * scaleY;
-                sapo.jumping = true;
-                jumpSound.currentTime = 0;
-                jumpSound.play().catch(() => {});
-            }
+            if (!sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.currentTime = 0; jumpSound.play(); }
         }
       });
 
       canvas.ontouchstart = (e) => {
-        if (gameStarted) { e.preventDefault(); if (!sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.currentTime = 0; jumpSound.play(); } }
+        if (gameStarted) { 
+          e.preventDefault(); 
+          if (!sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.currentTime = 0; jumpSound.play(); } 
+        }
       };
 
       restartButton.onclick = resetGame;
@@ -409,4 +410,5 @@
   </script>
 </body>
 </html>
+
 
