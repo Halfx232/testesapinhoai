@@ -227,18 +227,19 @@
     const startGameHandler = (e) => {
       if (e) e.preventDefault();
       
-      // DESTRAVA TUDO NA PRIMEIRA VEZ
-      backgroundMusic.play(); 
-      [jumpSound, failSound, victorySound].forEach(s => {
-          s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(()=>{});
-      });
+      // --- NOVO START GAME ---
+const startGameHandler = (e) => {
+  if (e) e.preventDefault();
+  
+  // Toca a música imediatamente
+  backgroundMusic.play(); 
 
-      if (!gameStarted) {
-        startBanner.classList.remove('active');
-        gameStarted = true;
-        animationFrameId = requestAnimationFrame(gameLoop);
-      }
-    };
+  if (!gameStarted && startBanner.classList.contains('active')) {
+    startBanner.classList.remove('active');
+    gameStarted = true;
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+};
 
     // --- 6. LOOP, COLISÃO E RESET (MANTIDOS) ---
     function gameLoop() {
@@ -323,36 +324,53 @@
       });
     }
 
-    // --- 7. EVENTOS ---
-    window.onload = () => {
-      resetGame();
-      fetchWeather();
-      atualizarHora();
-      setInterval(atualizarHora, 1000);
-      setInterval(fetchWeather, 600000);
+    // --- NOVO WINDOW ONLOAD ---
+window.onload = () => {
+  resetGame();
+  fetchWeather();
+  atualizarHora();
+  setInterval(atualizarHora, 1000);
+  setInterval(fetchWeather, 600000);
 
-      // Listener unificado para Start
-      startBanner.onclick = startGameHandler;
-      startBanner.ontouchstart = startGameHandler;
-      
-      document.addEventListener('keydown', (e) => {
-        if (!gameStarted) startGameHandler(e);
-        else if (e.code === 'Space' || e.code === 'ArrowUp') {
-            if (!sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.currentTime = 0; jumpSound.play(); }
+  // Eventos para o Banner de Início
+  startBanner.addEventListener('click', startGameHandler);
+  startBanner.addEventListener('touchstart', (e) => {
+      liberarAudio(); // Força a liberação no mobile
+      startGameHandler(e);
+  }, {passive: false});
+  
+  // Teclado
+  document.addEventListener('keydown', (e) => {
+    if (!gameStarted) {
+        liberarAudio(); 
+        startGameHandler(e);
+    } else if (e.code === 'Space' || e.code === 'ArrowUp') {
+        if (!sapo.jumping) { 
+            sapo.vy = -20 * scaleY; 
+            sapo.jumping = true; 
+            jumpSound.currentTime = 0; 
+            jumpSound.play(); 
         }
-      });
+    }
+  });
 
-      canvas.ontouchstart = (e) => {
-        if (gameStarted) { 
-          e.preventDefault(); 
-          if (!sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.currentTime = 0; jumpSound.play(); } 
-        }
-      };
+  // Pulo no Touch (Canvas)
+  canvas.ontouchstart = (e) => {
+    if (gameStarted) { 
+      e.preventDefault(); 
+      if (!sapo.jumping) { 
+          sapo.vy = -20 * scaleY; 
+          sapo.jumping = true; 
+          jumpSound.currentTime = 0; 
+          jumpSound.play(); 
+      } 
+    }
+  };
 
-      restartButton.onclick = resetGame;
-      playAgainButton.onclick = resetGame;
-      window.onresize = () => { resizeCanvas(); positionBanners(); };
-    };
+  restartButton.onclick = resetGame;
+  playAgainButton.onclick = resetGame;
+  window.onresize = () => { resizeCanvas(); positionBanners(); };
+};
   </script>
     <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
   <style>
@@ -410,5 +428,3 @@
   </script>
 </body>
 </html>
-
-
