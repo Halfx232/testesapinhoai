@@ -2,46 +2,31 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Jogo do Sapinho: uma aventura divertida com um sapo, desenvolvida com IA. Jogue agora!">
-  <meta name="keywords" content="jogo, sapinho, inteligência artificial, arcade">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jogo do Sapinho</title>
   <link rel="icon" href="https://em-content.zobj.net/thumbs/160/twitter/322/frog_1f438.png" type="image/png">
-  <!-- Meta tags Open Graph -->
-  <meta property="og:title" content="Jogo do Sapinho">
-  <meta property="og:description" content="Uma aventura divertida com um sapo!">
-  <meta property="og:image" content="https://sapinho-ai.vercel.app/thumbnail.jpg">
-  <meta property="og:url" content="https://sapinho-ai.vercel.app">
-  <meta property="og:type" content="website">
-  <!-- Meta tags Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://sapinho-ai.vercel.app/thumbnail.jpg">
-  <!-- Estilo inline inicial como fallback -->
+  
   <style>
-    html:not(.loaded) body { margin: 0; padding: 0; font-family: sans-serif; background: linear-gradient(180deg, #1a1a1a, #2e2e2e); color: #fff; visibility: hidden; }
-    #top-bar, #game-container, #test-version, #about-section, #footer { display: none; }
-    a { color: white; text-decoration: none; }
-    #start-banner, #game-over-banner, #victory-banner { display: none; }
-    canvas:not(.ready) { display: none; }
+    /* Previne o flash branco antes de carregar */
+    html:not(.loaded) body { background: #1a1a1a; visibility: hidden; }
     #top-bar { background: #1b5e20; display: flex; }
+    canvas { background: #dcedc8; display: block; margin: 0 auto; max-width: 100%; }
+    #force-portrait{visibility:hidden;opacity:0;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:999999;display:flex;justify-content:center;align-items:center;flex-direction:column;text-align:center;color:#fff;font-family:sans-serif;padding:20px;box-sizing:border-box;}
+    #force-portrait.active{visibility:visible;opacity:1}
   </style>
-  <!-- Pré-carregar fontes e CSS -->
-  <link rel="preload" href="styles-mobile.css?v=17" as="style" media="screen and (max-width: 1023px)" onload="this.rel='stylesheet'">
-  <link rel="preload" href="styles-desktop.css?v=6" as="style" media="screen and (min-width: 1024px)" onload="this.rel='stylesheet'">
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
   <link rel="stylesheet" href="styles-mobile.css?v=17" media="screen and (max-width: 1023px)">
   <link rel="stylesheet" href="styles-desktop.css?v=6" media="screen and (min-width: 1024px)">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-SEU-ID" crossorigin="anonymous"></script>
-
 </head>
 <body>
+
   <div id="top-bar">
     <button id="menu-toggle" class="fa fa-bars"></button>
     <div class="weather-clock">
-      <div id="weather">Previsão do Tempo</div>
-      <div id="clock">Relógio</div>
+      <div id="weather">Carregando clima...</div>
+      <div id="clock">--:--:--</div>
     </div>
     <nav id="nav-menu">
       <ul>
@@ -54,67 +39,40 @@
   </div>
 
   <div id="game-container">
-    <div id="top-ad">
-      <ins class="adsbygoogle" style="display:block; width:100%; max-width:400px; height:100px; background:#ccc;" data-ad-client="ca-pub-SEU-ID" data-ad-slot="SEU-SLOT-ID-MOBILE-TOP" data-ad-format="horizontal" data-full-width-responsive="false"></ins>
-    </div>
-    <div id="left-ad">
-      <ins class="adsbygoogle" style="display:block; width:300px; height:400px; max-width:300px; max-height:400px; min-width:300px; min-height:400px;" data-ad-client="ca-pub-SEU-ID" data-ad-slot="SEU-SLOT-ID-DESKTOP" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
-    </div>
     <canvas id="gameCanvas"></canvas>
-    <div id="right-ad">
-      <ins class="adsbygoogle" style="display:block; width:300px; height:400px; max-width:300px; max-height:400px; min-width:300px; min-height:400px;" data-ad-client="ca-pub-SEU-ID" data-ad-slot="SEU-SLOT-ID-DESKTOP" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
+
+    <div id="start-banner" class="active">
+      <h1>Sejam bem-vindos ao Jogo do Sapinho!</h1>
+      <p>Pressione ou Toque para iniciar</p>
     </div>
 
-<div id="start-banner" class="active">
-  <h1>Sejam bem-vindos ao Jogo do Sapinho!</h1>
-  <p>Pressione qualquer tecla ou toque para iniciar o jogo</p>
-</div>
+    <div id="game-over-banner">
+      <h2>Game Over!</h2>
+      <p>Sua pontuação: <span id="final-score"></span></p>
+      <button id="restart-button">Reiniciar Jogo</button>
+    </div>
 
-<div id="game-over-banner">
-  <h2>Game Over!</h2>
-  <p>Sua pontuação: <span id="final-score"></span></p>
-  <button id="restart-button">Reiniciar Jogo</button>
-</div>
-
-<div id="victory-banner">
-  <h2>Parabéns! Você venceu!</h2>
-  <p>Pontuação Final: <span id="victory-score"></span></p>
-  <button id="play-again-button">Jogar Novamente</button>
-</div>  </div>
-
-  <div id="test-version">
-    <p>Versão de teste do SapinhoAI, desenvolvida com auxílio de inteligência artificial. Atualizações em breve!</p>
+    <div id="victory-banner">
+      <h2>Parabéns! Você venceu!</h2>
+      <p>Pontuação Final: <span id="victory-score"></span></p>
+      <button id="play-again-button">Jogar Novamente</button>
+    </div>
   </div>
-
-  <div id="about-section">
-    <h2>Sobre o Jogo do Sapinho</h2>
-    <p>O Jogo do Sapinho é uma aventura divertida desenvolvida com auxílio de inteligência artificial. Esta é uma versão de teste, e novas atualizações estão a caminho!</p>
-  </div>
-
-  <div id="footer">Siga o Sapinho nas redes sociais! <a href="#">Instagram</a> | <a href="#">YouTube</a> | <a href="#">TikTok</a></div>
 
   <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
   <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
   <audio id="victorySound" src="Victory.mp3"></audio>
-  <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
+  <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>
+
+  <div id="force-portrait">
+    <h2>Gire o celular</h2>
+    <p>Use o modo vertical para jogar</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
+  
   <script>
-<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.documentElement.classList.add('loaded');
-      const canvasElement = document.getElementById('gameCanvas');
-      canvasElement.classList.add('ready');
-      document.getElementById('top-bar').style.display = 'flex';
-      document.getElementById('game-container').style.display = 'flex';
-      document.getElementById('test-version').style.display = 'block';
-      document.getElementById('about-section').style.display = 'block';
-      document.getElementById('footer').style.display = 'block';
-      
-      const invalidLinks = document.body.querySelectorAll('link[rel="stylesheet"]');
-      invalidLinks.forEach(link => link.remove());
-    });
-    
-  // --- 1. CONFIGURAÇÕES E SELEÇÃO ---
+    // --- 1. CONFIGURAÇÕES ---
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -126,20 +84,14 @@
 
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
-    const finalScore = document.getElementById("final-score");
-    const restartButton = document.getElementById("restart-button");
     const victoryBanner = document.getElementById("victory-banner");
-    const victoryScore = document.getElementById("victory-score");
-    const playAgainButton = document.getElementById("play-again-button");
+    
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
 
-    const PONTUACAO_VITORIA = 5000;
     const GRAVIDADE = 1.5;
     const BASE_WIDTH = 800;
     const BASE_HEIGHT = 400;
-    const ALTURA_SAPO = 40;
-    const ESPESSURA_CHAO = isMobile ? 20 : 50;
     const SAPO_OFFSET_VISUAL = 47;
     const fases = ["primavera", "verão", "outono", "inverno"];
     const coresFase = {
@@ -150,103 +102,79 @@
     };
 
     let gameStarted = false;
-    let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
-    let poeira = [], animationFrameId, scaleX = 1, scaleY = 1, ALTURA_CHAO;
+    let sapo, obstaculos = [], tempo = 0, intervaloObstaculo = 120, faseAtual = 0, pontuacao = 0;
+    let animationFrameId, scaleX = 1, scaleY = 1, ALTURA_CHAO, ESPESSURA_CHAO;
 
-    // --- 2. MENU HAMBÚRGUER ---
-    if (menuToggle && navMenu) {
-      menuToggle.onclick = (e) => {
-        e.stopPropagation();
-        navMenu.classList.toggle('open');
-      };
+    // --- 2. LÓGICA DE ÁUDIO (SOLUÇÃO MOBILE) ---
+    const liberarAudio = () => {
+      [backgroundMusic, jumpSound, failSound, victorySound].forEach(s => {
+        s.play().then(() => {
+          if (s.id !== 'backgroundMusic') { s.pause(); s.currentTime = 0; }
+        }).catch(() => {});
+      });
+      document.removeEventListener('touchstart', liberarAudio);
+      document.removeEventListener('mousedown', liberarAudio);
+    };
+    document.addEventListener('touchstart', liberarAudio);
+    document.addEventListener('mousedown', liberarAudio);
+
+    const startGameHandler = (e) => {
+      if (e) e.preventDefault();
+      liberarAudio(); // Garante liberação no momento do clique
+      backgroundMusic.play().catch(() => {});
+
+      if (!gameStarted && startBanner.classList.contains('active')) {
+        startBanner.classList.remove('active');
+        gameStarted = true;
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
+    };
+
+    // --- 3. FUNCIONALIDADES ---
+    if (menuToggle) {
+      menuToggle.onclick = (e) => { e.stopPropagation(); navMenu.classList.toggle('open'); };
       document.addEventListener('click', () => navMenu.classList.remove('open'));
     }
 
-    // --- 3. PREVISÃO DO TEMPO E RELÓGIO (RESTAURADOS) ---
     async function fetchWeather() {
       try {
-        const API_KEY = "b8a0cd03c689322da2746720be31d534";
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=${API_KEY}&lang=pt_br&units=metric`);
-        if (!res.ok) throw new Error();
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=b8a0cd03c689322da2746720be31d534&lang=pt_br&units=metric`);
         const data = await res.json();
         document.getElementById("weather").textContent = `SP: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`;
-      } catch {
-        document.getElementById("weather").textContent = "Clima indisponível";
-      }
+      } catch { document.getElementById("weather").textContent = "Clima indisponível"; }
     }
 
-    function atualizarHora() {
-      const d = new Date();
-      document.getElementById("clock").textContent = `${d.toLocaleDateString('pt-BR')} - ${d.toLocaleTimeString('pt-BR')}`;
-    }
-
-    // --- 4. DESENHO DO SAPO (COMPLETO) ---
     function drawSapo() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
       const { x, y, jumping } = sapo;
-      ctx.fillStyle = "green";
-      ctx.beginPath();
-      ctx.ellipse(x / scaleX + 25, y / scaleY + 18, 22, 15, 0, 0, Math.PI * 2);
-      ctx.fill();
+      const lx = x / scaleX; const ly = y / scaleY;
+      
+      ctx.fillStyle = "green"; ctx.beginPath();
+      ctx.ellipse(lx + 25, ly + 18, 22, 15, 0, 0, Math.PI * 2); ctx.fill();
 
-      // Braços que abrem
-      ctx.strokeStyle = "green";
-      ctx.lineWidth = 3 / scaleX;
+      ctx.strokeStyle = "green"; ctx.lineWidth = 3;
       const armAngle = jumping ? Math.PI/2 : Math.PI/4;
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 18, y / scaleY + 20); ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 5 - Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 32, y / scaleY + 20); ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 45 + Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
-      ctx.stroke();
+      ctx.beginPath(); // Braço Esq
+      ctx.moveTo(lx + 18, ly + 20); ctx.lineTo(lx + 5, ly + 20);
+      ctx.lineTo(lx + 5 - Math.cos(armAngle) * 18, ly + 20 + Math.sin(armAngle) * 18); ctx.stroke();
+      ctx.beginPath(); // Braço Dir
+      ctx.moveTo(lx + 32, ly + 20); ctx.lineTo(lx + 45, ly + 20);
+      ctx.lineTo(lx + 45 + Math.cos(armAngle) * 18, ly + 20 + Math.sin(armAngle) * 18); ctx.stroke();
 
-      // Olhos e Rosto
       ctx.fillStyle = "yellow"; ctx.beginPath();
-      ctx.arc(x / scaleX + 15, y / scaleY + 8, 6, 0, Math.PI * 2);
-      ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.arc(lx + 15, ly + 8, 6, 0, Math.PI * 2); ctx.arc(lx + 35, ly + 8, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "black"; ctx.beginPath();
-      ctx.arc(x / scaleX + 15, y / scaleY + 8, 2, 0, Math.PI * 2);
-      ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = "black"; ctx.lineWidth = 2 / scaleX; ctx.beginPath();
-      ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3); ctx.stroke();
-
-      // Pernas
-      ctx.strokeStyle = "green"; ctx.lineWidth = 4 / scaleX;
-      const legAngle = jumping ? Math.PI/2 : Math.PI/4;
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 15, y / scaleY + 30); ctx.lineTo(x / scaleX + 5 - Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
-      ctx.moveTo(x / scaleX + 35, y / scaleY + 30); ctx.lineTo(x / scaleX + 45 + Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
-      ctx.stroke();
+      ctx.arc(lx + 15, ly + 8, 2, 0, Math.PI * 2); ctx.arc(lx + 35, ly + 8, 2, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
 
-    // --- 5. LÓGICA DE ÁUDIO E INÍCIO ---
-    const startGameHandler = (e) => {
-      if (e) e.preventDefault();
-      
-      // --- NOVO START GAME ---
-const startGameHandler = (e) => {
-  if (e) e.preventDefault();
-  
-  // Toca a música imediatamente
-  backgroundMusic.play(); 
-
-  if (!gameStarted && startBanner.classList.contains('active')) {
-    startBanner.classList.remove('active');
-    gameStarted = true;
-    animationFrameId = requestAnimationFrame(gameLoop);
-  }
-};
-
-    // --- 6. LOOP, COLISÃO E RESET (MANTIDOS) ---
     function gameLoop() {
       if (!gameStarted) return;
       const fase = fases[faseAtual % fases.length];
       canvas.style.background = coresFase[fase].fundo;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
       ctx.fillStyle = coresFase[fase].chao;
       ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
 
@@ -258,173 +186,69 @@ const startGameHandler = (e) => {
       drawSapo();
 
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
-        let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
-        obstaculos.push({ x: canvas.width, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY, color: cores[Math.floor(Math.random()*4)] });
+        obstaculos.push({ x: canvas.width, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY });
       }
       
       obstaculos.forEach((obs) => {
         obs.x -= 5 * scaleX;
-        ctx.fillStyle = obs.color; ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-        const sapoHitboxY = sapo.y + 7 * scaleY;
-        if (sapo.x < obs.x + obs.width && sapo.x + 40 * scaleX > obs.x &&
-            sapoHitboxY < obs.y + obs.height && sapoHitboxY + ALTURA_SAPO * scaleY > obs.y) {
-          finalizarJogo(false);
+        ctx.fillStyle = "red"; ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+        if (sapo.x < obs.x + obs.width && sapo.x + 40 * scaleX > obs.x && sapo.y + 40 * scaleY > obs.y) {
+           gameStarted = false;
+           backgroundMusic.pause();
+           failSound.play();
+           document.getElementById("final-score").textContent = pontuacao;
+           gameOverBanner.classList.add('active');
         }
       });
       obstaculos = obstaculos.filter(o => o.x + o.width > 0);
-
       tempo++; pontuacao++;
-      if (tempo % 1500 === 0) { faseAtual++; intervaloObstaculo = Math.max(60, intervaloObstaculo - 10); }
-      if (pontuacao >= PONTUACAO_VITORIA) finalizarJogo(true);
-
-      ctx.fillStyle = "#000"; ctx.font = "bold 16px Arial";
-      ctx.fillText("Score: " + pontuacao, 10, 25);
       animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-    function finalizarJogo(vitoria) {
-      gameStarted = false;
-      cancelAnimationFrame(animationFrameId);
-      backgroundMusic.pause();
-      if (vitoria) { victorySound.play(); victoryBanner.classList.add('active'); }
-      else { failSound.play(); finalScore.textContent = pontuacao; gameOverBanner.classList.add('active'); }
-      positionBanners();
-    }
-
     function resetGame() {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      resizeCanvas();
-      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: 0, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
-      sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-      obstaculos = []; tempo = 0; intervaloObstaculo = 120; faseAtual = 0; pontuacao = 0;
-      gameOverBanner.classList.remove('active'); victoryBanner.classList.remove('active'); startBanner.classList.add('active');
-      gameStarted = false; backgroundMusic.pause(); backgroundMusic.currentTime = 0;
-      positionBanners();
-    }
-
-    function resizeCanvas() {
+      cancelAnimationFrame(animationFrameId);
       const containerWidth = window.innerWidth - 20;
       canvas.width = isMobile ? Math.min(containerWidth, 400) : BASE_WIDTH;
       canvas.height = isMobile ? canvas.width / 2 : BASE_HEIGHT;
       scaleX = canvas.width / BASE_WIDTH; scaleY = canvas.height / BASE_HEIGHT;
       ALTURA_CHAO = canvas.height;
+      ESPESSURA_CHAO = isMobile ? 20 : 50;
+
+      sapo = { x: canvas.width * 0.2, y: 0, vy: 0, jumping: false };
+      obstaculos = []; tempo = 0; pontuacao = 0;
+      gameOverBanner.classList.remove('active');
+      victoryBanner.classList.remove('active');
+      startBanner.classList.add('active');
+      gameStarted = false;
     }
 
-    function positionBanners() {
-      const banners = [startBanner, gameOverBanner, victoryBanner];
-      const canvasRect = canvas.getBoundingClientRect();
-      const containerRect = document.getElementById('game-container').getBoundingClientRect();
-      banners.forEach(banner => {
-        if (banner.classList.contains('active')) {
-          banner.style.position = 'absolute';
-          banner.style.left = `${(canvasRect.left - containerRect.left) + canvasRect.width / 2}px`;
-          banner.style.top = `${(canvasRect.top - containerRect.top) + canvasRect.height / 2}px`;
-          banner.style.transform = 'translate(-50%, -50%)';
+    window.onload = () => {
+      document.documentElement.classList.add('loaded');
+      resetGame();
+      fetchWeather();
+      setInterval(() => {
+        const d = new Date();
+        document.getElementById("clock").textContent = d.toLocaleTimeString('pt-BR');
+      }, 1000);
+
+      startBanner.addEventListener('click', startGameHandler);
+      startBanner.addEventListener('touchstart', startGameHandler);
+      
+      document.addEventListener('keydown', (e) => {
+        if (!gameStarted) startGameHandler();
+        else if ((e.code === 'Space' || e.code === 'ArrowUp') && !sapo.jumping) {
+          sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.play();
         }
       });
-    }
 
-    // --- NOVO WINDOW ONLOAD ---
-window.onload = () => {
-  resetGame();
-  fetchWeather();
-  atualizarHora();
-  setInterval(atualizarHora, 1000);
-  setInterval(fetchWeather, 600000);
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameStarted && !sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.play(); }
+      });
 
-  // Eventos para o Banner de Início
-  startBanner.addEventListener('click', startGameHandler);
-  startBanner.addEventListener('touchstart', (e) => {
-      liberarAudio(); // Força a liberação no mobile
-      startGameHandler(e);
-  }, {passive: false});
-  
-  // Teclado
-  document.addEventListener('keydown', (e) => {
-    if (!gameStarted) {
-        liberarAudio(); 
-        startGameHandler(e);
-    } else if (e.code === 'Space' || e.code === 'ArrowUp') {
-        if (!sapo.jumping) { 
-            sapo.vy = -20 * scaleY; 
-            sapo.jumping = true; 
-            jumpSound.currentTime = 0; 
-            jumpSound.play(); 
-        }
-    }
-  });
-
-  // Pulo no Touch (Canvas)
-  canvas.ontouchstart = (e) => {
-    if (gameStarted) { 
-      e.preventDefault(); 
-      if (!sapo.jumping) { 
-          sapo.vy = -20 * scaleY; 
-          sapo.jumping = true; 
-          jumpSound.currentTime = 0; 
-          jumpSound.play(); 
-      } 
-    }
-  };
-
-  restartButton.onclick = resetGame;
-  playAgainButton.onclick = resetGame;
-  window.onresize = () => { resizeCanvas(); positionBanners(); };
-};
-  </script>
-    <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
-  <style>
-    #force-portrait{visibility:hidden;opacity:0;transition:opacity .3s}
-    #force-portrait.active{visibility:visible;opacity:1}
-    #force-portrait{
-      position:fixed;top:0;left:0;width:100vw;height:100vh;
-      background:#000;z-index:999999;display:flex;
-      justify-content:center;align-items:center;flex-direction:column;
-      text-align:center;color:#fff;font-family:sans-serif;padding:20px;
-      box-sizing:border-box;transition:opacity .3s;
-    }
-    #force-portrait svg{width:80px;height:80px;margin-bottom:20px;
-      animation:g 3s linear infinite;stroke:#00ff00;stroke-width:2.5}
-    #force-portrait h2{font-size:28px;color:#00ff00;margin:0 0 10px}
-    #force-portrait p{font-size:18px}
-    @keyframes g{to{transform:rotate(360deg)}}
-  </style>
-
-  <div id="force-portrait">
-    <svg viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-      <line x1="8" y1="3" x2="8" y2="8"></line>
-      <line x1="16" y1="3" x2="16" y2="8"></line>
-      <path d="M12 16v5"></path>
-      <path d="M8 16h8"></path>
-    </svg>
-    <h2>Gire o celular</h2>
-    <p>Para jogar, use o modo vertical</p>
-  </div>
-
-  <script>
-    const blocker = document.getElementById('force-portrait');
-    function check() {
-      // A lógica mais confiável que existe no planeta Terra
-      const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-      const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-      if (w > h && w <= 1023) {
-        blocker.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      } else {
-        blocker.classList.remove('active');
-        document.body.style.overflow = '';
-      }
-    }
-    // Roda em tudo que existe
-    window.addEventListener('load', check);
-    window.addEventListener('resize', check);
-    window.addEventListener('orientationchange', check);
-    // Força checagem a cada 500ms por 5 segundos (mata qualquer bug de carregamento)
-    let i = 0;
-    const force = setInterval(() => { check(); if (++i === 10) clearInterval(force); }, 500);
-    // Primeira checagem imediata
-    check();
+      document.getElementById("restart-button").onclick = resetGame;
+      document.getElementById("play-again-button").onclick = resetGame;
+    };
   </script>
 </body>
 </html>
