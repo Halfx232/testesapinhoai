@@ -3,84 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jogo do Sapinho - Versão Final</title>
+  <title>Jogo do Sapinho</title>
   <link rel="icon" href="https://em-content.zobj.net/thumbs/160/twitter/322/frog_1f438.png" type="image/png">
+  <link rel="stylesheet" href="styles-mobile.css?v=17" media="screen and (max-width: 1023px)">
+  <link rel="stylesheet" href="styles-desktop.css?v=6" media="screen and (min-width: 1024px)">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  
   <style>
-    /* RESET E LAYOUT BASE */
-    body { margin: 0; padding: 0; font-family: sans-serif; background: #1a1a1a; color: #fff; overflow-x: hidden; }
-    #top-bar { background: #1b5e20; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; position: relative; z-index: 1000; }
-    
-    /* O SEGREDO DA CENTRALIZAÇÃO: O CONTAINER PRECISA SER RELATIVO */
-    #game-container { 
-      position: relative; /* Isso prende os banners dentro dele */
-      width: 100%; max-width: 800px; margin: 20px auto; 
-      display: flex; flex-direction: column; align-items: center; 
+    html:not(.loaded) body { background: #1a1a1a; visibility: hidden; }
+    #top-bar { background: #1b5e20; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; height: 60px; }
+    /* CORREÇÃO DE CENTRALIZAÇÃO MOBILE */
+    #game-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin: 0 auto; }
+    #start-banner, #game-over-banner, #victory-banner {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 100; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; text-align: center; width: 80%; max-width: 400px;
     }
-
-    canvas { background: #dcedc8; border: 4px solid #333; display: block; max-width: 100%; height: auto; }
-
-    /* BANNERS CENTRALIZADOS NO CANVAS */
-    .banner {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%); /* Centraliza exato no meio do canvas */
-      background: rgba(0, 0, 0, 0.85);
-      padding: 20px; border-radius: 15px; text-align: center;
-      width: 80%; max-width: 300px; z-index: 100;
-      display: none; border: 2px solid #00ff00;
-    }
-    .banner.active { display: block; }
-    button { padding: 10px 20px; cursor: pointer; background: #00ff00; border: none; font-weight: bold; border-radius: 5px; }
-
-    /* ADS SIMULADOS */
-    .ad-slot { background: #333; margin: 10px 0; width: 100%; text-align: center; color: #666; font-size: 12px; }
-    
-    #weather, #clock { font-size: 14px; }
-    #nav-menu { position: absolute; top: 60px; left: 0; background: #1b5e20; width: 100%; display: none; }
-    #nav-menu.open { display: block; }
-    #nav-menu ul { list-style: none; padding: 10px; margin: 0; }
-    #nav-menu li { padding: 10px; border-bottom: 1px solid #2e7d32; }
-    a { color: white; text-decoration: none; }
+    .active { display: block !important; }
+    canvas { display: block; background: #dcedc8; max-width: 100%; height: auto; border: 2px solid #333; }
+    .ad-slot { background: #333; color: #555; text-align: center; width: 100%; margin: 5px 0; font-size: 10px; }
   </style>
 </head>
 <body>
-
   <div id="top-bar">
-    <button id="menu-toggle" class="fa fa-bars" style="background:none; color:white; font-size:20px;"></button>
-    <div style="text-align: right;">
+    <button id="menu-toggle" class="fa fa-bars" style="background:none; border:none; color:white; font-size:24px;"></button>
+    <div class="weather-clock" style="text-align: right;">
       <div id="weather">Carregando clima...</div>
       <div id="clock">00:00:00</div>
     </div>
-    <nav id="nav-menu">
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Sobre</a></li>
-        <li><a href="#">Políticas</a></li>
+    <nav id="nav-menu" style="display:none; position:absolute; top:60px; left:0; background:#1b5e20; width:100%; z-index:1001;">
+      <ul style="list-style:none; padding:10px;">
+        <li><a href="index.html" style="color:white; text-decoration:none;">Home</a></li>
+        <li><a href="sobre.html" style="color:white; text-decoration:none;">Sobre</a></li>
       </ul>
     </nav>
   </div>
 
   <div id="game-container">
-    <div class="ad-slot" style="height: 50px;">ANÚNCIO TOPO</div>
-    
+    <div id="top-ad" class="ad-slot" style="height:50px;">ANÚNCIO TOPO</div>
     <canvas id="gameCanvas"></canvas>
+    <div id="bottom-ad" class="ad-slot" style="height:50px;">ANÚNCIO RODAPÉ</div>
 
-    <div id="start-banner" class="banner active">
-      <h1>Sapinho AI</h1>
-      <p>Toque para Iniciar</p>
-      <button onclick="startGameHandler()">JOGAR</button>
+    <div id="start-banner" class="active">
+      <h1>Jogo do Sapinho</h1>
+      <p>Toque para iniciar</p>
+      <button id="start-btn" style="padding:10px 20px; background:#00ff00; border:none; font-weight:bold;">JOGAR</button>
     </div>
 
-    <div id="game-over-banner" class="banner">
+    <div id="game-over-banner" style="display:none;">
       <h2>Game Over!</h2>
       <p>Score: <span id="final-score">0</span></p>
-      <button onclick="resetGame()">Tentar Novamente</button>
+      <button id="restart-button" style="padding:10px 20px; background:#00ff00; border:none;">REINICIAR</button>
     </div>
-
-    <div class="ad-slot" style="height: 50px;">ANÚNCIO RODAPÉ</div>
   </div>
+
+  <div id="about-section" style="padding:20px;">
+    <h2>Sobre o Sapinho AI</h2>
+    <p>Aventura divertida desenvolvida com Inteligência Artificial.</p>
+  </div>
+
+  <div id="footer" style="text-align:center; padding:10px;">SapinhoAI 2026</div>
 
   <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
   <audio id="backgroundMusic" src="Musicgame.mp3" loop preload="auto"></audio>
@@ -90,106 +70,94 @@
     const ctx = canvas.getContext("2d");
     const bgMusic = document.getElementById("backgroundMusic");
     const jumpSound = document.getElementById("jumpSound");
-    
-    let gameStarted = false;
-    let sapo = { x: 50, y: 150, vy: 0, jumping: false };
-    let pontuacao = 0;
-    let scale = 1;
+    const startBanner = document.getElementById("start-banner");
+    const gameOverBanner = document.getElementById("game-over-banner");
 
-    // --- CORREÇÃO DO SOM MOBILE (INTERAÇÃO GLOBAL) ---
-    // Esta função "desbloqueia" os áudios no primeiro toque em qualquer lugar
-    function unlockAudio() {
-      bgMusic.play().then(() => {
-        bgMusic.pause(); // Toca e pausa só para ganhar permissão do Chrome/Safari
-        bgMusic.currentTime = 0;
-      }).catch(e => console.log("Aguardando interação..."));
-      
-      document.removeEventListener('touchstart', unlockAudio);
-      document.removeEventListener('mousedown', unlockAudio);
-    }
-    document.addEventListener('touchstart', unlockAudio);
-    document.addEventListener('mousedown', unlockAudio);
+    let gameStarted = false, sapo, tempo = 0, pontuacao = 0, scaleX = 1, scaleY = 1;
+    let GRAVIDADE = 1.2, ALTURA_CHAO, ESPESSURA_CHAO = 40;
 
-    function startGameHandler() {
-      unlockAudio(); // Garante o desbloqueio
-      document.querySelectorAll('.banner').forEach(b => b.classList.remove('active'));
-      gameStarted = true;
+    // --- CORREÇÃO DEFINITIVA DO SOM MOBILE ---
+    function iniciarAudio() {
       bgMusic.currentTime = 0;
-      bgMusic.play(); // Agora toca de primeira porque o clique no botão JOGAR é uma ação humana
-      gameLoop();
+      bgMusic.play().catch(e => console.log("Erro áudio"));
+      document.removeEventListener('touchstart', iniciarAudio);
     }
 
-    // --- LÓGICA DO JOGO ---
+    const startGameHandler = () => {
+      iniciarAudio();
+      startBanner.classList.remove('active');
+      gameOverBanner.style.display = 'none';
+      gameStarted = true;
+      resetGame();
+      gameLoop();
+    };
+
+    function resetGame() {
+      sapo = { x: 50 * scaleX, y: ALTURA_CHAO - 100, vy: 0, jumping: false };
+      pontuacao = 0; tempo = 0;
+    }
+
     function drawSapo() {
+      ctx.save();
+      ctx.scale(scaleX, scaleY);
+      const lx = sapo.x / scaleX, ly = sapo.y / scaleY;
       ctx.fillStyle = "green";
-      ctx.beginPath();
-      ctx.ellipse(sapo.x + 25, sapo.y + 18, 20, 15, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.ellipse(lx + 25, ly + 18, 22, 15, 0, 0, Math.PI * 2); ctx.fill();
+      // Braços e Pernas
+      ctx.strokeStyle = "green"; ctx.lineWidth = 3;
+      const move = sapo.jumping ? 1.5 : 0.8;
+      ctx.beginPath(); ctx.moveTo(lx+18, ly+20); ctx.lineTo(lx+5, ly+20*move); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lx+32, ly+20); ctx.lineTo(lx+45, ly+20*move); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lx+15, ly+30); ctx.lineTo(lx+5, ly+45*move); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lx+35, ly+30); ctx.lineTo(lx+45, ly+45*move); ctx.stroke();
       // Olhos
-      ctx.fillStyle = "white";
-      ctx.beginPath(); ctx.arc(sapo.x + 15, sapo.y + 10, 5, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(sapo.x + 35, sapo.y + 10, 5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "yellow"; ctx.beginPath(); ctx.arc(lx+15, ly+8, 6, 0, Math.PI*2); ctx.arc(lx+35, ly+8, 6, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
     }
 
     function gameLoop() {
       if (!gameStarted) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#81c784"; ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
       
-      // Gravidade simples
-      sapo.vy += 1;
+      sapo.vy += GRAVIDADE;
       sapo.y += sapo.vy;
-      if (sapo.y > canvas.height - 40) {
-        sapo.y = canvas.height - 40;
-        sapo.vy = 0;
-        sapo.jumping = false;
+      if (sapo.y > ALTURA_CHAO - ESPESSURA_CHAO - 40) {
+        sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - 40;
+        sapo.vy = 0; sapo.jumping = false;
       }
-
       drawSapo();
       pontuacao++;
       requestAnimationFrame(gameLoop);
     }
 
-    function resetGame() {
-      sapo = { x: 50, y: 150, vy: 0, jumping: false };
-      pontuacao = 0;
-      startGameHandler();
-    }
-
-    // Pulo
-    function jump() {
-      if (!sapo.jumping && gameStarted) {
-        sapo.vy = -15;
-        sapo.jumping = true;
-        jumpSound.currentTime = 0;
-        jumpSound.play();
-      }
-    }
-
-    // --- APIS E EVENTOS ---
     window.onload = () => {
-      // Ajuste Canvas
-      canvas.width = Math.min(window.innerWidth - 40, 800);
+      document.documentElement.classList.add('loaded');
+      canvas.width = Math.min(window.innerWidth - 20, 800);
       canvas.height = canvas.width * 0.5;
-
-      // Relógio
-      setInterval(() => {
-        document.getElementById('clock').textContent = new Date().toLocaleTimeString();
-      }, 1000);
-
-      // Clima (API)
+      ALTURA_CHAO = canvas.height;
+      scaleX = canvas.width / 800; scaleY = canvas.height / 400;
+      
+      // APIs
+      setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
       fetch("https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=b8a0cd03c689322da2746720be31d534&units=metric")
-        .then(r => r.json()).then(d => {
-          document.getElementById('weather').textContent = `SP: ${Math.round(d.main.temp)}°C`;
-        });
+        .then(r => r.json()).then(d => { document.getElementById('weather').textContent = `SP: ${Math.round(d.main.temp)}°C`; });
 
-      // Menu
-      document.getElementById('menu-toggle').onclick = () => {
-        document.getElementById('nav-menu').classList.toggle('open');
+      // Botões e Toque
+      document.getElementById('start-btn').onclick = startGameHandler;
+      document.getElementById('restart-button').onclick = startGameHandler;
+      document.addEventListener('touchstart', iniciarAudio);
+      canvas.ontouchstart = (e) => {
+        e.preventDefault();
+        if (gameStarted && !sapo.jumping) { 
+          sapo.vy = -18; sapo.jumping = true; 
+          jumpSound.currentTime = 0; jumpSound.play(); 
+        }
       };
-
-      // Controles
-      window.addEventListener('keydown', (e) => { if(e.code === 'Space') jump(); });
-      canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+      document.getElementById('menu-toggle').onclick = () => {
+        const m = document.getElementById('nav-menu');
+        m.style.display = m.style.display === 'none' ? 'block' : 'none';
+      };
     };
   </script>
 </body>
