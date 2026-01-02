@@ -85,14 +85,13 @@
 
   <div id="footer">Siga o Sapinho nas redes sociais! <a href="#">Instagram</a> | <a href="#">YouTube</a> | <a href="#">TikTok</a></div>
 
-  <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
-  <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-  <audio id="victorySound" src="Victory.mp3"></audio>
-  <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>
+  <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
+  <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="victorySound" src="Victory.mp3" preload="auto"></audio>
+  <audio id="backgroundMusic" src="Musicgame.mp3" loop preload="auto"></audio>
 
   <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
-    // --- INICIALIZAÇÃO DO LAYOUT ---
     document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('loaded');
       const canvasElement = document.getElementById('gameCanvas');
@@ -134,13 +133,17 @@
     let sapo, obstaculos = [], tempo = 0, intervaloObstaculo = 120, faseAtual = 0, pontuacao = 0;
     let animationFrameId, scaleX = 1, scaleY = 1, ALTURA_CHAO, ESPESSURA_CHAO;
 
-    // --- MENU ---
     if (menuToggle) {
       menuToggle.onclick = (e) => { e.stopPropagation(); navMenu.classList.toggle('open'); };
       document.addEventListener('click', () => navMenu.classList.remove('open'));
     }
 
-    // --- ÁUDIO MOBILE ---
+    // --- CORREÇÃO DE ÁUDIO ---
+    function playAudio(audio) {
+      audio.currentTime = 0; // Sempre volta pro início para não falhar
+      audio.play().catch(() => {});
+    }
+
     function liberarAudio() {
       [backgroundMusic, jumpSound, failSound, victorySound].forEach(s => {
         s.play().then(() => { if (s.id !== 'backgroundMusic') { s.pause(); s.currentTime = 0; } }).catch(() => {});
@@ -153,52 +156,42 @@
       if (!gameStarted && startBanner.classList.contains('active')) {
         startBanner.classList.remove('active');
         gameStarted = true;
+        backgroundMusic.currentTime = 0; // Reinicia a música do zero
         backgroundMusic.play().catch(() => {});
         animationFrameId = requestAnimationFrame(gameLoop);
       }
     };
 
-    // --- DESENHO DO SAPO (BRAÇOS E PERNAS) ---
     function drawSapo() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
       const { x, y, jumping } = sapo;
       const lx = x / scaleX; const ly = y / scaleY;
-
-      // Corpo
       ctx.fillStyle = "green"; ctx.beginPath();
       ctx.ellipse(lx + 25, ly + 18, 22, 15, 0, 0, Math.PI * 2); ctx.fill();
-
-      // Braços articulados
       ctx.strokeStyle = "green"; ctx.lineWidth = 3;
       const armAngle = jumping ? Math.PI/2 : Math.PI/4;
-      ctx.beginPath(); // Esq
+      ctx.beginPath(); 
       ctx.moveTo(lx + 18, ly + 20); ctx.lineTo(lx + 5, ly + 20);
       ctx.lineTo(lx + 5 - Math.cos(armAngle) * 18, ly + 20 + Math.sin(armAngle) * 18); ctx.stroke();
-      ctx.beginPath(); // Dir
+      ctx.beginPath(); 
       ctx.moveTo(lx + 32, ly + 20); ctx.lineTo(lx + 45, ly + 20);
       ctx.lineTo(lx + 45 + Math.cos(armAngle) * 18, ly + 20 + Math.sin(armAngle) * 18); ctx.stroke();
-
-      // Pernas articuladas (CORRIGIDO)
       ctx.lineWidth = 4;
       const legAngle = jumping ? Math.PI/2 : Math.PI/4;
-      ctx.beginPath(); // Esq
+      ctx.beginPath(); 
       ctx.moveTo(lx + 15, ly + 30);
       ctx.lineTo(lx + 5 - Math.cos(legAngle) * 12, ly + 30 + Math.sin(legAngle) * 25); ctx.stroke();
-      ctx.beginPath(); // Dir
+      ctx.beginPath(); 
       ctx.moveTo(lx + 35, ly + 30);
       ctx.lineTo(lx + 45 + Math.cos(legAngle) * 12, ly + 30 + Math.sin(legAngle) * 25); ctx.stroke();
-
-      // Olhos
       ctx.fillStyle = "yellow"; ctx.beginPath();
       ctx.arc(lx + 15, ly + 8, 6, 0, Math.PI * 2); ctx.arc(lx + 35, ly + 8, 6, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "black"; ctx.beginPath();
       ctx.arc(lx + 15, ly + 8, 2, 0, Math.PI * 2); ctx.arc(lx + 35, ly + 8, 2, 0, Math.PI * 2); ctx.fill();
-      
       ctx.restore();
     }
 
-    // --- GAME LOOP ---
     function gameLoop() {
       if (!gameStarted) return;
       const fase = fases[faseAtual % fases.length];
@@ -206,25 +199,21 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = coresFase[fase].chao;
       ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
-
       sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
       const chaoY = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
       if (sapo.y > chaoY) { sapo.y = chaoY; sapo.vy = 0; sapo.jumping = false; }
-
       drawSapo();
-
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
         obstaculos.push({ x: canvas.width, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY });
       }
-      
       obstaculos.forEach((obs) => {
         obs.x -= 5 * scaleX;
         ctx.fillStyle = "red"; ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
         if (sapo.x < obs.x + obs.width && sapo.x + 40 * scaleX > obs.x && sapo.y + 40 * scaleY > obs.y) {
            gameStarted = false;
            backgroundMusic.pause();
-           failSound.play().catch(()=>{});
+           playAudio(failSound);
            document.getElementById("final-score").textContent = pontuacao;
            gameOverBanner.classList.add('active');
         }
@@ -242,13 +231,14 @@
       scaleX = canvas.width / BASE_WIDTH; scaleY = canvas.height / BASE_HEIGHT;
       ALTURA_CHAO = canvas.height;
       ESPESSURA_CHAO = isMobile ? 20 : 50;
-
       const chaoInicial = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
       sapo = { x: canvas.width * 0.2, y: chaoInicial, vy: 0, jumping: false };
-      
       obstaculos = []; tempo = 0; pontuacao = 0;
-      gameOverBanner.classList.remove('active'); victoryBanner.classList.remove('active'); startBanner.classList.add('active');
+      gameOverBanner.classList.remove('active'); victoryBanner.classList.remove('active');
       gameStarted = false;
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      startBanner.classList.add('active');
     }
 
     async function fetchWeather() {
@@ -266,22 +256,18 @@
         const d = new Date();
         document.getElementById("clock").textContent = d.toLocaleTimeString('pt-BR');
       }, 1000);
-      
       startBanner.addEventListener('click', startGameHandler);
-      startBanner.addEventListener('touchstart', startGameHandler);
-      
+      startBanner.addEventListener('touchstart', (e) => { e.preventDefault(); startGameHandler(); });
       document.addEventListener('keydown', (e) => {
         if (!gameStarted) startGameHandler();
         else if ((e.code === 'Space' || e.code === 'ArrowUp') && !sapo.jumping) {
-          sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.play().catch(()=>{});
+          sapo.vy = -20 * scaleY; sapo.jumping = true; playAudio(jumpSound);
         }
       });
-
       canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if (gameStarted && !sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; jumpSound.play().catch(()=>{}); }
+        if (gameStarted && !sapo.jumping) { sapo.vy = -20 * scaleY; sapo.jumping = true; playAudio(jumpSound); }
       });
-
       document.getElementById("restart-button").onclick = resetGame;
       document.getElementById("play-again-button").onclick = resetGame;
     };
