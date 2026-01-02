@@ -2,65 +2,104 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="description" content="Jogo do Sapinho: uma aventura divertida com um sapo, desenvolvida com IA. Jogue agora!">
+  <meta name="keywords" content="jogo, sapinho, inteligência artificial, arcade">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jogo do Sapinho</title>
   <link rel="icon" href="https://em-content.zobj.net/thumbs/160/twitter/322/frog_1f438.png" type="image/png">
-  <link rel="stylesheet" href="styles-mobile.css?v=17" media="screen and (max-width: 1023px)">
-  <link rel="stylesheet" href="styles-desktop.css?v=6" media="screen and (min-width: 1024px)">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
   <style>
-    html:not(.loaded) body { background: #1a1a1a; visibility: hidden; }
-    #top-bar { background: #1b5e20; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; height: 60px; }
-    /* CORREÇÃO DE CENTRALIZAÇÃO MOBILE */
-    #game-container { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin: 0 auto; }
+    /* RESET E LAYOUT ORIGINAL */
+    html:not(.loaded) body { margin: 0; padding: 0; font-family: sans-serif; background: linear-gradient(180deg, #1a1a1a, #2e2e2e); color: #fff; visibility: hidden; }
+    #top-bar { background: #1b5e20; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 60px; position: relative; z-index: 1000; }
+    
+    /* CORREÇÃO DA CENTRALIZAÇÃO NO CANVAS */
+    #game-container { 
+      position: relative; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      margin: 20px auto; 
+      width: 100%; 
+      max-width: 1200px; 
+    }
+
+    #gameCanvas { border: 4px solid #333; background-color: #dcedc8; display: block; }
+
+    /* BANNERS CENTRALIZADOS EXATAMENTE NO MEIO DO CANVAS */
     #start-banner, #game-over-banner, #victory-banner {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      z-index: 100; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; text-align: center; width: 80%; max-width: 400px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      border: 3px solid #4CAF50;
+      z-index: 2000;
+      width: 80%;
+      max-width: 400px;
+      display: none;
     }
     .active { display: block !important; }
-    canvas { display: block; background: #dcedc8; max-width: 100%; height: auto; border: 2px solid #333; }
-    .ad-slot { background: #333; color: #555; text-align: center; width: 100%; margin: 5px 0; font-size: 10px; }
+
+    /* ADS E OUTRAS SEÇÕES (RESTAURADOS) */
+    #left-ad, #right-ad { width: 300px; height: 600px; background: #333; display: flex; align-items: center; justify-content: center; }
+    #top-ad { width: 100%; height: 90px; background: #333; margin-bottom: 10px; }
+    #test-version, #about-section, #footer { padding: 20px; text-align: center; background: #222; margin-top: 10px; }
+    
+    @media (max-width: 1024px) {
+      #left-ad, #right-ad { display: none; }
+      #game-container { flex-direction: column; }
+    }
   </style>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-SEU-ID" crossorigin="anonymous"></script>
 </head>
 <body>
+
   <div id="top-bar">
-    <button id="menu-toggle" class="fa fa-bars" style="background:none; border:none; color:white; font-size:24px;"></button>
-    <div class="weather-clock" style="text-align: right;">
-      <div id="weather">Carregando clima...</div>
+    <button id="menu-toggle" class="fa fa-bars" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;"></button>
+    <div class="weather-clock" style="display: flex; gap: 20px;">
+      <div id="weather">Buscando clima...</div>
       <div id="clock">00:00:00</div>
     </div>
-    <nav id="nav-menu" style="display:none; position:absolute; top:60px; left:0; background:#1b5e20; width:100%; z-index:1001;">
-      <ul style="list-style:none; padding:10px;">
-        <li><a href="index.html" style="color:white; text-decoration:none;">Home</a></li>
-        <li><a href="sobre.html" style="color:white; text-decoration:none;">Sobre</a></li>
+    <nav id="nav-menu" style="display:none; position:absolute; top:60px; left:0; background:#1b5e20; width:200px; border:1px solid #000;">
+      <ul style="list-style:none; padding:20px; margin:0;">
+        <li><a href="index.html" style="color:white; text-decoration:none; display:block; padding:10px 0;">Home</a></li>
+        <li><a href="sobre.html" style="color:white; text-decoration:none; display:block; padding:10px 0;">Sobre</a></li>
       </ul>
     </nav>
   </div>
 
   <div id="game-container">
-    <div id="top-ad" class="ad-slot" style="height:50px;">ANÚNCIO TOPO</div>
-    <canvas id="gameCanvas"></canvas>
-    <div id="bottom-ad" class="ad-slot" style="height:50px;">ANÚNCIO RODAPÉ</div>
+    <div id="left-ad">ANÚNCIO ESQUERDA</div>
+    
+    <div style="position: relative;">
+      <div id="top-ad">ANÚNCIO TOPO</div>
+      <canvas id="gameCanvas"></canvas>
+      
+      <div id="start-banner" class="active">
+        <h1>Bem-vindo ao Jogo do Sapinho!</h1>
+        <p>Prepare-se para pular obstáculo!</p>
+        <button id="start-btn" style="padding:15px 30px; font-size:20px; background:#4CAF50; color:white; border:none; border-radius:10px; cursor:pointer;">INICIAR JOGO</button>
+      </div>
 
-    <div id="start-banner" class="active">
-      <h1>Jogo do Sapinho</h1>
-      <p>Toque para iniciar</p>
-      <button id="start-btn" style="padding:10px 20px; background:#00ff00; border:none; font-weight:bold;">JOGAR</button>
+      <div id="game-over-banner">
+        <h2>Fim de Jogo!</h2>
+        <p>Sua pontuação foi: <span id="final-score">0</span></p>
+        <button id="restart-button" style="padding:10px 20px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer;">TENTAR NOVAMENTE</button>
+      </div>
     </div>
 
-    <div id="game-over-banner" style="display:none;">
-      <h2>Game Over!</h2>
-      <p>Score: <span id="final-score">0</span></p>
-      <button id="restart-button" style="padding:10px 20px; background:#00ff00; border:none;">REINICIAR</button>
-    </div>
+    <div id="right-ad">ANÚNCIO DIREITA</div>
   </div>
 
-  <div id="about-section" style="padding:20px;">
-    <h2>Sobre o Sapinho AI</h2>
-    <p>Aventura divertida desenvolvida com Inteligência Artificial.</p>
-  </div>
-
-  <div id="footer" style="text-align:center; padding:10px;">SapinhoAI 2026</div>
+  <div id="test-version"><h3>Versão de Teste 2.0</h3><p>Desenvolvido com Sapinho AI.</p></div>
+  <div id="about-section"><h2>Sobre o Jogo</h2><p>Este é o clássico jogo do sapinho com braços e pernas!</p></div>
+  <div id="footer">© 2026 Jogo do Sapinho - Todos os direitos reservados.</div>
 
   <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
   <audio id="backgroundMusic" src="Musicgame.mp3" loop preload="auto"></audio>
@@ -73,59 +112,75 @@
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
 
-    let gameStarted = false, sapo, tempo = 0, pontuacao = 0, scaleX = 1, scaleY = 1;
-    let GRAVIDADE = 1.2, ALTURA_CHAO, ESPESSURA_CHAO = 40;
+    let gameStarted = false;
+    let sapo, obstaculos = [], pontuacao = 0, scaleX = 1, scaleY = 1;
+    let ALTURA_CHAO, ESPESSURA_CHAO = 50;
 
-    // --- CORREÇÃO DEFINITIVA DO SOM MOBILE ---
-    function iniciarAudio() {
+    // --- CORREÇÃO DO ÁUDIO (RESOLVE SEGUNDA VEZ NO MOBILE) ---
+    function resetarMusica() {
+      bgMusic.pause();
       bgMusic.currentTime = 0;
-      bgMusic.play().catch(e => console.log("Erro áudio"));
-      document.removeEventListener('touchstart', iniciarAudio);
+      bgMusic.play().catch(() => {});
     }
 
-    const startGameHandler = () => {
-      iniciarAudio();
-      startBanner.classList.remove('active');
-      gameOverBanner.style.display = 'none';
-      gameStarted = true;
-      resetGame();
-      gameLoop();
-    };
-
-    function resetGame() {
-      sapo = { x: 50 * scaleX, y: ALTURA_CHAO - 100, vy: 0, jumping: false };
-      pontuacao = 0; tempo = 0;
+    function tocarPulo() {
+      jumpSound.pause();
+      jumpSound.currentTime = 0;
+      jumpSound.play().catch(() => {});
     }
 
+    // --- FUNÇÕES DE DESENHO (SAPO COMPLETO) ---
     function drawSapo() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
-      const lx = sapo.x / scaleX, ly = sapo.y / scaleY;
+      const lx = sapo.x / scaleX;
+      const ly = sapo.y / scaleY;
+      
       ctx.fillStyle = "green";
-      ctx.beginPath(); ctx.ellipse(lx + 25, ly + 18, 22, 15, 0, 0, Math.PI * 2); ctx.fill();
-      // Braços e Pernas
+      ctx.beginPath();
+      ctx.ellipse(lx + 25, ly + 18, 22, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Braços e Pernas Articulados
       ctx.strokeStyle = "green"; ctx.lineWidth = 3;
-      const move = sapo.jumping ? 1.5 : 0.8;
-      ctx.beginPath(); ctx.moveTo(lx+18, ly+20); ctx.lineTo(lx+5, ly+20*move); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(lx+32, ly+20); ctx.lineTo(lx+45, ly+20*move); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(lx+15, ly+30); ctx.lineTo(lx+5, ly+45*move); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(lx+35, ly+30); ctx.lineTo(lx+45, ly+45*move); ctx.stroke();
+      const ang = sapo.jumping ? 1.2 : 1;
+      ctx.beginPath(); ctx.moveTo(lx+18, ly+20); ctx.lineTo(lx+5, ly+25*ang); ctx.stroke(); // Braço E
+      ctx.beginPath(); ctx.moveTo(lx+32, ly+20); ctx.lineTo(lx+45, ly+25*ang); ctx.stroke(); // Braço D
+      ctx.beginPath(); ctx.moveTo(lx+15, ly+30); ctx.lineTo(lx+5, ly+45*ang); ctx.stroke();  // Perna E
+      ctx.beginPath(); ctx.moveTo(lx+35, ly+30); ctx.lineTo(lx+45, ly+45*ang); ctx.stroke(); // Perna D
+
       // Olhos
-      ctx.fillStyle = "yellow"; ctx.beginPath(); ctx.arc(lx+15, ly+8, 6, 0, Math.PI*2); ctx.arc(lx+35, ly+8, 6, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "yellow";
+      ctx.beginPath(); ctx.arc(lx+15, ly+8, 6, 0, Math.PI*2); ctx.arc(lx+35, ly+8, 6, 0, Math.PI*2); ctx.fill();
       ctx.restore();
+    }
+
+    function iniciarJogo() {
+      startBanner.classList.remove('active');
+      gameOverBanner.classList.remove('active');
+      gameStarted = true;
+      pontuacao = 0;
+      resetarMusica(); // Reinicia a música do zero
+      gameLoop();
     }
 
     function gameLoop() {
       if (!gameStarted) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#81c784"; ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
       
-      sapo.vy += GRAVIDADE;
+      // Chão
+      ctx.fillStyle = "#81c784";
+      ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
+
+      // Física Sapo
+      sapo.vy += 1.2;
       sapo.y += sapo.vy;
-      if (sapo.y > ALTURA_CHAO - ESPESSURA_CHAO - 40) {
-        sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - 40;
-        sapo.vy = 0; sapo.jumping = false;
+      if (sapo.y > ALTURA_CHAO - ESPESSURA_CHAO - 45) {
+        sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - 45;
+        sapo.vy = 0;
+        sapo.jumping = false;
       }
+
       drawSapo();
       pontuacao++;
       requestAnimationFrame(gameLoop);
@@ -133,30 +188,32 @@
 
     window.onload = () => {
       document.documentElement.classList.add('loaded');
-      canvas.width = Math.min(window.innerWidth - 20, 800);
+      canvas.width = Math.min(window.innerWidth - 40, 800);
       canvas.height = canvas.width * 0.5;
       ALTURA_CHAO = canvas.height;
       scaleX = canvas.width / 800; scaleY = canvas.height / 400;
       
-      // APIs
+      sapo = { x: 100, y: ALTURA_CHAO - 100, vy: 0, jumping: false };
+
+      // APIs Clima e Relógio
       setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
       fetch("https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=b8a0cd03c689322da2746720be31d534&units=metric")
         .then(r => r.json()).then(d => { document.getElementById('weather').textContent = `SP: ${Math.round(d.main.temp)}°C`; });
 
-      // Botões e Toque
-      document.getElementById('start-btn').onclick = startGameHandler;
-      document.getElementById('restart-button').onclick = startGameHandler;
-      document.addEventListener('touchstart', iniciarAudio);
-      canvas.ontouchstart = (e) => {
+      // Eventos
+      document.getElementById('start-btn').onclick = iniciarJogo;
+      document.getElementById('restart-button').onclick = iniciarJogo;
+      
+      canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if (gameStarted && !sapo.jumping) { 
-          sapo.vy = -18; sapo.jumping = true; 
-          jumpSound.currentTime = 0; jumpSound.play(); 
+        if (gameStarted && !sapo.jumping) {
+          sapo.vy = -18; sapo.jumping = true; tocarPulo();
         }
-      };
+      });
+
       document.getElementById('menu-toggle').onclick = () => {
-        const m = document.getElementById('nav-menu');
-        m.style.display = m.style.display === 'none' ? 'block' : 'none';
+        const n = document.getElementById('nav-menu');
+        n.style.display = n.style.display === 'none' ? 'block' : 'none';
       };
     };
   </script>
