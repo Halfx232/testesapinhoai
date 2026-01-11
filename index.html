@@ -528,31 +528,85 @@
         sapo.vy = 0;
         sapo.jumping = false;
       }
-      drawSapo();
-      atualizarPoeira();
-      if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
-        let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
-        let cor = cores[Math.floor(Math.random() * cores.length)];
-        obstaculos.push({ x: BASE_WIDTH * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY, color: cor });
-      }
-      for (let i = 0; i < obstaculos.length; i++) {
-        let obs = obstaculos[i];
-        obs.x -= 5 * scaleX;
-        drawObstaculo(obs);
-      }
-      obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
-      tempo++;
-      pontuacao++;
-      if (tempo % 1500 === 0) {
-        faseAtual++;
-        intervaloObstaculo = Math.max(60, intervaloObstaculo - 10);
-      }
-      ctx.save();
-      ctx.font = isMobile ? "bold 16px Arial" : "bold 18px Arial";
-      ctx.fillStyle = "#000";
-      ctx.fillText("Score: " + pontuacao, 10, isMobile ? 20 : 25);
-      ctx.restore();
-    }
+     function drawSapo() {
+    ctx.save();
+    ctx.scale(scaleX, scaleY);
+    const { x, y, jumping } = sapo;
+    const lx = x / scaleX; 
+    const ly = y / scaleY;
+
+    // 1. CORPO PRINCIPAL (A elipse verde)
+    ctx.fillStyle = "#4CAF50"; // Verde sapo
+    ctx.beginPath();
+    ctx.ellipse(lx + 25, ly + 18, 22, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. BRAÇOS E PERNAS (Articulados como na imagem)
+    ctx.strokeStyle = "#4CAF50";
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    
+    // O ângulo muda se estiver pulando para dar efeito de movimento
+    const offset = jumping ? 5 : 0;
+
+    // Braço Esquerdo
+    ctx.beginPath();
+    ctx.moveTo(lx + 15, ly + 18);
+    ctx.lineTo(lx - 5, ly + 15 - offset);
+    ctx.stroke();
+    // Dedos Esquerdo
+    drawFingers(lx - 5, ly + 15 - offset);
+
+    // Braço Direito
+    ctx.beginPath();
+    ctx.moveTo(lx + 35, ly + 18);
+    ctx.lineTo(lx + 55, ly + 15 - offset);
+    ctx.stroke();
+    // Dedos Direito
+    drawFingers(lx + 55, ly + 15 - offset);
+
+    // Pernas de baixo (as que ficam no chão)
+    ctx.beginPath();
+    ctx.moveTo(lx + 10, ly + 25);
+    ctx.lineTo(lx + 5, ly + 35 + offset);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(lx + 40, ly + 25);
+    ctx.lineTo(lx + 45, ly + 35 + offset);
+    ctx.stroke();
+
+    // 3. OLHOS (Grandes e amarelos)
+    ctx.fillStyle = "#FFF176"; // Amarelo claro
+    ctx.beginPath();
+    ctx.arc(lx + 15, ly + 8, 7, 0, Math.PI * 2); // Olho E
+    ctx.arc(lx + 35, ly + 8, 7, 0, Math.PI * 2); // Olho D
+    ctx.fill();
+    
+    // Pupilas
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(lx + 15, ly + 8, 2, 0, Math.PI * 2);
+    ctx.arc(lx + 35, ly + 8, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. SORRISO
+    ctx.strokeStyle = "#1B5E20";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(lx + 25, ly + 18, 12, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+// Função auxiliar para desenhar as pontas das patas (os círculos)
+function drawFingers(x, y) {
+    ctx.fillStyle = "#4CAF50";
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x - 4, y - 4, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 4, y - 4, 2, 0, Math.PI * 2); ctx.fill();
+}
 
     function verificarColisao() {
       for (let obs of obstaculos) {
@@ -763,5 +817,6 @@
   </script>
 </body>
 </html>
+
 
 
