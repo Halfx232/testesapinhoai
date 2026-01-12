@@ -212,9 +212,6 @@
     const backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
-    const backgroundMusic = document.getElementById("backgroundMusic");
-    backgroundMusic.preload = 'auto';
-    backgroundMusic.volume = 0.5;
     let audioUnlocked = false;  // Flag pra saber se já desbloqueamos
 
     const startBanner = document.getElementById("start-banner");
@@ -734,12 +731,7 @@
       setInterval(atualizarHora, 60 * 1000);
 
         document.body.addEventListener('touchstart', unlockAudio, { once: true });
-        jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
-        failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
-        victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
-        backgroundMusic.play().then(() => backgroundMusic.pause()).catch(e => console.log("Erro ao desbloquear backgroundMusic:", e));
-      }, { once: true });
-
+        
       positionBanners();
     });
 
@@ -802,4 +794,5 @@
   </script>
 </body>
 </html>
+
 
