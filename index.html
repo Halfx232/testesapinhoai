@@ -212,6 +212,10 @@
     const backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
+    const backgroundMusic = document.getElementById("backgroundMusic");
+    backgroundMusic.preload = 'auto';
+    backgroundMusic.volume = 0.5;
+    let audioUnlocked = false;  // Flag pra saber se já desbloqueamos
 
     const startBanner = document.getElementById("start-banner");
     const gameOverBanner = document.getElementById("game-over-banner");
@@ -244,6 +248,26 @@
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [];
     let animationFrameId;
+
+    function unlockAudio() {
+  if (audioUnlocked) return;
+
+  // Tenta play/pause rápido em todos os sons pra desbloquear o contexto de áudio no iOS
+  [jumpSound, failSound, victorySound, backgroundMusic].forEach(sound => {
+    const promise = sound.play();
+    if (promise !== undefined) {
+      promise
+        .then(() => {
+          sound.pause();
+          sound.currentTime = 0;
+          console.log(`Desbloqueado: ${sound.id}`);
+        })
+        .catch(e => console.log(`Unlock falhou em ${sound.id} (normal na primeira vez):`, e));
+    }
+  });
+
+  audioUnlocked = true;
+}
 
     function positionBanners() {
       const banners = [startBanner, gameOverBanner, victoryBanner];
@@ -375,14 +399,21 @@
       }
     };
 
-    const startGameHandler = (e) => {
-      e.preventDefault();
-      if (!gameStarted && startBanner.classList.contains('active')) {
-        startBanner.classList.remove('active');
-        iniciarJogo();
-        console.log("Jogo iniciado!");
-      }
-    };
+   const startGameHandler = (e) => {
+  e.preventDefault();
+  
+  if (!gameStarted && startBanner.classList.contains('active')) {
+    // Primeiro: desbloqueia com essa interação do usuário (toque/clique no banner)
+    unlockAudio();
+    
+    // Pequeno delay pra dar tempo pro browser registrar o unlock (funciona melhor no Safari)
+    setTimeout(() => {
+      startBanner.classList.remove('active');
+      iniciarJogo();
+      console.log("Jogo iniciado após unlock de áudio!");
+    }, 80);  // 80ms é seguro e imperceptível
+  }
+};
 
     function resetGame() {
       if (animationFrameId) {
@@ -580,7 +611,15 @@
           handleJump();
         }
       });
-      backgroundMusic.play().catch(e => console.log("Erro ao tocar música de fundo:", e));
+        // Tenta tocar a música (depois do unlock, deve funcionar na primeira vez)
+  backgroundMusic.play()
+    .then(() => {
+      console.log("Música de fundo iniciada com sucesso!");
+    })
+    .catch(e => {
+      console.error("Falha ao tocar música (talvez precise de outra interação):", e);
+      // Se ainda falhar (raro), pode tentar de novo em próximo toque, mas geralmente não precisa
+    });
       animationFrameId = requestAnimationFrame(gameLoop);
     }
 
@@ -694,7 +733,7 @@
       setInterval(fetchWeather, 10 * 60 * 1000);
       setInterval(atualizarHora, 60 * 1000);
 
-      document.body.addEventListener('touchstart', () => {
+        document.body.addEventListener('touchstart', unlockAudio, { once: true });
         jumpSound.play().then(() => jumpSound.pause()).catch(e => console.log("Erro ao desbloquear jumpSound:", e));
         failSound.play().then(() => failSound.pause()).catch(e => console.log("Erro ao desbloquear failSound:", e));
         victorySound.play().then(() => victorySound.pause()).catch(e => console.log("Erro ao desbloquear victorySound:", e));
@@ -763,3 +802,4 @@
   </script>
 </body>
 </html>
+
