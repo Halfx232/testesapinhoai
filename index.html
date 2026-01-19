@@ -60,7 +60,7 @@
     <div id="left-ad">
       <ins class="adsbygoogle" style="display:block; width:300px; height:400px; max-width:300px; max-height:400px; min-width:300px; min-height:400px;" data-ad-client="ca-pub-SEU-ID" data-ad-slot="SEU-SLOT-ID-DESKTOP" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
     </div>
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas" width="400" height="200" class="ready"></canvas>
     <div id="right-ad">
       <ins class="adsbygoogle" style="display:block; width:300px; height:400px; max-width:300px; max-height:400px; min-width:300px; min-height:400px;" data-ad-client="ca-pub-SEU-ID" data-ad-slot="SEU-SLOT-ID-DESKTOP" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
     </div>
@@ -98,22 +98,27 @@
   <audio id="victorySound" src="Victory.mp3"></audio>
   <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.documentElement.classList.add('loaded');
-      const canvas = document.getElementById('gameCanvas');
-      canvas.classList.add('ready');
-      document.getElementById('top-bar').style.display = 'flex';
-      document.getElementById('game-container').style.display = 'flex';
-      document.getElementById('test-version').style.display = 'block';
-      document.getElementById('about-section').style.display = 'block';
-      document.getElementById('footer').style.display = 'block';
-      // Remover qualquer link de stylesheet no body
-      const invalidLinks = document.body.querySelectorAll('link[rel="stylesheet"]');
-      invalidLinks.forEach(link => {
-        console.warn('Link de stylesheet encontrado no body, removendo:', link);
-        link.remove();
-      });
-    });
+  document.addEventListener('DOMContentLoaded', () => {
+  document.documentElement.classList.add('loaded');
+
+  // Adicione aqui (calcula tamanho e posição logo no início)
+  resizeCanvas();
+  positionBanners();
+
+  const canvas = document.getElementById('gameCanvas');
+  canvas.classList.add('ready');
+  document.getElementById('top-bar').style.display = 'flex';
+  document.getElementById('game-container').style.display = 'flex';
+  document.getElementById('test-version').style.display = 'block';
+  document.getElementById('about-section').style.display = 'block';
+  document.getElementById('footer').style.display = 'block';
+  // Remover qualquer link de stylesheet no body
+  const invalidLinks = document.body.querySelectorAll('link[rel="stylesheet"]');
+  invalidLinks.forEach(link => {
+    console.warn('Link de stylesheet encontrado no body, removendo:', link);
+    link.remove();
+  });
+});
 
     window.addEventListener('load', () => {
       window.cookieconsent.initialise({
@@ -266,51 +271,66 @@
   audioUnlocked = true;
 }
 
-    function positionBanners() {
-      const banners = [startBanner, gameOverBanner, victoryBanner];
-      const canvas = document.getElementById('gameCanvas');
-      const canvasRect = canvas.getBoundingClientRect();
-      const gameContainer = document.getElementById('game-container');
+function positionBanners() {
+  const banners = [startBanner, gameOverBanner, victoryBanner];
+  const canvas = document.getElementById('gameCanvas');
+  const canvasRect = canvas.getBoundingClientRect();
+  const gameContainer = document.getElementById('game-container');
 
+  banners.forEach(banner => {
+    if (banner.classList.contains('active')) {
+      banner.style.position = 'absolute';
+      const canvasCenterX = canvasRect.left - gameContainer.getBoundingClientRect().left + canvasRect.width / 2;
+      const canvasCenterY = canvasRect.top - gameContainer.getBoundingClientRect().top + canvasRect.height / 2;
+      banner.style.left = `${canvasCenterX}px`;
+      banner.style.top = `${canvasCenterY}px`;
+      banner.style.transform = 'translate(-50%, -50%)';
+      banner.style.zIndex = '1000';
+      console.log(`Banner ${banner.id} visível, posicionado no centro do canvas: left=${canvasCenterX}px, top=${canvasCenterY}px`);
+      console.log(`Banner ${banner.id} dimensions:`, banner.getBoundingClientRect());
+    }
+  });
+
+  console.log('Canvas dimensions:', canvasRect);
+  if (!isMobile) {
+    console.log('Left Ad:', document.getElementById('left-ad').getBoundingClientRect());
+    console.log('Right Ad:', document.getElementById('right-ad').getBoundingClientRect());
+  } else {
+    console.log('Top Ad:', document.getElementById('top-ad').getBoundingClientRect());
+  }
+
+  const testVersion = document.getElementById('test-version');
+  const aboutSection = document.getElementById('about-section');
+  const topAd = document.getElementById('top-ad');
+  testVersion.style.position = 'relative';
+  testVersion.style.zIndex = '2';
+  aboutSection.style.position = 'relative';
+  aboutSection.style.zIndex = '2';
+  topAd.style.width = '100%';
+  topAd.style.maxWidth = '400px';
+  topAd.style.height = '100px';
+  const adIns = topAd.querySelector('ins.adsbygoogle');
+  if (adIns) {
+    adIns.style.width = '100%';
+    adIns.style.maxWidth = '400px';
+    adIns.style.height = '100px';
+  }
+
+  // Adicione isso: Garantia extra pro mobile - reposiciona após 100ms
+  if (isMobile) {
+    setTimeout(() => {
+      const canvasRect = canvas.getBoundingClientRect();
       banners.forEach(banner => {
         if (banner.classList.contains('active')) {
-          banner.style.position = 'absolute';
           const canvasCenterX = canvasRect.left - gameContainer.getBoundingClientRect().left + canvasRect.width / 2;
           const canvasCenterY = canvasRect.top - gameContainer.getBoundingClientRect().top + canvasRect.height / 2;
           banner.style.left = `${canvasCenterX}px`;
           banner.style.top = `${canvasCenterY}px`;
-          banner.style.transform = 'translate(-50%, -50%)';
-          banner.style.zIndex = '1000';
-          console.log(`Banner ${banner.id} visível, posicionado no centro do canvas: left=${canvasCenterX}px, top=${canvasCenterY}px`);
-          console.log(`Banner ${banner.id} dimensions:`, banner.getBoundingClientRect());
         }
       });
-
-      console.log('Canvas dimensions:', canvasRect);
-      if (!isMobile) {
-        console.log('Left Ad:', document.getElementById('left-ad').getBoundingClientRect());
-        console.log('Right Ad:', document.getElementById('right-ad').getBoundingClientRect());
-      } else {
-        console.log('Top Ad:', document.getElementById('top-ad').getBoundingClientRect());
-      }
-
-      const testVersion = document.getElementById('test-version');
-      const aboutSection = document.getElementById('about-section');
-      const topAd = document.getElementById('top-ad');
-      testVersion.style.position = 'relative';
-      testVersion.style.zIndex = '2';
-      aboutSection.style.position = 'relative';
-      aboutSection.style.zIndex = '2';
-      topAd.style.width = '100%';
-      topAd.style.maxWidth = '400px';
-      topAd.style.height = '100px';
-      const adIns = topAd.querySelector('ins.adsbygoogle');
-      if (adIns) {
-        adIns.style.width = '100%';
-        adIns.style.maxWidth = '400px';
-        adIns.style.height = '100px';
-      }
-    }
+    }, 100);
+  }
+}
 
     function resizeCanvas() {
       console.log('resizeCanvas chamado');
@@ -794,5 +814,6 @@
   </script>
 </body>
 </html>
+
 
 
