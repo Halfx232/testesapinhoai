@@ -712,29 +712,26 @@ function positionBanners() {
       }
     }
 
-    async function atualizarHora() {
-      try {
-        const now = Date.now();
-        if (lastTimeData && now - lastTimeFetch < TIME_CACHE_DURATION) {
-          clockElement.textContent = lastTimeData;
-          return;
-        }
-        const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
-        if (!response.ok) throw new Error(`Falha na API WorldTimeAPI: ${response.status}`);
-        const data = await response.json();
-        const dateTime = new Date(data.datetime);
-        lastTimeData = ` ${dateTime.toLocaleDateString('pt-BR')} - ${dateTime.toLocaleTimeString('pt-BR')}`;
-        lastTimeFetch = now;
-        clockElement.textContent = lastTimeData;
-      } catch (error) {
-        console.error("Erro ao buscar hora:", error);
-        setTimeout(atualizarHora, 2000);
-        const now = new Date();
-        lastTimeData = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-        clockElement.textContent = lastTimeData;
-      }
-    }
-
+ async function atualizarHoraInicial() {
+  try {
+    const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
+    if (!response.ok) throw new Error("Falha na API");
+    const data = await response.json();
+    const dateTime = new Date(data.datetime);
+    lastTimeData = dateTime;  // guarda a hora sincronizada
+    atualizarRelogioLocal();  // atualiza imediatamente
+    console.log("Hora sincronizada com API:", lastTimeData.toLocaleTimeString('pt-BR'));
+  } catch (error) {
+    console.error("Erro na API de hora:", error);
+    // Fallback: usa hora local do navegador
+    lastTimeData = new Date();
+    atualizarRelogioLocal();
+  }
+}
+   function atualizarRelogioLocal() {
+   const now = lastTimeData || new Date();  // usa hora sincronizada ou local
+   clockElement.textContent = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
+}
     window.addEventListener('load', () => {
       handleOrientation();
       resizeCanvas();
@@ -745,10 +742,10 @@ function positionBanners() {
       resetGame();
 
       fetchWeather();
-      atualizarHora();
+      //atualizarHora();
 
       setInterval(fetchWeather, 10 * 60 * 1000);
-      setInterval(atualizarHora, 60 * 1000);
+      //setInterval(atualizarHora, 60 * 1000);
 
         document.body.addEventListener('touchstart', unlockAudio, { once: true });
         
@@ -814,6 +811,7 @@ function positionBanners() {
   </script>
 </body>
 </html>
+
 
 
 
