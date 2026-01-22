@@ -680,6 +680,11 @@ function positionBanners() {
 
    const weatherElement = document.getElementById("weather");
    const clockElement = document.getElementById("clock");
+    if (!clockElement) {
+   console.error("ERRO: Elemento #clock não encontrado no DOM!");
+} else {
+   console.log("Elemento #clock encontrado OK");
+}
 
     let lastWeatherData = null;
     let lastWeatherFetch = 0;
@@ -818,6 +823,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
