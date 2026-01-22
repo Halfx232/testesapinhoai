@@ -678,8 +678,8 @@ function positionBanners() {
       animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-    const weatherElement = document.getElementById("weather");
-    const clockElement = document.getElementById("clock");
+   const weatherElement = document.getElementById("weather");
+   const clockElement = document.getElementById("clock");
 
     let lastWeatherData = null;
     let lastWeatherFetch = 0;
@@ -728,11 +728,7 @@ function positionBanners() {
     atualizarRelogioLocal();
   }
 }
-  function atualizarRelogioLocal() {
-  const now = lastTimeData || new Date();  // usa a hora sincronizada da API ou a local
-  clockElement.textContent = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-}
-  window.addEventListener('load', () => {
+window.addEventListener('load', () => {
   handleOrientation();
   resizeCanvas();
   window.addEventListener('resize', debounce(() => {
@@ -742,20 +738,25 @@ function positionBanners() {
   resetGame();
 
   fetchWeather();
-  atualizarHoraInicial();  // sincroniza com a API uma vez no carregamento
+  atualizarHoraInicial();  // sincroniza hora com API
 
-  // IMPORTANTE: atualiza os segundos em tempo real a cada 1 segundo
-  setInterval(atualizarRelogioLocal, 1000);
+  // Atualiza o relógio a cada 1 segundo (segundos contam!)
+  setInterval(() => {
+    atualizarRelogioLocal();
+  }, 1000);
 
-  // Sincroniza com a API novamente a cada 10 minutos (opcional, mas evita atraso)
+  // Sincroniza com API a cada 10 minutos
   setInterval(atualizarHoraInicial, 10 * 60 * 1000);
 
   setInterval(fetchWeather, 10 * 60 * 1000);
 
-  // Seu código de desbloqueio de áudio (já tem)
+  // Desbloqueio de áudio no primeiro toque
   document.body.addEventListener('touchstart', unlockAudio, { once: true });
 
   positionBanners();
+
+  // Debug: força uma atualização imediata
+  atualizarRelogioLocal();
 });
 
     restartButton.addEventListener("click", resetGame);
@@ -817,6 +818,7 @@ function positionBanners() {
   </script>
 </body>
 </html>
+
 
 
 
