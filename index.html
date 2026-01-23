@@ -675,38 +675,26 @@ function positionBanners() {
         canvas.removeEventListener('touchstart', handleJump);
         return;
       }
-       animationFrameId = requestAnimationFrame(gameLoop);
+      animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-      const weatherElement = document.getElementById("weather");
-      const clockElement = document.getElementById("clock");
+    const weatherElement = document.getElementById("weather");
+    const clockElement = document.getElementById("clock");
 
-      let lastTimeData = null;
+    let lastWeatherData = null;
+    let lastWeatherFetch = 0;
+    const CACHE_DURATION = 10 * 60 * 1000;
 
-      async function atualizarHoraInicial() {
+    let lastTimeData = null;
+    let lastTimeFetch = 0;
+    const TIME_CACHE_DURATION = 60 * 1000;
+
+    async function fetchWeather() {
       try {
-      const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
-     if (!response.ok) throw new Error("Falha na API");
-     const data = await response.json();
-     const dateTime = new Date(data.datetime);
-     lastTimeData = dateTime;
-     atualizarRelogioLocal();
-     console.log("Hora sincronizada com API:", lastTimeData.toLocaleTimeString('pt-BR'));
-   } catch (error) {
-     console.error("Erro na API de hora:", error);
-     lastTimeData = new Date();  // fallback hora local
-     atualizarRelogioLocal();
-   }
- }
-
-     function atualizarRelogioLocal() {
-     if (!clockElement) {
-     console.error("Elemento #clock não encontrado!");
-         return;
-  }
-     const now = lastTimeData || new Date();
-         clockElement.textContent = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-  }
+        const now = Date.now();
+        if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
+          weatherElement.textContent = lastWeatherData;
+          return;
         }
         const API_KEY = "b8a0cd03c689322da2746720be31d534";
         const city = "São Paulo";
@@ -724,68 +712,48 @@ function positionBanners() {
       }
     }
 
-    async function atualizarHoraInicial() {
-  try {
-    const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
-    if (!response.ok) throw new Error("Falha na API");
-    const data = await response.json();
-    const dateTime = new Date(data.datetime);
-    lastTimeData = dateTime;
-    atualizarRelogioLocal();
-    console.log("Hora sincronizada com API:", lastTimeData.toLocaleTimeString('pt-BR'));
-  } catch (error) {
-    console.error("Erro na API de hora:", error);
-    lastTimeData = new Date();  // fallback hora local
-    atualizarRelogioLocal();
-  }
-}
+    async function atualizarHora() {
+      try {
+        const now = Date.now();
+        if (lastTimeData && now - lastTimeFetch < TIME_CACHE_DURATION) {
+          clockElement.textContent = lastTimeData;
+          return;
+        }
+        const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
+        if (!response.ok) throw new Error(`Falha na API WorldTimeAPI: ${response.status}`);
+        const data = await response.json();
+        const dateTime = new Date(data.datetime);
+        lastTimeData = ` ${dateTime.toLocaleDateString('pt-BR')} - ${dateTime.toLocaleTimeString('pt-BR')}`;
+        lastTimeFetch = now;
+        clockElement.textContent = lastTimeData;
+      } catch (error) {
+        console.error("Erro ao buscar hora:", error);
+        setTimeout(atualizarHora, 2000);
+        const now = new Date();
+        lastTimeData = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
+        clockElement.textContent = lastTimeData;
+      }
+    }
 
-function atualizarRelogioLocal() {
-  if (!clockElement) {
-    console.error("Elemento #clock não encontrado!");
-    return;
-  }
-  const now = lastTimeData || new Date();
-  clockElement.textContent = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-}
-    const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
-    if (!response.ok) throw new Error("Falha na API");
-    const data = await response.json();
-    const dateTime = new Date(data.datetime);
-    lastTimeData = dateTime;  // guarda a hora sincronizada
-    atualizarRelogioLocal();  // atualiza imediatamente
-    console.log("Hora sincronizada com API:", lastTimeData.toLocaleTimeString('pt-BR'));
-  } catch (error) {
-    console.error("Erro na API de hora:", error);
-    // Fallback: usa hora local do navegador
-    lastTimeData = new Date();
-    atualizarRelogioLocal();
-  }
-}
-window.addEventListener('load', () => {
-  handleOrientation();
-  resizeCanvas();
-  window.addEventListener('resize', debounce(() => {
-    resizeCanvas();
-    positionBanners();
-  }, 100));
-  resetGame();
+    window.addEventListener('load', () => {
+      handleOrientation();
+      resizeCanvas();
+      window.addEventListener('resize', debounce(() => {
+        resizeCanvas();
+        positionBanners();
+      }, 100));
+      resetGame();
 
-  fetchWeather();
-  atualizarHoraInicial();  // sincroniza hora com API
+      fetchWeather();
+      atualizarHora();
 
-  // Atualiza segundos em tempo real
-  setInterval(atualizarRelogioLocal, 1000);
+      setInterval(fetchWeather, 10 * 60 * 1000);
+      setInterval(atualizarHora, 60 * 1000);
 
-  // Sincroniza API a cada 10 minutos
-  setInterval(atualizarHoraInicial, 10 * 60 * 1000);
-
-  setInterval(fetchWeather, 10 * 60 * 1000);
-
-  document.body.addEventListener('touchstart', unlockAudio, { once: true });
-
-  positionBanners();
-});
+        document.body.addEventListener('touchstart', unlockAudio, { once: true });
+        
+      positionBanners();
+    });
 
     restartButton.addEventListener("click", resetGame);
     playAgainButton.addEventListener("click", resetGame);
@@ -846,4 +814,3 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
-
