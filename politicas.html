@@ -185,33 +185,118 @@
     });
   </script>
 
-  <!-- Scripts antigos permanecem iguais -->
   <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.documentElement.classList.add('loaded');
-      document.getElementById('top-bar').style.display = 'flex';
-      document.getElementById('contact-section').style.display = 'block';
-      document.getElementById('footer').style.display = 'block';
-    });
+<script>
+  // Mostra o conteúdo quando o DOM carregar (remove o hidden do fallback)
+  document.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.classList.add('loaded');
+    document.getElementById('top-bar').style.display = 'flex';
+    document.getElementById('contact-section').style.display = 'block';
+    document.getElementById('footer').style.display = 'block';
+  });
 
-    window.addEventListener('load', () => {
-      window.cookieconsent.initialise({
-        "palette": { "popup": { "background": "#1b5e20" }, "button": { "background": "#00ff00" } },
-        "content": { "message": "Este site usa cookies para melhorar sua experiência.", "dismiss": "Entendido", "link": "Saiba mais", "href": "/politicas.html" }
+  // ────────────────────────────────────────────────
+  //          RELÓGIO COM SEGUNDOS EM TEMPO REAL
+  // ────────────────────────────────────────────────
+
+  function formatarDataHoraBR(date) {
+    const dia  = String(date.getDate()).padStart(2, '0');
+    const mes  = String(date.getMonth() + 1).padStart(2, '0');
+    const ano  = date.getFullYear();
+    const hora = String(date.getHours()).padStart(2, '0');
+    const min  = String(date.getMinutes()).padStart(2, '0');
+    const seg  = String(date.getSeconds()).padStart(2, '0');
+    return `${dia}/${mes}/${ano} - ${hora}:${min}:${seg}`;
+  }
+
+  function atualizarRelogioLocal() {
+    const agora = new Date();
+    const clock = document.getElementById('clock');
+    if (clock) clock.textContent = formatarDataHoraBR(agora);
+  }
+
+  async function tentarHorarioOficialUmaVez() {
+    const clock = document.getElementById('clock');
+    if (!clock) return;
+
+    try {
+      const res = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", {
+        mode: 'cors',
+        cache: 'no-store'
       });
+      if (!res.ok) throw new Error("status " + res.status);
+      const data = await res.json();
+      const dataHoraApi = new Date(data.datetime);
+      clock.textContent = formatarDataHoraBR(dataHoraApi);
+      console.log("Relógio sincronizado com WorldTimeAPI");
+    } catch (err) {
+      console.warn("API de hora falhou → usando relógio local", err);
+      atualizarRelogioLocal();
+    }
+  }
+
+  // ────────────────────────────────────────────────
+  //          CLIMA (igual às outras páginas)
+  // ────────────────────────────────────────────────
+
+  let lastWeatherData = null;
+  let lastWeatherFetch = 0;
+  const CACHE_DURATION = 10 * 60 * 1000;
+
+  async function fetchWeather() {
+    try {
+      const now = Date.now();
+      if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
+        document.getElementById('weather').textContent = lastWeatherData;
+        return;
+      }
+      const API_KEY = "b8a0cd03c689322da2746720be31d534";
+      const city = "São Paulo";
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=pt_br&units=metric`;
+      const response = await fetch(url, { mode: 'cors' });
+      if (!response.ok) throw new Error("API error");
+      const data = await response.json();
+      const temp = Math.round(data.main.temp);
+      const description = data.weather[0].description;
+      lastWeatherData = ` ${city}: ${temp}°C, ${description}`;
+      lastWeatherFetch = now;
+      document.getElementById('weather').textContent = lastWeatherData;
+    } catch (error) {
+      console.error("Erro clima:", error);
+      document.getElementById('weather').textContent = "Clima indisponível";
+    }
+  }
+
+  // ────────────────────────────────────────────────
+  //          INICIALIZAÇÃO FINAL (menu + cookie + relógio + clima)
+  // ────────────────────────────────────────────────
+
+  window.addEventListener('load', () => {
+    window.cookieconsent.initialise({
+      "palette": { "popup": { "background": "#1b5e20" }, "button": { "background": "#00ff00" } },
+      "content": { "message": "Este site usa cookies para melhorar sua experiência.", "dismiss": "Entendido", "link": "Saiba mais", "href": "/politicas.html" }
     });
 
+    // Menu toggle
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
-    function toggleMenu() { navMenu.classList.toggle('open'); }
+    function toggleMenu() {
+      navMenu.classList.toggle('open');
+    }
     if (menuToggle && navMenu) {
       menuToggle.addEventListener('click', toggleMenu);
-      navMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => navMenu.classList.remove('open')));
+      navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => navMenu.classList.remove('open'));
+      });
     }
 
-    // (seu código de clima e relógio continua igual)
-    // ... mantive só o essencial pra não ficar gigante
-  </script>
-</body>
-</html>
+    // Inicia clima e relógio
+    fetchWeather();
+    setInterval(fetchWeather, CACHE_DURATION);
+
+    tentarHorarioOficialUmaVez();
+    atualizarRelogioLocal();
+    setInterval(atualizarRelogioLocal, 1000);
+  });
+</script>
+ 
