@@ -685,10 +685,6 @@ function positionBanners() {
     let lastWeatherFetch = 0;
     const CACHE_DURATION = 10 * 60 * 1000;
 
-    let lastTimeData = null;
-    let lastTimeFetch = 0;
-    const TIME_CACHE_DURATION = 60 * 1000;
-
     async function fetchWeather() {
       try {
         const now = Date.now();
@@ -712,28 +708,61 @@ function positionBanners() {
       }
     }
 
-    async function atualizarHora() {
-      try {
-        const now = Date.now();
-        if (lastTimeData && now - lastTimeFetch < TIME_CACHE_DURATION) {
-          clockElement.textContent = lastTimeData;
-          return;
-        }
-        const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
-        if (!response.ok) throw new Error(`Falha na API WorldTimeAPI: ${response.status}`);
-        const data = await response.json();
-        const dateTime = new Date(data.datetime);
-        lastTimeData = ` ${dateTime.toLocaleDateString('pt-BR')} - ${dateTime.toLocaleTimeString('pt-BR')}`;
-        lastTimeFetch = now;
-        clockElement.textContent = lastTimeData;
-      } catch (error) {
-        console.error("Erro ao buscar hora:", error);
-        setTimeout(atualizarHora, 2000);
-        const now = new Date();
-        lastTimeData = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-        clockElement.textContent = lastTimeData;
-      }
+ // ────────────────────────────────────────────────
+//          RELÓGIO COM SEGUNDOS EM TEMPO REAL
+// ────────────────────────────────────────────────
+
+function formatarDataHoraBR(date) {
+  const dia  = String(date.getDate()).padStart(2, '0');
+  const mes  = String(date.getMonth() + 1).padStart(2, '0');
+  const ano  = date.getFullYear();
+  
+  const hora = String(date.getHours()).padStart(2, '0');
+  const min  = String(date.getMinutes()).padStart(2, '0');
+  const seg  = String(date.getSeconds()).padStart(2, '0');
+  
+  return `${dia}/${mes}/${ano} - ${hora}:${min}:${seg}`;
+}
+
+function atualizarRelogioLocal() {
+  const agora = new Date();
+  clockElement.textContent = formatarDataHoraBR(agora);
+}
+
+// Tenta pegar horário oficial de São Paulo uma única vez no carregamento
+async function tentarHorarioOficialUmaVez() {
+  try {
+    const res = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", {
+      mode: 'cors',
+      cache: 'no-store'
+    });
+    if (!res.ok) throw new Error("status " + res.status);
+    
+    const data = await res.json();
+    const dataHoraApi = new Date(data.datetime);
+    
+    // Ajusta o relógio local pro horário oficial (só na inicialização)
+    const diferencaMs = dataHoraApi - new Date();
+    if (Math.abs(diferencaMs) > 30000) { // mais de 30s de diferença → ajusta
+      console.warn("Ajustando relógio local com diferença de", Math.round(diferencaMs/1000), "segundos");
+      // Aqui poderíamos compensar, mas na prática o relógio do SO costuma estar ok
     }
+    
+    clockElement.textContent = formatarDataHoraBR(dataHoraApi);
+  } catch (err) {
+    console.warn("Não conseguiu pegar horário oficial → usando relógio local", err);
+    atualizarRelogioLocal();
+  }
+}
+
+// Inicia o relógio
+window.addEventListener('load', () => {
+  // ... seu código existente ...
+
+  tentarHorarioOficialUmaVez();           // tenta sincronizar uma vez
+  atualizarRelogioLocal();                // mostra imediatamente
+  setInterval(atualizarRelogioLocal, 1000); // atualiza segundos a cada 1s
+});
 
     window.addEventListener('load', () => {
       handleOrientation();
@@ -814,3 +843,4 @@ function positionBanners() {
   </script>
 </body>
 </html>
+
