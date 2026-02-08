@@ -151,10 +151,8 @@
       // APIs com cache
       let lastWeatherData = null, lastWeatherFetch = 0;
       const CACHE_DURATION = 10 * 60 * 1000;
-      let lastTimeData = null, lastTimeFetch = 0;
-      const TIME_CACHE_DURATION = 60 * 1000;
-
-      async function fetchWeather() {
+      
+       async function fetchWeather() {
         try {
           const now = Date.now();
           if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
@@ -177,34 +175,65 @@
         }
       }
 
-      async function atualizarHora() {
-        try {
-          const now = Date.now();
-          if (lastTimeData && now - lastTimeFetch < TIME_CACHE_DURATION) {
-            document.getElementById('clock').textContent = lastTimeData;
-            return;
-          }
-          const response = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", { mode: 'cors' });
-          if (!response.ok) throw new Error("API error");
-          const data = await response.json();
-          const dateTime = new Date(data.datetime);
-          lastTimeData = ` ${dateTime.toLocaleDateString('pt-BR')} - ${dateTime.toLocaleTimeString('pt-BR')}`;
-          lastTimeFetch = now;
-          document.getElementById('clock').textContent = lastTimeData;
-        } catch (error) {
-          const now = new Date();
-          lastTimeData = ` ${now.toLocaleDateString('pt-BR')} - ${now.toLocaleTimeString('pt-BR')}`;
-          document.getElementById('clock').textContent = lastTimeData;
-        }
-      }
+  // ────────────────────────────────────────────────
+//          RELÓGIO COM SEGUNDOS EM TEMPO REAL (versão que deu certo na home)
+// ────────────────────────────────────────────────
 
-      fetchWeather();
-      atualizarHora();
-      setInterval(fetchWeather, 10 * 60 * 1000);
-      setInterval(atualizarHora, 60 * 1000);
+function formatarDataHoraBR(date) {
+  const dia  = String(date.getDate()).padStart(2, '0');
+  const mes  = String(date.getMonth() + 1).padStart(2, '0');
+  const ano  = date.getFullYear();
+  
+  const hora = String(date.getHours()).padStart(2, '0');
+  const min  = String(date.getMinutes()).padStart(2, '0');
+  const seg  = String(date.getSeconds()).padStart(2, '0');
+  
+  return `${dia}/${mes}/${ano} - ${hora}:${min}:${seg}`;
+}
+
+function atualizarRelogioLocal() {
+  const agora = new Date();
+  document.getElementById('clock').textContent = formatarDataHoraBR(agora);
+}
+
+// Tenta sincronizar com horário oficial de SP UMA ÚNICA VEZ no carregamento
+async function tentarHorarioOficialUmaVez() {
+  try {
+    const res = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", {
+      mode: 'cors',
+      cache: 'no-store'
     });
+    if (!res.ok) throw new Error("status " + res.status);
+    
+    const data = await res.json();
+    const dataHoraApi = new Date(data.datetime);
+    
+    // Mostra o valor da API imediatamente (pra ficar "oficial" no primeiro segundo)
+    document.getElementById('clock').textContent = formatarDataHoraBR(dataHoraApi);
+    
+    console.log("Relógio sincronizado com WorldTimeAPI");
+  } catch (err) {
+    console.warn("API de hora falhou → usando relógio local do navegador", err);
+    atualizarRelogioLocal();
+  }
+}
+
+   window.addEventListener('load', () => {
+  window.cookieconsent.initialise({
+    "palette": { "popup": { "background": "#1b5e20" }, "button": { "background": "#00ff00" } },
+    "content": { "message": "Este site usa cookies para melhorar sua experiência.", "dismiss": "Entendido", "link": "Saiba mais", "href": "/politicas.html" }
+  });
+
+  fetchWeather();                    // mantém o clima (atualiza a cada 10min)
+  tentarHorarioOficialUmaVez();      // tenta API uma vez
+  atualizarRelogioLocal();           // mostra imediatamente (fallback)
+  setInterval(atualizarRelogioLocal, 1000); // segundos tic-tac a cada 1s
+
+  setInterval(fetchWeather, 10 * 60 * 1000);
+});
   </script>
 </body>
 </html>
+
 
 
