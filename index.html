@@ -250,7 +250,9 @@
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [];
     let animationFrameId;
-
+    
+    let musicaMutada = false;  // Estado do mute (só música de fundo)
+    
     function unlockAudio() {
   if (audioUnlocked) return;
 
@@ -270,8 +272,12 @@
 
   audioUnlocked = true;
 }
-
-function positionBanners() {
+  function toggleMute() {
+  musicaMutada = !musicaMutada;
+  backgroundMusic.muted = musicaMutada;
+}
+  
+  function positionBanners() {
   const banners = [startBanner, gameOverBanner, victoryBanner];
   const canvas = document.getElementById('gameCanvas');
   const canvasRect = canvas.getBoundingClientRect();
@@ -467,7 +473,8 @@ function positionBanners() {
           handleJump();
         }
       });
-
+      musicaMutada = false;
+      backgroundMusic.muted = false;
       resizeCanvas();
       positionBanners();
     }
@@ -563,6 +570,31 @@ function positionBanners() {
       poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0.05);
     }
 
+    function drawMuteButton() {
+  ctx.save();
+  ctx.scale(scaleX, scaleY);
+
+  const btnX = (canvas.width / scaleX) - 60;  // 60px da borda direita
+  const btnY = 10;                            // 10px do topo
+  const btnW = 50;
+  const btnH = 50;
+
+  // Fundo semi-transparente verde-escuro
+  ctx.fillStyle = 'rgba(27, 94, 32, 0.7)';
+  ctx.fillRect(btnX, btnY, btnW, btnH);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 3 / scaleX;
+  ctx.strokeRect(btnX, btnY, btnW, btnH);
+
+  // Ícone (emoji funciona bem em canvas)
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 28px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(musicaMutada ? '🔇' : '🔊', btnX + btnW / 2, btnY + btnH / 2);
+
+  ctx.restore();
+}
     function atualizarJogo() {
       if (!gameStarted) return;
       const fase = getFaseAtual();
@@ -595,6 +627,8 @@ function positionBanners() {
         faseAtual++;
         intervaloObstaculo = Math.max(60, intervaloObstaculo - 10);
       }
+      // Desenha o botão mute no topo direito
+      drawMuteButton();
       ctx.save();
       ctx.font = isMobile ? "bold 16px Arial" : "bold 18px Arial";
       ctx.fillStyle = "#000";
@@ -628,6 +662,28 @@ function positionBanners() {
           handleJump();
         }
       });
+
+      // Detecta clique/toque no botão mute (sup. direito)
+  function handleMuteClick(e) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+  const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+  // Área do botão ajustada pela escala
+  const btnX = canvas.width - 60 * scaleX;
+  const btnY = 10 * scaleY;
+  const btnW = 50 * scaleX;
+  const btnH = 50 * scaleY;
+
+  if (clickX >= btnX && clickX <= btnX + btnW && clickY >= btnY && clickY <= btnY + btnH) {
+    toggleMute();
+  }
+}
+
+// Adiciona os listeners (uma única vez)
+canvas.addEventListener('click', handleMuteClick);
+canvas.addEventListener('touchstart', handleMuteClick);
         // Tenta tocar a música (depois do unlock, deve funcionar na primeira vez)
   backgroundMusic.play()
     .then(() => {
@@ -843,3 +899,4 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
