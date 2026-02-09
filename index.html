@@ -570,30 +570,24 @@
       poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0.05);
     }
 
-    function drawMuteButton() {
-  ctx.save();
-  ctx.scale(scaleX, scaleY);
+ function drawMuteButton() {
+  // ... seu código do botão
+}
 
-  const btnX = (canvas.width / scaleX) - 60;  // 60px da borda direita
-  const btnY = 10;                            // 10px do topo
-  const btnW = 50;
-  const btnH = 50;
+function handleMuteClick(e) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+  const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
 
-  // Fundo semi-transparente verde-escuro
-  ctx.fillStyle = 'rgba(27, 94, 32, 0.7)';
-  ctx.fillRect(btnX, btnY, btnW, btnH);
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 3 / scaleX;
-  ctx.strokeRect(btnX, btnY, btnW, btnH);
+  const btnX = canvas.width - 60 * scaleX;
+  const btnY = 10 * scaleY;
+  const btnW = 50 * scaleX;
+  const btnH = 50 * scaleY;
 
-  // Ícone (emoji funciona bem em canvas)
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 28px Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(musicaMutada ? '🔇' : '🔊', btnX + btnW / 2, btnY + btnH / 2);
-
-  ctx.restore();
+  if (clickX >= btnX && clickX <= btnX + btnW && clickY >= btnY && clickY <= btnY + btnH) {
+    toggleMute();
+  }
 }
     function atualizarJogo() {
       if (!gameStarted) return;
@@ -822,6 +816,16 @@ window.addEventListener('load', () => {
       resizeCanvas();
       window.addEventListener('resize', debounce(() => {
         resizeCanvas();
+              // Adiciona listeners do mute UMA ÚNICA VEZ (só aqui!)
+      canvas.addEventListener('click', handleMuteClick);
+      canvas.addEventListener('touchstart', handleMuteClick);
+
+      // Remove duplicata anterior (se ainda tiver)
+      // document.body.addEventListener('touchstart', unlockAudio, { once: true });  ← NÃO cole isso de novo, já tem antes
+
+      // Botões de restart e play-again (mova pra cá!)
+      restartButton.addEventListener("click", resetGame);
+      playAgainButton.addEventListener("click", resetGame);
         positionBanners();
       }, 100));
       resetGame();
@@ -837,11 +841,6 @@ window.addEventListener('load', () => {
       canvas.addEventListener('click', handleMuteClick);
       canvas.addEventListener('touchstart', handleMuteClick);
 
-      document.body.addEventListener('touchstart', unlockAudio, { once: true });
-      positionBanners();
-
-    restartButton.addEventListener("click", resetGame);
-    playAgainButton.addEventListener("click", resetGame);
   </script>
     <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
   <style>
@@ -899,5 +898,6 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
