@@ -72,13 +72,13 @@
 
 <div id="game-over-banner">
   <h2>Game Over!</h2>
-  <p>Sua pontuação: <span id="final-score"></span> | Melhor: <span id="high-score"></span></p>
+  <p>Sua pontuação: <span id="final-score"></span></p>
   <button id="restart-button">Reiniciar Jogo</button>
 </div>
 
 <div id="victory-banner">
   <h2>Parabéns! Você venceu!</h2>
-  <p>Pontuação Final: <span id="victory-score"></span> | Melhor: <span id="high-score-victory"></span></p>
+  <p>Pontuação Final: <span id="victory-score"></span></p>
   <button id="play-again-button">Jogar Novamente</button>
 </div>  </div>
 
@@ -250,20 +250,9 @@
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [];
     let animationFrameId;
-    
-    let vidas = 3;
-    let piscandoVermelho = false;
-    let tempoPiscar = 0;
-    let musicaMutada = false;  // Estado do mute (só música)
-    let highScore = parseInt(localStorage.getItem('sapinhoHighScore')) || 0;
 
     function unlockAudio() {
   if (audioUnlocked) return;
-
-    function toggleMute() {
-  musicaMutada = !musicaMutada;
-  backgroundMusic.muted = musicaMutada;
-  }
 
   // Tenta play/pause rápido em todos os sons pra desbloquear o contexto de áudio no iOS
   [jumpSound, failSound, victorySound, backgroundMusic].forEach(sound => {
@@ -478,15 +467,6 @@ function positionBanners() {
           handleJump();
         }
       });
-      // No resetGame():
-      vidas = 3;
-      piscandoVermelho = false;
-      tempoPiscar = 0;
-      musicaMutada = false;
-      backgroundMusic.muted = false;
-
-      // No victory (similar):
-      document.getElementById('high-score-victory').textContent = highScore;
 
       resizeCanvas();
       positionBanners();
@@ -555,13 +535,6 @@ function positionBanners() {
       ctx.stroke();
       ctx.restore();
     }
-    // Logo após ctx.save() e ctx.scale():
-     if (piscandoVermelho && tempoPiscar > 0 && Math.floor(tempoPiscar / 5) % 2) {
-     ctx.fillStyle = "#ff4444";  // Pisca
-    } else {
-    ctx.fillStyle = "green";
-    }
-// ... resto igual
 
     function drawObstaculo(obs) {
       ctx.save();
@@ -603,38 +576,6 @@ function positionBanners() {
         sapo.vy = 0;
         sapo.jumping = false;
       }
-      function drawMuteButton() {
-  ctx.save();
-  ctx.scale(scaleX, scaleY);
-  
-  const btnX = (canvas.width / scaleX) - 60;
-  const btnY = 10;
-  const btnW = 50;
-  const btnH = 50;
-  
-  // Fundo do botão (semi-transparente verde)
-  ctx.fillStyle = 'rgba(27, 94, 32, 0.8)';
-  ctx.fillRect(btnX, btnY, btnW, btnH);
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 3 / scaleX;
-  ctx.strokeRect(btnX, btnY, btnW, btnH);
-  
-  // Ícone (simples: ondas de som ou X)
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 24px Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  if (musicaMutada) {
-    // Mute: X no alto-falante
-    ctx.fillText('🔇', btnX + btnW/2, btnY + btnH/2);
-  } else {
-    // Volume: ondas
-    ctx.fillText('🔊', btnX + btnW/2, btnY + btnH/2);
-  }
-  
-  ctx.restore();
-}
       drawSapo();
       atualizarPoeira();
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
@@ -654,49 +595,12 @@ function positionBanners() {
         faseAtual++;
         intervaloObstaculo = Math.max(60, intervaloObstaculo - 10);
       }
-      // Lógica piscar
-if (piscandoVermelho && tempoPiscar > 0) {
-  tempoPiscar--;
-} else {
-  piscandoVermelho = false;
-}
-
-// Desenhar botão mute
-drawMuteButton();
-   // Score + Vidas (topo esquerdo)
-ctx.save();
-ctx.scale(scaleX, scaleY);
-ctx.font = isMobile ? "bold 16px Arial" : "bold 18px Arial";
-ctx.fillStyle = "#fff";
-ctx.strokeStyle = "#000";
-ctx.lineWidth = 2 / scaleX;
-ctx.textAlign = 'left';
-
-// Score
-ctx.strokeText("Score: " + pontuacao, 10, 20);
-ctx.fillText("Score: " + pontuacao, 10, 20);
-
-// Vidas (3 corações ao lado)
-for (let i = 0; i < 3; i++) {
-  const cor = i < vidas 
-    ? (piscandoVermelho && tempoPiscar > 0 ? "#ff4444" : "#ff1744") 
-    : "#666";
-  ctx.fillStyle = cor;
-  
-  const coracaoX = 120 + i * 30;  // Ao lado do score
-  const coracaoY = 18;
-  
-  // Desenho simples de coração
-  ctx.beginPath();
-  ctx.moveTo(coracaoX, coracaoY + 5);
-  ctx.bezierCurveTo(coracaoX, coracaoY, coracaoX - 5, coracaoY, coracaoX - 5, coracaoY + 5);
-  ctx.bezierCurveTo(coracaoX - 5, coracaoY + 7, coracaoX - 3, coracaoY + 10, coracaoX, coracaoY + 8);
-  ctx.bezierCurveTo(coracaoX + 3, coracaoY + 10, coracaoX + 5, coracaoY + 7, coracaoX + 5, coracaoY + 5);
-  ctx.bezierCurveTo(coracaoX + 5, coracaoY, coracaoX, coracaoY, coracaoX, coracaoY + 5);
-  ctx.fill();
-}
-
-ctx.restore();
+      ctx.save();
+      ctx.font = isMobile ? "bold 16px Arial" : "bold 18px Arial";
+      ctx.fillStyle = "#000";
+      ctx.fillText("Score: " + pontuacao, 10, isMobile ? 20 : 25);
+      ctx.restore();
+    }
 
     function verificarColisao() {
       for (let obs of obstaculos) {
@@ -724,26 +628,6 @@ ctx.restore();
           handleJump();
         }
       });
-      // Detecta clique/toque no botão mute (sup. direito)
-  function handleCanvasClick(e) {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX || e.touches[0].clientX) - rect.left;
-  const y = (e.clientY || e.touches[0].clientY) - rect.top;
-  
-  // Área do botão: sup. direito (50x50px ajustado por scale)
-  const btnX = canvas.width - 60 * scaleX;
-  const btnY = 10 * scaleY;
-  const btnW = 50 * scaleX;
-  const btnH = 50 * scaleY;
-  
-  if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
-    toggleMute();
-  }
-}
-
-canvas.addEventListener('click', handleCanvasClick);
-canvas.addEventListener('touchstart', handleCanvasClick);
         // Tenta tocar a música (depois do unlock, deve funcionar na primeira vez)
   backgroundMusic.play()
     .then(() => {
@@ -761,39 +645,21 @@ canvas.addEventListener('touchstart', handleCanvasClick);
         return;
       }
       atualizarJogo();
-     if (verificarColisao()) {
-  if (piscandoVermelho) return;  // Invencível durante piscar
-
-  vidas--;
-  piscandoVermelho = true;
-  tempoPiscar = 60;  // ~1s piscando
-
-  // Reset sapo no chão
-  sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-  sapo.vy = 0;
-  sapo.jumping = false;
-
-  failSound.currentTime = 0;
-  failSound.play().catch(e => {});
-
-  if (vidas <= 0) {
-    // Game over real
-    gameStarted = false;
-    cancelAnimationFrame(animationFrameId);
-    backgroundMusic.pause();
-    backgroundMusic.currentTime = 0;
-    finalScore.textContent = pontuacao;
-    document.getElementById('high-score').textContent = highScore;
-    if (pontuacao > highScore) {
-      highScore = pontuacao;
-      localStorage.setItem('sapinhoHighScore', highScore);
-    }
-    gameOverBanner.classList.add('active');
-    positionBanners();
-    return;
-  }
-  return;  // Continua com vida -
-}
+      if (verificarColisao()) {
+        gameStarted = false;
+        cancelAnimationFrame(animationFrameId);
+        failSound.play().catch(e => console.log("Erro ao tocar som:", e));
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+        finalScore.textContent = pontuacao;
+        gameOverBanner.classList.add('active');
+        positionBanners();
+        document.removeEventListener('keydown', handleKeyJump);
+        document.removeEventListener('keydown', startGameHandler);
+        document.removeEventListener('touchstart', startGameHandler);
+        canvas.removeEventListener('touchstart', handleJump);
+        return;
+      }
       if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
         cancelAnimationFrame(animationFrameId);
@@ -977,5 +843,3 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
-
-
