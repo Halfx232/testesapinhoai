@@ -571,7 +571,25 @@
     }
 
  function drawMuteButton() {
-  // ... seu código do botão
+ 
+function drawMuteButton() {
+  // seu código do botão...
+}
+
+function handleMuteClick(e) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+  const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+  const btnX = canvas.width - 60 * scaleX;
+  const btnY = 10 * scaleY;
+  const btnW = 50 * scaleX;
+  const btnH = 50 * scaleY;
+
+  if (clickX >= btnX && clickX <= btnX + btnW && clickY >= btnY && clickY <= btnY + btnH) {
+    toggleMute();
+  }
 }
 
 function handleMuteClick(e) {
@@ -658,12 +676,7 @@ function handleMuteClick(e) {
       });
 
       // Detecta clique/toque no botão mute (sup. direito)
-  function handleMuteClick(e) {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-  const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-
+  
   // Área do botão ajustada pela escala
   const btnX = canvas.width - 60 * scaleX;
   const btnY = 10 * scaleY;
@@ -811,35 +824,33 @@ window.addEventListener('load', () => {
   setInterval(atualizarRelogioLocal, 1000); // atualiza segundos a cada 1s
 });
 
-    window.addEventListener('load', () => {
-      handleOrientation();
-      resizeCanvas();
-      window.addEventListener('resize', debounce(() => {
-        resizeCanvas();
-              // Adiciona listeners do mute UMA ÚNICA VEZ (só aqui!)
-      canvas.addEventListener('click', handleMuteClick);
-      canvas.addEventListener('touchstart', handleMuteClick);
+window.addEventListener('load', () => {
+  handleOrientation();
+  resizeCanvas();
+  window.addEventListener('resize', debounce(() => {
+    resizeCanvas();
+    positionBanners();
+  }, 100));
 
-      // Remove duplicata anterior (se ainda tiver)
-      // document.body.addEventListener('touchstart', unlockAudio, { once: true });  ← NÃO cole isso de novo, já tem antes
+  resetGame();
 
-      // Botões de restart e play-again (mova pra cá!)
-      restartButton.addEventListener("click", resetGame);
-      playAgainButton.addEventListener("click", resetGame);
-        positionBanners();
-      }, 100));
-      resetGame();
+  fetchWeather();
+  tentarHorarioOficialUmaVez();           // corrigido: usa a função certa
+  atualizarRelogioLocal();
+  setInterval(fetchWeather, 10 * 60 * 1000);
+  setInterval(atualizarRelogioLocal, 1000);  // corrigido
 
-      fetchWeather();
-      atualizarHora();
+  document.body.addEventListener('touchstart', unlockAudio, { once: true });
 
-      setInterval(fetchWeather, 10 * 60 * 1000);
-      setInterval(atualizarHora, 60 * 1000);
+  // Adiciona listeners do mute UMA ÚNICA VEZ (aqui!)
+  canvas.addEventListener('click', handleMuteClick);
+  canvas.addEventListener('touchstart', handleMuteClick);
 
-        document.body.addEventListener('touchstart', unlockAudio, { once: true });
-       // Adiciona listeners do mute UMA ÚNICA VEZ
-      canvas.addEventListener('click', handleMuteClick);
-      canvas.addEventListener('touchstart', handleMuteClick);
+  positionBanners();
+
+  restartButton.addEventListener("click", resetGame);
+  playAgainButton.addEventListener("click", resetGame);
+});
 
   </script>
     <!-- BLOQUEIO HORIZONTAL – VERSÃO FINAL E IMORTAL (FUNCIONA EM TODOS OS CELULARES) -->
@@ -898,6 +909,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
