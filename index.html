@@ -681,9 +681,6 @@
   }
 }
 
-// Adiciona os listeners (uma única vez)
-canvas.addEventListener('click', handleMuteClick);
-canvas.addEventListener('touchstart', handleMuteClick);
         // Tenta tocar a música (depois do unlock, deve funcionar na primeira vez)
   backgroundMusic.play()
     .then(() => {
@@ -836,9 +833,12 @@ window.addEventListener('load', () => {
       setInterval(atualizarHora, 60 * 1000);
 
         document.body.addEventListener('touchstart', unlockAudio, { once: true });
-        
+       // Adiciona listeners do mute UMA ÚNICA VEZ
+      canvas.addEventListener('click', handleMuteClick);
+      canvas.addEventListener('touchstart', handleMuteClick);
+
+      document.body.addEventListener('touchstart', unlockAudio, { once: true });
       positionBanners();
-    });
 
     restartButton.addEventListener("click", resetGame);
     playAgainButton.addEventListener("click", resetGame);
@@ -899,4 +899,5 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
