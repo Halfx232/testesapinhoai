@@ -570,12 +570,6 @@
       poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0.05);
     }
 
- function drawMuteButton() {
- 
-function drawMuteButton() {
-  // seu código do botão...
-}
-
 function handleMuteClick(e) {
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
@@ -592,21 +586,6 @@ function handleMuteClick(e) {
   }
 }
 
-function handleMuteClick(e) {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-  const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-
-  const btnX = canvas.width - 60 * scaleX;
-  const btnY = 10 * scaleY;
-  const btnW = 50 * scaleX;
-  const btnH = 50 * scaleY;
-
-  if (clickX >= btnX && clickX <= btnX + btnW && clickY >= btnY && clickY <= btnY + btnH) {
-    toggleMute();
-  }
-}
     function atualizarJogo() {
       if (!gameStarted) return;
       const fase = getFaseAtual();
@@ -647,6 +626,21 @@ function handleMuteClick(e) {
       ctx.fillText("Score: " + pontuacao, 10, isMobile ? 20 : 25);
       ctx.restore();
     }
+  function handleMuteClick(e) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+  const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+  const btnX = canvas.width - 60 * scaleX;
+  const btnY = 10 * scaleY;
+  const btnW = 50 * scaleX;
+  const btnH = 50 * scaleY;
+
+  if (clickX >= btnX && clickX <= btnX + btnW && clickY >= btnY && clickY <= btnY + btnH) {
+    toggleMute();
+  }
+}
 
     function verificarColisao() {
       for (let obs of obstaculos) {
@@ -909,6 +903,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
