@@ -468,12 +468,18 @@ function positionBanners() {
   }
 };
 
-    function resetGame() {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
+      function resetGame() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
       ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
-      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
+      sapo = { 
+        x: BASE_WIDTH * 0.2 * scaleX, 
+        y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
+        width: 40 * scaleX, 
+        height: ALTURA_SAPO * scaleY, 
+        vy: 0, 
+        jumping: false 
+      };
       obstaculos = [];
       poeira = [];
       tempo = 0;
@@ -488,38 +494,17 @@ function positionBanners() {
       backgroundMusic.pause();
       backgroundMusic.currentTime = 0;
 
-      document.removeEventListener('keydown', handleKeyJump);
-      document.removeEventListener('keydown', startGameHandler);
-      document.removeEventListener('touchstart', startGameHandler);
-      canvas.removeEventListener('touchstart', handleJump);
-
-        // Remover listeners antigos (start E jogo)
+      // Limpar todos os listeners possíveis
       startBanner.removeEventListener('click', startGameHandler);
       startBanner.removeEventListener('touchstart', startGameHandler);
       document.removeEventListener('keydown', startGameHandler);
       document.removeEventListener('keydown', handleKeyJump);
       canvas.removeEventListener('touchstart', canvasTouchHandler);
 
-        // Reset vars
-      sapo = { x: BASE_WIDTH * 0.2 * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, width: 40 * scaleX, height: ALTURA_SAPO * scaleY, vy: 0, jumping: false };
-         obstaculos = [];
-         poeira = [];
-         tempo = 0;
-         intervaloObstaculo = 120;
-         faseAtual = 0;
-         pontuacao = 0;
-         gameOverBanner.classList.remove('active');
-         victoryBanner.classList.remove('active');
-         startBanner.classList.add('active');
-         gameStarted = false;
-
-    backgroundMusic.pause();
-    backgroundMusic.currentTime = 0;
-
-      // Adicionar APENAS listeners de START
-    startBanner.addEventListener('click', startGameHandler);
-    startBanner.addEventListener('touchstart', startGameHandler);
-    document.addEventListener('keydown', startGameHandler);
+      // Adicionar só os de início
+      startBanner.addEventListener('click', startGameHandler);
+      startBanner.addEventListener('touchstart', startGameHandler);
+      document.addEventListener('keydown', startGameHandler);
 
       resizeCanvas();
       positionBanners();
@@ -677,24 +662,25 @@ function positionBanners() {
       return false;
     }
 
-    function iniciarJogo() {
+        function iniciarJogo() {
       if (gameStarted) return;
-       gameStarted = true;
-     // Adicionar listeners de JOGO
-document.addEventListener('keydown', handleKeyJump);
-canvas.addEventListener('touchstart', canvasTouchHandler);
+      gameStarted = true;
+      // Adicionar listeners de JOGO
+      document.addEventListener('keydown', handleKeyJump);
+      canvas.addEventListener('touchstart', canvasTouchHandler);
 
-// Música com mute
-backgroundMusic.volume = isMuted ? 0 : 0.5;
-backgroundMusic.play()
-  .then(() => {
-    console.log("Música de fundo iniciada com sucesso!");
-  })
-  .catch(e => {
-    console.error("Falha ao tocar música:", e);
-  });
+      // Música com mute
+      backgroundMusic.volume = isMuted ? 0 : 0.5;
+      backgroundMusic.play()
+        .then(() => {
+          console.log("Música de fundo iniciada com sucesso!");
+        })
+        .catch(e => {
+          console.error("Falha ao tocar música:", e);
+        });
 
-animationFrameId = requestAnimationFrame(gameLoop);
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }   // ← fechou aqui corretamente
 
     function gameLoop() {
       if (!gameStarted) {
@@ -710,10 +696,10 @@ animationFrameId = requestAnimationFrame(gameLoop);
         finalScore.textContent = pontuacao;
         gameOverBanner.classList.add('active');
         positionBanners();
-       // Remover APENAS listeners de JOGO
+        // Remover APENAS listeners de JOGO
         document.removeEventListener('keydown', handleKeyJump);
         canvas.removeEventListener('touchstart', canvasTouchHandler);
-        
+        return;  // ← bom ter return aqui
       }
       if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
@@ -726,40 +712,9 @@ animationFrameId = requestAnimationFrame(gameLoop);
         positionBanners();
         document.removeEventListener('keydown', handleKeyJump);
         canvas.removeEventListener('touchstart', canvasTouchHandler);
-        
         return;
       }
       animationFrameId = requestAnimationFrame(gameLoop);
-    }
-
-    const weatherElement = document.getElementById("weather");
-    const clockElement = document.getElementById("clock");
-
-    let lastWeatherData = null;
-    let lastWeatherFetch = 0;
-    const CACHE_DURATION = 10 * 60 * 1000;
-
-    async function fetchWeather() {
-      try {
-        const now = Date.now();
-        if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
-          weatherElement.textContent = lastWeatherData;
-          return;
-        }
-        const API_KEY = "b8a0cd03c689322da2746720be31d534";
-        const city = "São Paulo";
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=pt_br&units=metric`, { mode: 'cors' });
-        if (!response.ok) throw new Error(`Falha na API OpenWeatherMap: ${response.status}`);
-        const data = await response.json();
-        const temp = Math.round(data.main.temp);
-        const description = data.weather[0].description;
-        lastWeatherData = ` ${city}: ${temp}°C, ${description}`;
-        lastWeatherFetch = now;
-        weatherElement.textContent = lastWeatherData;
-      } catch (error) {
-        console.error("Erro ao buscar previsão do tempo:", error);
-        weatherElement.textContent = "Clima indisponível";
-      }
     }
 
  // ────────────────────────────────────────────────
@@ -897,4 +852,5 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
