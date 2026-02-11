@@ -626,23 +626,8 @@ function handleMuteClick(e) {
       ctx.fillText("Score: " + pontuacao, 10, isMobile ? 20 : 25);
       ctx.restore();
     }
-  function handleMuteClick(e) {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const clickX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-  const clickY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-
-  const btnX = canvas.width - 60 * scaleX;
-  const btnY = 10 * scaleY;
-  const btnW = 50 * scaleX;
-  const btnH = 50 * scaleY;
-
-  if (clickX >= btnX && clickX <= btnX + btnW && clickY >= btnY && clickY <= btnY + btnH) {
-    toggleMute();
-  }
-}
-
-    function verificarColisao() {
+  
+      function verificarColisao() {
       for (let obs of obstaculos) {
         const sapoHitboxY = sapo.y + 7 * scaleY;
         if (
@@ -668,19 +653,6 @@ function handleMuteClick(e) {
           handleJump();
         }
       });
-
-      // Detecta clique/toque no botão mute (sup. direito)
-  
-  // Área do botão ajustada pela escala
-  const btnX = canvas.width - 60 * scaleX;
-  const btnY = 10 * scaleY;
-  const btnW = 50 * scaleX;
-  const btnH = 50 * scaleY;
-
-  if (clickX >= btnX && clickX <= btnX + btnW && clickY >= btnY && clickY <= btnY + btnH) {
-    toggleMute();
-  }
-}
 
         // Tenta tocar a música (depois do unlock, deve funcionar na primeira vez)
   backgroundMusic.play()
@@ -903,6 +875,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
