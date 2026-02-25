@@ -737,10 +737,10 @@ function formatarDataHoraBR(date) {
 
 function atualizarRelogioLocal() {
   const agora = new Date();
-  clockElement.textContent = formatarDataHoraBR(agora);
+  document.getElementById('clock').textContent = formatarDataHoraBR(agora);
 }
 
-// Tenta pegar horário oficial de São Paulo uma única vez no carregamento
+// Tenta sincronizar com horário oficial de SP UMA ÚNICA VEZ no carregamento
 async function tentarHorarioOficialUmaVez() {
   try {
     const res = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", {
@@ -752,48 +752,29 @@ async function tentarHorarioOficialUmaVez() {
     const data = await res.json();
     const dataHoraApi = new Date(data.datetime);
     
-    // Ajusta o relógio local pro horário oficial (só na inicialização)
-    const diferencaMs = dataHoraApi - new Date();
-    if (Math.abs(diferencaMs) > 30000) { // mais de 30s de diferença → ajusta
-      console.warn("Ajustando relógio local com diferença de", Math.round(diferencaMs/1000), "segundos");
-      // Aqui poderíamos compensar, mas na prática o relógio do SO costuma estar ok
-    }
+    // Mostra o valor da API imediatamente (pra ficar "oficial" no primeiro segundo)
+    document.getElementById('clock').textContent = formatarDataHoraBR(dataHoraApi);
     
-    clockElement.textContent = formatarDataHoraBR(dataHoraApi);
+    console.log("Relógio sincronizado com WorldTimeAPI");
   } catch (err) {
-    console.warn("Não conseguiu pegar horário oficial → usando relógio local", err);
+    console.warn("API de hora falhou → usando relógio local do navegador", err);
     atualizarRelogioLocal();
   }
 }
 
-// Inicia o relógio
 window.addEventListener('load', () => {
-  // ... seu código existente ...
+  window.cookieconsent.initialise({
+    "palette": { "popup": { "background": "#1b5e20" }, "button": { "background": "#00ff00" } },
+    "content": { "message": "Este site usa cookies para melhorar sua experiência.", "dismiss": "Entendido", "link": "Saiba mais", "href": "/politicas.html" }
+  });
 
-  tentarHorarioOficialUmaVez();           // tenta sincronizar uma vez
-  atualizarRelogioLocal();                // mostra imediatamente
-  setInterval(atualizarRelogioLocal, 1000); // atualiza segundos a cada 1s
+  fetchWeather();                    // mantém o clima (atualiza a cada 10min)
+  tentarHorarioOficialUmaVez();      // tenta API uma vez
+  atualizarRelogioLocal();           // mostra imediatamente (fallback)
+  setInterval(atualizarRelogioLocal, 1000); // segundos tic-tac a cada 1s
+
+  setInterval(fetchWeather, 10 * 60 * 1000);
 });
-
-    window.addEventListener('load', () => {
-      handleOrientation();
-      resizeCanvas();
-      window.addEventListener('resize', debounce(() => {
-        resizeCanvas();
-        positionBanners();
-      }, 100));
-      resetGame();
-
-      fetchWeather();
-      atualizarHora();
-
-      setInterval(fetchWeather, 10 * 60 * 1000);
-      setInterval(atualizarHora, 60 * 1000);
-
-        document.body.addEventListener('touchstart', unlockAudio, { once: true });
-        
-      positionBanners();
-    });
 
     restartButton.addEventListener("click", resetGame);
     playAgainButton.addEventListener("click", resetGame);
@@ -854,6 +835,3 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
-
-
-
