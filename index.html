@@ -235,6 +235,8 @@
     const backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
+    
+    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';  // Ou use 'https://api.allorigins.win/raw?url=' 
 
     let isMuted = false;
 const muteBtn = document.getElementById('mute-btn');
@@ -765,7 +767,40 @@ async function tentarHorarioOficialUmaVez() {
     atualizarRelogioLocal();
   }
 }
+let lastWeatherData = null;
+let lastWeatherFetch = 0;
+const CACHE_DURATION = 10 * 60 * 1000;  // 10 minutos
 
+async function fetchWeather() {
+  try {
+    const now = Date.now();
+    if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
+      document.getElementById('weather').textContent = lastWeatherData;
+      return;
+    }
+
+    const API_KEY = "b8a0cd03c689322da2746720be31d534";
+    const city = "São Paulo";
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=pt_br&units=metric`;
+
+    // Usando proxy CORS para contornar bloqueio (essencial!)
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/' + url;
+
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error(`API status: ${response.status}`);
+
+    const data = await response.json();
+    const temp = Math.round(data.main.temp);
+    const description = data.weather[0].description;
+    lastWeatherData = ` ${city}: ${temp}°C, ${description}`;
+    lastWeatherFetch = now;
+
+    document.getElementById('weather').textContent = lastWeatherData;
+  } catch (error) {
+    console.error("Erro ao buscar previsão do tempo:", error);
+    document.getElementById('weather').textContent = "Clima indisponível";
+  }
+}
 // Inicia o relógio
 window.addEventListener('load', () => {
   // ... seu código existente ...
@@ -854,4 +889,3 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
-
