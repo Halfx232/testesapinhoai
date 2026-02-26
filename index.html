@@ -236,11 +236,6 @@
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
 
-    const weatherElement = document.getElementById('weather');
-    const clockElement = document.getElementById('clock');
-    
-    const CORS_PROXY = 'https://api.allorigins.win/raw?url='; 
-
     let isMuted = false;
 const muteBtn = document.getElementById('mute-btn');
 if (muteBtn) {
@@ -748,22 +743,14 @@ function atualizarRelogioLocal() {
 // Tenta pegar horário oficial de São Paulo uma única vez no carregamento
 async function tentarHorarioOficialUmaVez() {
   try {
-    const url = "https://worldtimeapi.org/api/timezone/America/Sao_Paulo";
-    const proxyUrl = CORS_PROXY + encodeURIComponent(url);
-
-    const res = await fetch(proxyUrl);
+    const res = await fetch("https://worldtimeapi.org/api/timezone/America/Sao_Paulo", {
+      mode: 'cors',
+      cache: 'no-store'
+    });
     if (!res.ok) throw new Error("status " + res.status);
-
+    
     const data = await res.json();
     const dataHoraApi = new Date(data.datetime);
-
-    clockElement.textContent = formatarDataHoraBR(dataHoraApi);
-    console.log("Relógio sincronizado via proxy");
-  } catch (err) {
-    console.warn("API de hora falhou → usando relógio local", err);
-    atualizarRelogioLocal();
-  }
-}
     
     // Ajusta o relógio local pro horário oficial (só na inicialização)
     const diferencaMs = dataHoraApi - new Date();
@@ -778,41 +765,7 @@ async function tentarHorarioOficialUmaVez() {
     atualizarRelogioLocal();
   }
 }
-let lastWeatherData = null;
-let lastWeatherFetch = 0;
-const CACHE_DURATION = 10 * 60 * 1000;  // 10 minutos
 
-async function fetchWeather() {
-  try {
-    const now = Date.now();
-    if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
-      document.getElementById('weather').textContent = lastWeatherData;
-      return;
-    }
-
-    const API_KEY = "b8a0cd03c689322da2746720be31d534";  // Se der 401, crie nova key grátis em openweathermap.org
-    const city = "São Paulo";
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=pt_br&units=metric`;
-
-    const proxyUrl = CORS_PROXY + encodeURIComponent(url);  // encodeURIComponent é importante aqui!
-
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error(`API status: ${response.status}`);
-
-    const data = await response.json();
-    if (data.cod !== 200) throw new Error(data.message || 'Erro na API');
-
-    const temp = Math.round(data.main.temp);
-    const description = data.weather[0].description;
-    lastWeatherData = ` ${city}: ${temp}°C, ${description}`;
-    lastWeatherFetch = now;
-
-    document.getElementById('weather').textContent = lastWeatherData;
-  } catch (error) {
-    console.error("Erro ao buscar previsão do tempo:", error);
-    document.getElementById('weather').textContent = "Clima indisponível 😅";
-  }
-}
 // Inicia o relógio
 window.addEventListener('load', () => {
   // ... seu código existente ...
@@ -901,4 +854,3 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
-
