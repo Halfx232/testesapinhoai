@@ -718,7 +718,37 @@ function positionBanners() {
       }
       animationFrameId = requestAnimationFrame(gameLoop);
     }
+    //Parte da previsão do tempo
+  
+    const weatherElement = document.getElementById("weather");
+    const clockElement = document.getElementById("clock");
 
+    let lastWeatherData = null;
+    let lastWeatherFetch = 0;
+    const CACHE_DURATION = 10 * 60 * 1000;
+
+    async function fetchWeather() {
+      try {
+        const now = Date.now();
+        if (lastWeatherData && now - lastWeatherFetch < CACHE_DURATION) {
+          weatherElement.textContent = lastWeatherData;
+          return;
+        }
+        const API_KEY = "b8a0cd03c689322da2746720be31d534";
+        const city = "São Paulo";
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=pt_br&units=metric`, { mode: 'cors' });
+        if (!response.ok) throw new Error(`Falha na API OpenWeatherMap: ${response.status}`);
+        const data = await response.json();
+        const temp = Math.round(data.main.temp);
+        const description = data.weather[0].description;
+        lastWeatherData = ` ${city}: ${temp}°C, ${description}`;
+        lastWeatherFetch = now;
+        weatherElement.textContent = lastWeatherData;
+      } catch (error) {
+        console.error("Erro ao buscar previsão do tempo:", error);
+        weatherElement.textContent = "Clima indisponível";
+      }
+    }
   // ────────────────────────────────────────────────
 //          RELÓGIO COM SEGUNDOS EM TEMPO REAL
 // ────────────────────────────────────────────────
