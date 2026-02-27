@@ -543,6 +543,7 @@ function positionBanners() {
     }
     if (Math.floor(agora / 120) % 2 === 1) return; // não desenha em frames "apagados"
   }
+    }
       ctx.save();
       ctx.scale(scaleX, scaleY);
       const { x, y, jumping } = sapo;
@@ -972,4 +973,5 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
