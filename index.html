@@ -281,6 +281,15 @@ if (muteBtn) {
     let gameStarted = false;
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [];
+    let vidas = 3;
+    let piscandoSapo = false;
+    let tempoPiscadaSapo = 0;
+    const DURACAO_PISCADA_SAPO = 600;     // 0.6 segundos
+    let ultimoTogglePiscada = 0;
+    let intervaloPiscada = 80;            // troca visibilidade a cada 80ms
+
+    let flashCoracoes = 0;                // timer do flash vermelho nos corações
+    const DURACAO_FLASH_CORACOES = 1200;  // 1.2 segundos de flash
     let animationFrameId;
 
     function unlockAudio() {
@@ -472,6 +481,10 @@ function positionBanners() {
 
       function resetGame() {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
+       
+        vidas = 3;                           // ← novo
+        piscandoSapo = false;
+        flashCoracoes = 0;
 
       ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
       sapo = { 
@@ -523,6 +536,13 @@ function positionBanners() {
     }
 
     function drawSapo() {
+ if (piscandoSapo) {
+  const agora = performance.now();
+    if ((agora - ultimoTogglePiscada) > intervaloPiscada) {
+      ultimoTogglePiscada = agora;
+    }
+    if (Math.floor(agora / 120) % 2 === 1) return; // não desenha em frames "apagados"
+  }
       ctx.save();
       ctx.scale(scaleX, scaleY);
       const { x, y, jumping } = sapo;
@@ -576,6 +596,45 @@ function positionBanners() {
       ctx.restore();
     }
 
+      function drawCoracoes() {
+      const tamanhoCoracao = 22 * Math.min(scaleX, scaleY); // escala um pouco com tela
+      const espacamento = tamanhoCoracao * 1.4;
+      const xInicio = 160 * scaleX;   // logo depois do score (ajuste se precisar)
+      const yPos = 22 * scaleY;
+
+  // Desenha os 3 corações
+   for (let i = 0; i < 3; i++) {
+    const x = xInicio + i * espacamento;
+
+    let cor = (i < vidas) ? "#e53935" : "#555";  // vermelho vivo ou cinza
+
+  // Flash temporário quando perde vida
+ if (flashCoracoes > 0) {
+  const pulso = Math.sin(flashCoracoes / 80) * 0.4 + 0.6;
+    cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
+    }
+
+    ctx.save();
+    ctx.scale(scaleX, scaleY);
+    ctx.fillStyle = cor;
+    ctx.beginPath();
+    // Forma de coração simples (melhor que emoji no canvas)
+    const cx = (x / scaleX) + tamanhoCoracao / 2;
+    const cy = (yPos / scaleY) + tamanhoCoracao / 4;
+    ctx.moveTo(cx, cy + tamanhoCoracao * 0.3);
+    ctx.bezierCurveTo(cx, cy, cx - tamanhoCoracao*0.5, cy, cx - tamanhoCoracao*0.5, cy + tamanhoCoracao*0.4);
+    ctx.bezierCurveTo(cx - tamanhoCoracao*0.5, cy + tamanhoCoracao*0.8, cx, cy + tamanhoCoracao*0.9, cx, cy + tamanhoCoracao*0.6);
+    ctx.bezierCurveTo(cx, cy + tamanhoCoracao*0.9, cx + tamanhoCoracao*0.5, cy + tamanhoCoracao*0.8, cx + tamanhoCoracao*0.5, cy + tamanhoCoracao*0.4);
+    ctx.bezierCurveTo(cx + tamanhoCoracao*0.5, cy, cx, cy, cx, cy + tamanhoCoracao * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    // Bordinha branca pra destacar
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1.2 / Math.max(scaleX, scaleY);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
     function drawObstaculo(obs) {
       ctx.save();
       ctx.scale(scaleX, scaleY);
@@ -638,8 +697,24 @@ function positionBanners() {
       ctx.fillStyle = "#000";
       ctx.font = "bold 18px Arial";
       ctx.fillText("Score: " + pontuacao, 10, 25);
-      }
+     
+      // Atualiza os timers de piscada (diminui o tempo restante)
+     if (piscandoSapo) {
+        tempoPiscadaSapo -= 1000 / 60;  // assume ~60 frames por segundo
+    if (tempoPiscadaSapo <= 0) {
+        piscandoSapo = false;         // termina a piscada do sapo
+  }
+}
 
+    if (flashCoracoes > 0) {
+       flashCoracoes -= 1000 / 60;     // diminui o flash dos corações
+}
+
+// Desenha os 3 corações ao lado do score
+  drawCoracoes();
+}
+// O score já está sendo desenhado logo acima, então não mexe nisso
+      
     function verificarColisao() {
       for (let obs of obstaculos) {
         const sapoHitboxY = sapo.y + 7 * scaleY;
@@ -680,19 +755,41 @@ function positionBanners() {
         return;
       }
       atualizarJogo();
-      if (verificarColisao()) {
-        gameStarted = false;
-        cancelAnimationFrame(animationFrameId);
-        failSound.play().catch(e => console.log("Erro ao tocar som:", e));
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-        finalScore.textContent = pontuacao;
-        gameOverBanner.classList.add('active');
-        positionBanners();
-        // Remover APENAS listeners de JOGO
-        document.removeEventListener('keydown', handleKeyJump);
-        canvas.removeEventListener('touchstart', canvasTouchHandler);
-        return;  // ← bom ter return aqui
+     if (verificarColisao()) {
+     if (vidas > 1) {
+    // Perde vida, pisca, volta pro chão, continua
+      vidas--;
+      piscandoSapo = true;
+      tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+      ultimoTogglePiscada = performance.now();
+      flashCoracoes = DURACAO_FLASH_CORACOES;
+
+    failSound.currentTime = 0;
+    failSound.play().catch(() => {});
+
+    // Volta pro chão
+    sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+    sapo.vy = 0;
+    sapo.jumping = false;
+
+    // NÃO para o jogo → continua rodando
+  } else {
+    // Última vida → game over de verdade
+    vidas = 0;
+    gameStarted = false;
+    cancelAnimationFrame(animationFrameId);
+    failSound.play().catch(e => console.log("Erro som:", e));
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+    finalScore.textContent = pontuacao;
+    gameOverBanner.classList.add('active');
+    positionBanners();
+
+    document.removeEventListener('keydown', handleKeyJump);
+    canvas.removeEventListener('touchstart', canvasTouchHandler);
+    return;
+  }
+}
       }
       if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
@@ -875,3 +972,4 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
