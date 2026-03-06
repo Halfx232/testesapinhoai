@@ -536,14 +536,20 @@ function positionBanners() {
     }
 
     function drawSapo() {
- if (piscandoSapo) {
-  const agora = performance.now();
-    if ((agora - ultimoTogglePiscada) > intervaloPiscada) {
+  // Controle de piscar (invencibilidade visual)
+  if (piscandoSapo) {
+    const agora = performance.now();
+    
+    // Troca visibilidade a cada ~120ms (mais perceptível)
+    if (agora - ultimoTogglePiscada > 120) {
       ultimoTogglePiscada = agora;
     }
-    if (Math.floor(agora / 120) % 2 === 1) return; // não desenha em frames "apagados"
-  }
+    
+    // Se for frame "apagado" → não desenha o sapo nessa frame
+    if (Math.floor(agora / 120) % 2 === 1) {
+      return;
     }
+  }
       ctx.save();
       ctx.scale(scaleX, scaleY);
       const { x, y, jumping } = sapo;
@@ -973,5 +979,6 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
