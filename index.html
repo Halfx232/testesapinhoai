@@ -281,6 +281,13 @@ if (muteBtn) {
     let gameStarted = false;
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
     let poeira = [];
+    let vidas = 3;
+    let piscandoSapo = false;
+    let tempoPiscadaSapo = 0;
+    const DURACAO_PISCADA_SAPO = 1200;     // 1.2 segundos de piscar/invencibilidade
+    let ultimoTogglePiscada = 0;
+    let flashCoracoes = 0;
+    const DURACAO_FLASH_CORACOES = 1200;   // mesmo tempo do flash
     let animationFrameId;
 
     function unlockAudio() {
@@ -471,7 +478,15 @@ function positionBanners() {
 };
 
       function resetGame() {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+  vidas = 3;                           // ← reset vidas
+  piscandoSapo = false;
+  flashCoracoes = 0;
+  tempoPiscadaSapo = 0;
+
+  // ... resto do resetGame igual ...
+}
 
       ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
       sapo = { 
@@ -522,68 +537,103 @@ function positionBanners() {
       ctx.fillRect(0, ALTURA_CHAO - ESPESSURA_CHAO, canvas.width, ESPESSURA_CHAO);
     }
 
-    function drawSapo() {
-      ctx.save();
-      ctx.scale(scaleX, scaleY);
-      const { x, y, jumping } = sapo;
-      ctx.fillStyle = "green";
-      ctx.beginPath();
-      ctx.ellipse(x / scaleX + 25, y / scaleY + 18, 22, 15, 0, 0, Math.PI * 2);
-      ctx.fill();
+       function drawSapo() {
+    if (piscandoSapo) {
+    const agora = performance.now();
+    if (agora - ultimoTogglePiscada > 120) {  // troca a cada 120ms
+      ultimoTogglePiscada = agora;
+    }
+    if (Math.floor(agora / 120) % 2 === 1) {
+    return;  // não desenha nessa frame → efeito piscar
+    }
+  }
 
-      ctx.strokeStyle = "green";
-      ctx.lineWidth = 3 / scaleX;
-      const armAngle = jumping ? Math.PI/2 : Math.PI/4;
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 18, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 5 - Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
-      ctx.stroke();
+  ctx.save();
+  ctx.scale(scaleX, scaleY);
+  const { x, y, jumping } = sapo;
+  ctx.fillStyle = "green";
+  ctx.beginPath();
+  ctx.ellipse(x / scaleX + 25, y / scaleY + 18, 22, 15, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 32, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
-      ctx.lineTo(x / scaleX + 45 + Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
-      ctx.stroke();
+  ctx.strokeStyle = "green";
+  ctx.lineWidth = 3 / scaleX;
+  const armAngle = jumping ? Math.PI/2 : Math.PI/4;
+  ctx.beginPath();
+  ctx.moveTo(x / scaleX + 18, y / scaleY + 20);
+  ctx.lineTo(x / scaleX + 5, y / scaleY + 20);
+  ctx.lineTo(x / scaleX + 5 - Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
+  ctx.stroke();
 
-      ctx.fillStyle = "yellow";
-      ctx.beginPath();
-      ctx.arc(x / scaleX + 15, y / scaleY + 8, 6, 0, Math.PI * 2);
-      ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2);
-      ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x / scaleX + 32, y / scaleY + 20);
+  ctx.lineTo(x / scaleX + 45, y / scaleY + 20);
+  ctx.lineTo(x / scaleX + 45 + Math.cos(armAngle) * 18, y / scaleY + 20 + Math.sin(armAngle) * 18);
+  ctx.stroke();
 
-      ctx.fillStyle = "black";
-      ctx.beginPath();
-      ctx.arc(x / scaleX + 15, y / scaleY + 8, 2, 0, Math.PI * 2);
-      ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2);
-      ctx.fill();
+  ctx.fillStyle = "yellow";
+  ctx.beginPath();
+  ctx.arc(x / scaleX + 15, y / scaleY + 8, 6, 0, Math.PI * 2);
+  ctx.arc(x / scaleX + 35, y / scaleY + 8, 6, 0, Math.PI * 2);
+  ctx.fill();
 
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 2 / scaleX;
-      ctx.beginPath();
-      ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3);
-      ctx.stroke();
+  ctx.fillStyle = "black";
+  ctx.beginPath();
+  ctx.arc(x / scaleX + 15, y / scaleY + 8, 2, 0, Math.PI * 2);
+  ctx.arc(x / scaleX + 35, y / scaleY + 8, 2, 0, Math.PI * 2);
+  ctx.fill();
 
-      ctx.strokeStyle = "green";
-      ctx.lineWidth = 4 / scaleX;
-      const legAngle = jumping ? Math.PI/2 : Math.PI/4;
-      ctx.beginPath();
-      ctx.moveTo(x / scaleX + 15, y / scaleY + 30);
-      ctx.lineTo(x / scaleX + 5 - Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
-      ctx.moveTo(x / scaleX + 35, y / scaleY + 30);
-      ctx.lineTo(x / scaleX + 45 + Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
-      ctx.stroke();
-      ctx.restore();
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2 / scaleX;
+  ctx.beginPath();
+  ctx.arc(x / scaleX + 25, y / scaleY + 18, 8, 0.3, Math.PI - 0.3);
+  ctx.stroke();
+
+  ctx.strokeStyle = "green";
+  ctx.lineWidth = 4 / scaleX;
+  const legAngle = jumping ? Math.PI/2 : Math.PI/4;
+  ctx.beginPath();
+  ctx.moveTo(x / scaleX + 15, y / scaleY + 30);
+  ctx.lineTo(x / scaleX + 5 - Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
+  ctx.moveTo(x / scaleX + 35, y / scaleY + 30);
+  ctx.lineTo(x / scaleX + 45 + Math.cos(legAngle) * 12, y / scaleY + 30 + Math.sin(legAngle) * 25);
+  ctx.stroke();
+  ctx.restore();
+}
+     function drawCoracoes() {
+  const tamanho = 22 * Math.min(scaleX, scaleY);
+  const espacamento = tamanho * 1.4;
+  const xInicio = 160 * scaleX;  // ajuste se o score estiver sobrepondo
+  const yPos = 22 * scaleY;
+
+  for (let i = 0; i < 3; i++) {
+    const x = xInicio + i * espacamento;
+    let cor = (i < vidas) ? "#e53935" : "#555";
+
+    if (flashCoracoes > 0) {
+      const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
+      cor = `rgb(255, ${Math.floor(100 + 155 * pulso)}, ${Math.floor(100 + 155 * pulso)})`;
     }
 
-    function drawObstaculo(obs) {
-      ctx.save();
-      ctx.scale(scaleX, scaleY);
-      ctx.fillStyle = obs.color;
-      ctx.fillRect(obs.x / scaleX, obs.y / scaleY, obs.width / scaleX, obs.height / scaleY);
-      ctx.restore();
-    }
-
+    ctx.save();
+    ctx.scale(scaleX, scaleY);
+    ctx.fillStyle = cor;
+    ctx.beginPath();
+    const cx = (x / scaleX) + tamanho / 2;
+    const cy = (yPos / scaleY) + tamanho / 4;
+    ctx.moveTo(cx, cy + tamanho * 0.3);
+    ctx.bezierCurveTo(cx, cy, cx - tamanho*0.5, cy, cx - tamanho*0.5, cy + tamanho*0.4);
+    ctx.bezierCurveTo(cx - tamanho*0.5, cy + tamanho*0.8, cx, cy + tamanho*0.9, cx, cy + tamanho*0.6);
+    ctx.bezierCurveTo(cx, cy + tamanho*0.9, cx + tamanho*0.5, cy + tamanho*0.8, cx + tamanho*0.5, cy + tamanho*0.4);
+    ctx.bezierCurveTo(cx + tamanho*0.5, cy, cx, cy, cx, cy + tamanho * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1.2 / Math.max(scaleX, scaleY);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
     function atualizarPoeira() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
@@ -638,7 +688,19 @@ function positionBanners() {
       ctx.fillStyle = "#000";
       ctx.font = "bold 18px Arial";
       ctx.fillText("Score: " + pontuacao, 10, 25);
-      }
+
+       // ← Adicione aqui os timers e corações
+  if (piscandoSapo) {
+    tempoPiscadaSapo -= 16.7;  // ~60fps
+    if (tempoPiscadaSapo <= 0) piscandoSapo = false;
+  }
+
+  if (flashCoracoes > 0) {
+    flashCoracoes -= 16.7;
+  }
+
+  drawCoracoes();  // ← desenha os 3 corações
+}
 
     function verificarColisao() {
       for (let obs of obstaculos) {
@@ -680,20 +742,39 @@ function positionBanners() {
         return;
       }
       atualizarJogo();
+     
       if (verificarColisao()) {
-        gameStarted = false;
-        cancelAnimationFrame(animationFrameId);
-        failSound.play().catch(e => console.log("Erro ao tocar som:", e));
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-        finalScore.textContent = pontuacao;
-        gameOverBanner.classList.add('active');
-        positionBanners();
-        // Remover APENAS listeners de JOGO
-        document.removeEventListener('keydown', handleKeyJump);
-        canvas.removeEventListener('touchstart', canvasTouchHandler);
-        return;  // ← bom ter return aqui
-      }
+  if (vidas > 1) {
+    vidas--;
+    piscandoSapo = true;
+    tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+    ultimoTogglePiscada = performance.now();
+    flashCoracoes = DURACAO_FLASH_CORACOES;
+
+    failSound.currentTime = 0;
+    failSound.play().catch(() => {});
+
+    // Volta pro chão + continua jogando
+    sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+    sapo.vy = 0;
+    sapo.jumping = false;
+  } else {
+    // Game over de verdade
+    vidas = 0;
+    gameStarted = false;
+    cancelAnimationFrame(animationFrameId);
+    failSound.play().catch(e => console.log("Erro som:", e));
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+    finalScore.textContent = pontuacao;
+    gameOverBanner.classList.add('active');
+    positionBanners();
+
+    document.removeEventListener('keydown', handleKeyJump);
+    canvas.removeEventListener('touchstart', canvasTouchHandler);
+    return;
+  }
+}
       if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
         cancelAnimationFrame(animationFrameId);
@@ -875,3 +956,4 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
