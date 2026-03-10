@@ -477,55 +477,50 @@ function positionBanners() {
   }
 };
 
-      function resetGame() {
+function resetGame() {
   if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-  vidas = 3;                           // ← reset vidas
+  vidas = 3;
   piscandoSapo = false;
   flashCoracoes = 0;
   tempoPiscadaSapo = 0;
 
-  // ... resto do resetGame igual ...
+  ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
+  sapo = { 
+    x: BASE_WIDTH * 0.2 * scaleX, 
+    y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
+    width: 40 * scaleX, 
+    height: ALTURA_SAPO * scaleY, 
+    vy: 0, 
+    jumping: false 
+  };
+  obstaculos = [];
+  poeira = [];
+  tempo = 0;
+  intervaloObstaculo = 120;
+  faseAtual = 0;
+  pontuacao = 0;
+  gameOverBanner.classList.remove('active');
+  victoryBanner.classList.remove('active');
+  startBanner.classList.add('active');
+  gameStarted = false;
+
+  backgroundMusic.pause();
+  backgroundMusic.currentTime = 0;
+
+  startBanner.removeEventListener('click', startGameHandler);
+  startBanner.removeEventListener('touchstart', startGameHandler);
+  document.removeEventListener('keydown', startGameHandler);
+  document.removeEventListener('keydown', handleKeyJump);
+  canvas.removeEventListener('touchstart', canvasTouchHandler);
+
+  startBanner.addEventListener('click', startGameHandler);
+  startBanner.addEventListener('touchstart', startGameHandler);
+  document.addEventListener('keydown', startGameHandler);
+
+  resizeCanvas();
+  positionBanners();
 }
-
-      ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
-      sapo = { 
-        x: BASE_WIDTH * 0.2 * scaleX, 
-        y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
-        width: 40 * scaleX, 
-        height: ALTURA_SAPO * scaleY, 
-        vy: 0, 
-        jumping: false 
-      };
-      obstaculos = [];
-      poeira = [];
-      tempo = 0;
-      intervaloObstaculo = 120;
-      faseAtual = 0;
-      pontuacao = 0;
-      gameOverBanner.classList.remove('active');
-      victoryBanner.classList.remove('active');
-      startBanner.classList.add('active');
-      gameStarted = false;
-
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
-
-      // Limpar todos os listeners possíveis
-      startBanner.removeEventListener('click', startGameHandler);
-      startBanner.removeEventListener('touchstart', startGameHandler);
-      document.removeEventListener('keydown', startGameHandler);
-      document.removeEventListener('keydown', handleKeyJump);
-      canvas.removeEventListener('touchstart', canvasTouchHandler);
-
-      // Adicionar só os de início
-      startBanner.addEventListener('click', startGameHandler);
-      startBanner.addEventListener('touchstart', startGameHandler);
-      document.addEventListener('keydown', startGameHandler);
-
-      resizeCanvas();
-      positionBanners();
-    }
 
     function getFaseAtual() {
       return fases[faseAtual % fases.length];
@@ -887,10 +882,10 @@ window.addEventListener('load', () => {
       resetGame();
 
       fetchWeather();
-      atualizarHora();
+      //atualizarHora();
 
       setInterval(fetchWeather, 10 * 60 * 1000);
-      setInterval(atualizarHora, 60 * 1000);
+      //setInterval(atualizarHora, 60 * 1000);
 
         document.body.addEventListener('touchstart', unlockAudio, { once: true });
         
@@ -956,4 +951,5 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
