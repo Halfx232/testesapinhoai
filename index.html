@@ -749,8 +749,8 @@ function resetGame() {
       }
       atualizarJogo();
      
-      if (verificarColisao()) {
-  if (vidas > 1) {
+    if (verificarColisao()) {
+      if (vidas > 1) {
     vidas--;
     piscandoSapo = true;
     tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
@@ -760,12 +760,17 @@ function resetGame() {
     failSound.currentTime = 0;
     failSound.play().catch(() => {});
 
-    // Volta pro chão + continua jogando
+    // Reset completo do estado de pulo (essencial para não travar no ar)
     sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
     sapo.vy = 0;
     sapo.jumping = false;
+
+    // Evita colisão imediata novamente (remove obstáculos muito próximos)
+    obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
+
+    console.log("Perdeu vida → reset pulo | vidas restantes:", vidas);
   } else {
-    // Game over de verdade
+    // Game over
     vidas = 0;
     gameStarted = false;
     cancelAnimationFrame(animationFrameId);
@@ -962,6 +967,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
