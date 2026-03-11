@@ -661,6 +661,17 @@ function resetGame() {
         sapo.vy = 0;
         sapo.jumping = false;
       }
+      try {
+      ctx.fillStyle = "rgba(0,0,0,0.6)";
+      ctx.fillRect(5, 5, 140, 35);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 18px Arial";
+      ctx.fillText("Score: " + pontuacao, 15, 28);
+
+      drawCoracoes();
+    } catch (err) {
+      console.error("Erro ao desenhar UI:", err);
+  }
       drawSapo();
       atualizarPoeira();
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
@@ -951,5 +962,6 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
