@@ -688,7 +688,7 @@ function resetGame() {
       }
       for (let i = 0; i < obstaculos.length; i++) {
         let obs = obstaculos[i];
-        obs.x -= 5 * scaleX;
+        obs.x -= 3.5 * scaleX;
         drawObstaculo(obs);
       }
       obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
@@ -985,6 +985,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
