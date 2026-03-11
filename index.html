@@ -656,6 +656,13 @@ function resetGame() {
       drawChao();
       sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
+      // Segurança: se sapo sair muito pra baixo ou pra cima, força reset
+      if (sapo.y < -100 * scaleY || sapo.y > canvas.height + 100 * scaleY) {
+      sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+      sapo.vy = 0;
+      sapo.jumping = false;
+      console.log("Sapo saiu da tela → reset forçado");
+   }
       if (sapo.y > ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY) {
         sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
         sapo.vy = 0;
@@ -967,6 +974,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
