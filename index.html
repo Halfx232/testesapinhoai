@@ -714,7 +714,14 @@ function resetGame() {
 
   drawCoracoes();  // ← desenha os 3 corações
 }
-
+    
+    function drawObstaculo(obs) {
+      ctx.save();
+      ctx.scale(scaleX, scaleY);
+      ctx.fillStyle = obs.color;
+      ctx.fillRect(obs.x / scaleX, obs.y / scaleY, obs.width / scaleX, obs.height / scaleY);
+      ctx.restore();
+  }
     function verificarColisao() {
       for (let obs of obstaculos) {
         const sapoHitboxY = sapo.y + 7 * scaleY;
@@ -978,6 +985,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
