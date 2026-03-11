@@ -750,7 +750,11 @@ function resetGame() {
       animationFrameId = requestAnimationFrame(gameLoop);
     }   // ← fechou aqui corretamente
 
-    function gameLoop() {
+      function gameLoop() {
+    console.log("Frame:", tempo, "| sapo y:", sapo.y.toFixed(1), "vy:", sapo.vy.toFixed(1), "jumping:", sapo.jumping, "obstaculos:", obstaculos.length);
+     if (!gameStarted) return;
+    atualizarJogo();
+     // resto do código...
       if (!gameStarted) {
         return;
       }
@@ -974,6 +978,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
