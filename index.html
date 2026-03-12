@@ -269,6 +269,7 @@ if (muteBtn) {
 
     const PONTUACAO_VITORIA = 5000;
     const GRAVIDADE = 0.8;
+    const GAME_SPEED = 0.6;  // 0.6 = ~60% da velocidade atual, ajusta aqui até ficar bom (teste 0.5 a 0.8)
     const BASE_WIDTH = 800;
     const BASE_HEIGHT = 400;
     let ALTURA_CHAO = isMobile ? 150 : 300;
@@ -431,7 +432,7 @@ function positionBanners() {
 
     function handleJump() {
       if (gameStarted && !sapo.jumping) {
-        sapo.vy = -14 * scaleY;
+        sapo.vy = -14 * scaleY * GAME_SPEED;
         sapo.jumping = true;
         jumpSound.currentTime = 0;
         jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
@@ -654,7 +655,7 @@ function resetGame() {
       canvas.style.background = coresFase[fase].fundo;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawChao();
-      sapo.vy += GRAVIDADE * scaleY;
+      sapo.vy += GRAVIDADE * scaleY * GAME_SPEED;
       sapo.y += sapo.vy;
       // Segurança: se sapo sair muito pra baixo ou pra cima, força reset
       if (sapo.y < -100 * scaleY || sapo.y > canvas.height + 100 * scaleY) {
@@ -688,7 +689,7 @@ function resetGame() {
       }
       for (let i = 0; i < obstaculos.length; i++) {
         let obs = obstaculos[i];
-        obs.x -= 3.5 * scaleX;
+        obs.x -= 3.5 * scaleX * GAME_SPEED;
         drawObstaculo(obs);
       }
       obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
@@ -701,6 +702,10 @@ function resetGame() {
       ctx.fillStyle = "#000";
       ctx.font = "bold 18px Arial";
       ctx.fillText("Score: " + pontuacao, 10, 25);
+
+      // ← ADICIONE AQUI AS DUAS LINHAS
+      tempo += GAME_SPEED;
+      pontuacao += GAME_SPEED;
 
        // ← Adicione aqui os timers e corações
   if (piscandoSapo) {
@@ -983,6 +988,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
