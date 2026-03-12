@@ -703,10 +703,6 @@ function resetGame() {
       ctx.font = "bold 18px Arial";
       ctx.fillText("Score: " + pontuacao, 10, 25);
 
-      // ← ADICIONE AQUI AS DUAS LINHAS
-      tempo += GAME_SPEED;
-      pontuacao += GAME_SPEED;
-
        // ← Adicione aqui os timers e corações
   if (piscandoSapo) {
     tempoPiscadaSapo -= 16.7;  // ~60fps
@@ -988,6 +984,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
