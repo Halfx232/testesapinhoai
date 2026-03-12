@@ -767,28 +767,26 @@ function resetGame() {
       }
       atualizarJogo();
      
-    if (verificarColisao()) {
-      if (vidas > 1) {
-    vidas--;
-    piscandoSapo = true;
-    tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
-    ultimoTogglePiscada = performance.now();
-    flashCoracoes = DURACAO_FLASH_CORACOES;
+       if (verificarColisao()) {
+  // Ativa flash e piscar SEMPRE que bater (incluindo a última vida)
+  flashCoracoes = DURACAO_FLASH_CORACOES;
+  piscandoSapo = true;
+  tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+  ultimoTogglePiscada = performance.now();
 
+  if (vidas > 1) {
+    vidas--;
     failSound.currentTime = 0;
     failSound.play().catch(() => {});
 
-    // Reset completo do estado de pulo (essencial para não travar no ar)
     sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
     sapo.vy = 0;
     sapo.jumping = false;
 
-    // Evita colisão imediata novamente (remove obstáculos muito próximos)
     obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
-
-    console.log("Perdeu vida → reset pulo | vidas restantes:", vidas);
+    console.log("Perdeu vida → reset | vidas:", vidas);
   } else {
-    // Game over
+    // Última vida → game over COM flash já ativado acima
     vidas = 0;
     gameStarted = false;
     cancelAnimationFrame(animationFrameId);
@@ -985,6 +983,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
