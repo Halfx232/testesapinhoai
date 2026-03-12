@@ -768,8 +768,8 @@ function resetGame() {
       }
       atualizarJogo();
      
-       if (verificarColisao()) {
-  // Ativa flash e piscar SEMPRE que bater (incluindo a última vida)
+   if (verificarColisao()) {
+  // Ativa flash e piscar SEMPRE que bater
   flashCoracoes = DURACAO_FLASH_CORACOES;
   piscandoSapo = true;
   tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
@@ -786,29 +786,27 @@ function resetGame() {
 
     obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
     console.log("Perdeu vida → reset | vidas:", vidas);
-    } else {
-  // Última vida → game over COM flash
-  vidas = 0;
-  flashCoracoes = DURACAO_FLASH_CORACOES;  // garante que pisca
-  piscandoSapo = true;
-  tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+  } else {
+    // Última vida → game over COM flash e atraso
+    vidas = 0;
 
-  // Atraso de 1.2s pra ver o flash antes do game over
-  setTimeout(() => {
-    gameStarted = false;
-    cancelAnimationFrame(animationFrameId);
-    failSound.play().catch(() => {});
-    backgroundMusic.pause();
-    backgroundMusic.currentTime = 0;
-    finalScore.textContent = pontuacao;
-    gameOverBanner.classList.add('active');
-    positionBanners();
+    // Atraso de 1.2s pra ver o flash antes do game over
+    setTimeout(() => {
+      gameStarted = false;
+      cancelAnimationFrame(animationFrameId);
+      failSound.play().catch(() => {});
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      finalScore.textContent = pontuacao;
+      gameOverBanner.classList.add('active');
+      positionBanners();
 
-    document.removeEventListener('keydown', handleKeyJump);
-    canvas.removeEventListener('touchstart', canvasTouchHandler);
-  }, 1200);  // ← 1200ms = 1.2 segundos de delay
+      document.removeEventListener('keydown', handleKeyJump);
+      canvas.removeEventListener('touchstart', canvasTouchHandler);
+    }, 1200);
 
-  return;
+    return;
+  }
 }
       if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
@@ -991,6 +989,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
