@@ -786,12 +786,18 @@ function resetGame() {
 
     obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
     console.log("Perdeu vida → reset | vidas:", vidas);
-  } else {
-    // Última vida → game over COM flash já ativado acima
-    vidas = 0;
+    } else {
+  // Última vida → game over COM flash
+  vidas = 0;
+  flashCoracoes = DURACAO_FLASH_CORACOES;  // garante que pisca
+  piscandoSapo = true;
+  tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+
+  // Atraso de 1.2s pra ver o flash antes do game over
+  setTimeout(() => {
     gameStarted = false;
     cancelAnimationFrame(animationFrameId);
-    failSound.play().catch(e => console.log("Erro som:", e));
+    failSound.play().catch(() => {});
     backgroundMusic.pause();
     backgroundMusic.currentTime = 0;
     finalScore.textContent = pontuacao;
@@ -800,8 +806,9 @@ function resetGame() {
 
     document.removeEventListener('keydown', handleKeyJump);
     canvas.removeEventListener('touchstart', canvasTouchHandler);
-    return;
-  }
+  }, 1200);  // ← 1200ms = 1.2 segundos de delay
+
+  return;
 }
       if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
@@ -984,6 +991,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
