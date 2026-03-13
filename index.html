@@ -432,7 +432,7 @@ function positionBanners() {
 
     function handleJump() {
       if (gameStarted && !sapo.jumping) {
-        sapo.vy = -14 * scaleY * GAME_SPEED;
+        sapo.vy = -22 * scaleY; 
         sapo.jumping = true;
         jumpSound.currentTime = 0;
         jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
@@ -989,6 +989,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
