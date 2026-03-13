@@ -498,7 +498,7 @@ function resetGame() {
   obstaculos = [];
   poeira = [];
   tempo = 0;
-  intervaloObstaculo = 120;
+  intervaloObstaculo = 200;
   faseAtual = 0;
   pontuacao = 0;
   gameOverBanner.classList.remove('active');
@@ -697,7 +697,7 @@ function resetGame() {
       pontuacao++;
       if (tempo % 1500 === 0) {
         faseAtual++;
-        intervaloObstaculo = Math.max(60, intervaloObstaculo - 10);
+        intervaloObstaculo = Math.max(80, intervaloObstaculo - 5);
       }
       ctx.fillStyle = "#000";
       ctx.font = "bold 18px Arial";
@@ -768,9 +768,9 @@ function resetGame() {
       }
       atualizarJogo();
      
-  if (verificarColisao()) {
-  // Ativa flash e piscar SEMPRE que bater (incluindo a última vida)
-  flashCoracoes = DURACAO_FLASH_CORACOES * 1.3;  // um pouco mais longo pra ver bem
+   if (verificarColisao()) {
+  // Ativa flash e piscar SEMPRE que bater
+  flashCoracoes = DURACAO_FLASH_CORACOES * 1.6;   // mais tempo pra ver o piscar na última vida
   piscandoSapo = true;
   tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
   ultimoTogglePiscada = performance.now();
@@ -787,10 +787,10 @@ function resetGame() {
     obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
     console.log("Perdeu vida → reset | vidas:", vidas);
   } else {
-    // Última vida → game over COM flash visível + delay
+    // Última vida → game over COM flash visível
     vidas = 0;
 
-    // Atraso de 1.5 segundos pra ver o piscar do último coração antes do game over
+    // Delay maior pra ver o piscar do último coração
     setTimeout(() => {
       gameStarted = false;
       cancelAnimationFrame(animationFrameId);
@@ -803,7 +803,7 @@ function resetGame() {
 
       document.removeEventListener('keydown', handleKeyJump);
       canvas.removeEventListener('touchstart', canvasTouchHandler);
-    }, 1500);  // ← 1500ms = 1.5 segundos (dá tempo de ver o flash)
+    }, 1800);   // 1.8 segundos de flash
 
     return;
   }
@@ -989,6 +989,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
