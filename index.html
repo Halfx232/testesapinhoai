@@ -768,8 +768,8 @@ function resetGame() {
       }
       atualizarJogo();
      
-   if (verificarColisao()) {
-  // Ativa flash e piscar SEMPRE que bater
+  if (verificarColisao()) {
+  // Ativa flash e piscar SEMPRE (incluindo a última vida)
   flashCoracoes = DURACAO_FLASH_CORACOES;
   piscandoSapo = true;
   tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
@@ -787,10 +787,10 @@ function resetGame() {
     obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
     console.log("Perdeu vida → reset | vidas:", vidas);
   } else {
-    // Última vida → game over COM flash e atraso
+    // Última vida → game over COM flash visível
     vidas = 0;
 
-    // Atraso de 1.2s pra ver o flash antes do game over
+    // Atraso de 1.2s pra ver o piscar do último coração
     setTimeout(() => {
       gameStarted = false;
       cancelAnimationFrame(animationFrameId);
@@ -989,6 +989,7 @@ window.addEventListener('load', () => {
   </script>
 </body>
 </html>
+
 
 
 
