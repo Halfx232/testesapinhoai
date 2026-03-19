@@ -602,22 +602,18 @@ function resetGame() {
   const xInicio = 160 * scaleX;
   const yPos = 22 * scaleY;
 
-  // Invertemos: desenhamos da ESQUERDA para DIREITA
-  // Coração 0 (esquerda) = primeira vida perdida
-  // Coração 2 (direita) = última vida perdida
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
     let cor = "#444"; // cinza padrão (morto)
 
-    // Se ainda vivo (i < vidas), base é vermelho
     if (i < vidas) {
-      cor = "#e53935";
+      cor = "#e53935"; // vermelho se vivo
     }
 
-    // Flash: só pisca nos corações que ainda estão vivos
+    // Flash só nos corações vivos
     if (flashCoracoes > 0 && i < vidas) {
       const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
-      cor = `rgb(255, ${Math.floor(100 + 155 * pulso)}, ${Math.floor(100 + 155 * pulso)})`;
+      cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
     }
 
     ctx.save();
@@ -802,27 +798,25 @@ function resetGame() {
 
     obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
     console.log("Perdeu vida → reset | vidas:", vidas);
-  } else {
-    // Última vida → game over
-    vidas = 0;  // força todos corações cinza após o flash
+   } else {
+  vidas = 0;
 
-    // Delay maior pra ver o piscar e a mudança de cor
-    setTimeout(() => {
-      gameStarted = false;
-      cancelAnimationFrame(animationFrameId);
-      failSound.play().catch(() => {});
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
-      finalScore.textContent = pontuacao;
-      gameOverBanner.classList.add('active');
-      positionBanners();
+  setTimeout(() => {
+    flashCoracoes = 0;  // força fim do flash → coração fica cinza imediatamente
+    gameStarted = false;
+    cancelAnimationFrame(animationFrameId);
+    failSound.play().catch(() => {});
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+    finalScore.textContent = pontuacao;
+    gameOverBanner.classList.add('active');
+    positionBanners();
 
-      document.removeEventListener('keydown', handleKeyJump);
-      canvas.removeEventListener('touchstart', canvasTouchHandler);
-    }, 1800);  // 1.8 segundos de flash + tempo pra ver o cinza
+    document.removeEventListener('keydown', handleKeyJump);
+    canvas.removeEventListener('touchstart', canvasTouchHandler);
+  }, 1800);
 
-    return;
-  }
+  return;
 }
       if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
