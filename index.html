@@ -773,9 +773,16 @@ function resetGame() {
       }
       atualizarJogo();
      
-   if (verificarColisao()) {
-  // Ativa flash e piscar SEMPRE que bater
-  flashCoracoes = DURACAO_FLASH_CORACOES * 1.6;   // mais tempo pra ver o piscar na última vida
+      if (verificarColisao()) {
+  // Flash normal nas primeiras vidas
+  let flashDuration = DURACAO_FLASH_CORACOES;
+
+  // Na última vida: flash mais longo pra ver bem a mudança
+  if (vidas === 1) {
+    flashDuration = DURACAO_FLASH_CORACOES * 1.8;  // ~2.16 segundos de piscada forte
+  }
+
+  flashCoracoes = flashDuration;
   piscandoSapo = true;
   tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
   ultimoTogglePiscada = performance.now();
@@ -792,10 +799,10 @@ function resetGame() {
     obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
     console.log("Perdeu vida → reset | vidas:", vidas);
   } else {
-    // Última vida → game over COM flash visível
-    vidas = 0;
+    // Última vida → game over
+    vidas = 0;  // força todos corações cinza após o flash
 
-    // Delay maior pra ver o piscar do último coração
+    // Delay maior pra ver o piscar e a mudança de cor
     setTimeout(() => {
       gameStarted = false;
       cancelAnimationFrame(animationFrameId);
@@ -808,7 +815,7 @@ function resetGame() {
 
       document.removeEventListener('keydown', handleKeyJump);
       canvas.removeEventListener('touchstart', canvasTouchHandler);
-    }, 1800);   // 1.8 segundos de flash
+    }, 1800);  // 1.8 segundos de flash + tempo pra ver o cinza
 
     return;
   }
