@@ -605,15 +605,15 @@ function resetGame() {
   // Desenhamos da ESQUERDA para DIREITA (coração esquerdo = primeira vida)
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
-    let cor = (i < vidas) ? "#e53935" : "#444";   // cinza mais visível
+    let cor;
 
+    // Se flash ativo, pisca forte (mesmo na última vida)
     if (flashCoracoes > 0) {
       const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
-      if (i < vidas) {
-        cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
-      } else {
-        cor = `rgb(${Math.floor(68 + 40 * pulso)}, ${Math.floor(68 + 40 * pulso)}, ${Math.floor(68 + 40 * pulso)})`;
-      }
+      cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
+    } else {
+      // Sem flash: vermelho se vivo, cinza se morto
+      cor = (i < vidas) ? "#e53935" : "#444";
     }
 
     ctx.save();
