@@ -604,14 +604,12 @@ function resetGame() {
 
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
-    let cor = "#444"; // cinza padrão (morto)
 
-    if (i < vidas) {
-      cor = "#e53935"; // vermelho se vivo
-    }
+    // Aqui a mágica: inverte a contagem para direita → esquerda
+    let cor = (i >= 3 - vidas) ? "#e53935" : "#444";
 
-    // Flash só nos corações vivos
-    if (flashCoracoes > 0 && i < vidas) {
+    // Flash só nos corações ainda vivos (os da direita)
+    if (flashCoracoes > 0 && i >= 3 - vidas) {
       const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
       cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
     }
