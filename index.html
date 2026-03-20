@@ -775,49 +775,57 @@ function drawCoracoes() {
       atualizarJogo();
      
 if (verificarColisao()) {
- // Flash (mantém o efeito legal)
- let flashDuration = DURACAO_FLASH_CORACOES;
- if (vidas === 1) flashDuration = DURACAO_FLASH_CORACOES * 1.8;
- flashCoracoes = flashDuration;
- piscandoSapo = true;
- tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
- ultimoTogglePiscada = performance.now();
+  // Flash sempre acontece
+  let flashDuration = DURACAO_FLASH_CORACOES;
+  if (vidas === 1) {
+    flashDuration = DURACAO_FLASH_CORACOES * 2.5;  // ~3s de flash na última pra ver bem
+  }
+  flashCoracoes = flashDuration;
+  piscandoSapo = true;
+  tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+  ultimoTogglePiscada = performance.now();
 
- // === MUDANÇA IMPORTANTÍSSIMA ===
- vidas--; // decrementa ANTES de tudo
+  // Decrementa vidas ANTES de decidir o que fazer
+  vidas--;
 
- failSound.currentTime = 0;
- failSound.play().catch(() => {});
+  failSound.currentTime = 0;
+  failSound.play().catch(() => {});
 
- if (vidas > 0) {
- // Perdeu vida normal (1ª ou 2ª)
- sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
- sapo.vy = 0;
- sapo.jumping = false;
- obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
- console.log("Perdeu vida → vidas restantes:", vidas);
- } else {
- // === 3ª vida perdida ===
- // Força o desenho dos corações com vidas=0 AGORA (antes do delay)
- drawCoracoes(); // ← isso faz o coração da esquerda ficar cinza imediatamente
+  if (vidas > 0) {
+    // Vidas normais (1ª e 2ª perda)
+    sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+    sapo.vy = 0;
+    sapo.jumping = false;
+    obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
+    console.log("Perdeu vida → reset | vidas restantes:", vidas);
+  } else {
+    // Última vida perdida (aqui está o fix)
+    console.log("Última vida perdida! vidas agora =", vidas);
 
- setTimeout(() => {
- flashCoracoes = 0;
- gameStarted = false;
- cancelAnimationFrame(animationFrameId);
- failSound.play().catch(() => {});
- backgroundMusic.pause();
- backgroundMusic.currentTime = 0;
- finalScore.textContent = pontuacao;
- gameOverBanner.classList.add('active');
- positionBanners();
+    // Força redraw imediato dos corações com vidas=0 (faz o último ficar cinza AGORA)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawChao();
+    drawSapo();
+    atualizarPoeira();
+    drawCoracoes();  // ← ESSA LINHA É O QUE FALTAVA
 
- document.removeEventListener('keydown', handleKeyJump);
- canvas.removeEventListener('touchstart', canvasTouchHandler);
- }, 1800);
- }
+    // Mantém o delay bonito de ~2s antes do banner
+    setTimeout(() => {
+      flashCoracoes = 0;
+      gameStarted = false;
+      cancelAnimationFrame(animationFrameId);
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      finalScore.textContent = pontuacao;
+      gameOverBanner.classList.add('active');
+      positionBanners();
 
- return;
+      document.removeEventListener('keydown', handleKeyJump);
+      canvas.removeEventListener('touchstart', canvasTouchHandler);
+    }, 1800);
+  }
+
+  return;  // sai do frame atual
 }
   }
       if (pontuacao >= PONTUACAO_VITORIA) {
