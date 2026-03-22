@@ -764,85 +764,79 @@ function drawCoracoes() {
       animationFrameId = requestAnimationFrame(gameLoop);
     }   // ← fechou aqui corretamente
 
-      function gameLoop() {
-    console.log("Frame:", tempo, "| sapo y:", sapo.y.toFixed(1), "vy:", sapo.vy.toFixed(1), "jumping:", sapo.jumping, "obstaculos:", obstaculos.length);
-     if (!gameStarted) return;
-    atualizarJogo();
-     // resto do código...
-      if (!gameStarted) {
-        return;
-      }
-      atualizarJogo();
-     
-if (verificarColisao()) {
-  // Flash sempre acontece
-  let flashDuration = DURACAO_FLASH_CORACOES;
-  if (vidas === 1) {
-    flashDuration = DURACAO_FLASH_CORACOES * 2.5;  // ~3s de flash na última pra ver bem
-  }
-  flashCoracoes = flashDuration;
-  piscandoSapo = true;
-  tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
-  ultimoTogglePiscada = performance.now();
+     function gameLoop() {
+  if (!gameStarted) return;
 
-  // Decrementa vidas ANTES de decidir o que fazer
-  vidas--;
+  console.log("Frame:", tempo, "| sapo y:", sapo.y.toFixed(1), "vy:", sapo.vy.toFixed(1), "jumping:", sapo.jumping, "obstaculos:", obstaculos.length);
 
-  failSound.currentTime = 0;
-  failSound.play().catch(() => {});
+  atualizarJogo();  // ← mantenha só ESSA chamada aqui
 
-  if (vidas > 0) {
-    // Vidas normais (1ª e 2ª perda)
-    sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-    sapo.vy = 0;
-    sapo.jumping = false;
-    obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
-    console.log("Perdeu vida → reset | vidas restantes:", vidas);
-  } else {
-    // Última vida perdida (aqui está o fix)
-    console.log("Última vida perdida! vidas agora =", vidas);
+  if (verificarColisao()) {
+    // Flash sempre acontece
+    let flashDuration = DURACAO_FLASH_CORACOES;
+    if (vidas === 1) {
+      flashDuration = DURACAO_FLASH_CORACOES * 2.5;  // mais tempo na última
+    }
+    flashCoracoes = flashDuration;
+    piscandoSapo = true;
+    tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+    ultimoTogglePiscada = performance.now();
 
-    // Força redraw imediato dos corações com vidas=0 (faz o último ficar cinza AGORA)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawChao();
-    drawSapo();
-    atualizarPoeira();
-    drawCoracoes();  // ← ESSA LINHA É O QUE FALTAVA
+    vidas--;
 
-    // Mantém o delay bonito de ~2s antes do banner
-    setTimeout(() => {
-      flashCoracoes = 0;
-      gameStarted = false;
-      cancelAnimationFrame(animationFrameId);
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
-      finalScore.textContent = pontuacao;
-      gameOverBanner.classList.add('active');
-      positionBanners();
+    failSound.currentTime = 0;
+    failSound.play().catch(() => {});
 
-      document.removeEventListener('keydown', handleKeyJump);
-      canvas.removeEventListener('touchstart', canvasTouchHandler);
-    }, 1800);
-  }
+    if (vidas > 0) {
+      sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+      sapo.vy = 0;
+      sapo.jumping = false;
+      obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
+      console.log("Perdeu vida → reset | vidas restantes:", vidas);
+    } else {
+      console.log("Última vida perdida! vidas agora =", vidas);
 
-  return;  // sai do frame atual
-}
-  
-      if (pontuacao >= PONTUACAO_VITORIA) {
+      // Força redraw imediato para ver o último coração cinza
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawChao();
+      drawSapo();
+      atualizarPoeira();
+      drawCoracoes();
+
+      setTimeout(() => {
+        flashCoracoes = 0;
         gameStarted = false;
         cancelAnimationFrame(animationFrameId);
-        victorySound.play().catch(e => console.log("Erro ao tocar som:", e));
         backgroundMusic.pause();
         backgroundMusic.currentTime = 0;
-        victoryScore.textContent = pontuacao;
-        victoryBanner.classList.add('active');
+        finalScore.textContent = pontuacao;
+        gameOverBanner.classList.add('active');
         positionBanners();
+
         document.removeEventListener('keydown', handleKeyJump);
         canvas.removeEventListener('touchstart', canvasTouchHandler);
-        return;
-      }
-      animationFrameId = requestAnimationFrame(gameLoop);
+      }, 1800);
     }
+
+    return;  // sai deste frame
+  }
+
+  if (pontuacao >= PONTUACAO_VITORIA) {
+    gameStarted = false;
+    cancelAnimationFrame(animationFrameId);
+    victorySound.play().catch(e => console.log("Erro ao tocar som:", e));
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+    victoryScore.textContent = pontuacao;
+    victoryBanner.classList.add('active');
+    positionBanners();
+    document.removeEventListener('keydown', handleKeyJump);
+    canvas.removeEventListener('touchstart', canvasTouchHandler);
+    return;
+  }
+
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
     //Parte da previsão do tempo
   
     const weatherElement = document.getElementById("weather");
