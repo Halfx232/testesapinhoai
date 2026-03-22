@@ -764,23 +764,25 @@ function drawCoracoes() {
       animationFrameId = requestAnimationFrame(gameLoop);
     }   // ← fechou aqui corretamente
 
-     function gameLoop() {
+    function gameLoop() {
   if (!gameStarted) return;
 
+  // Log (pode remover depois de testar)
   console.log("Frame:", tempo, "| sapo y:", sapo.y.toFixed(1), "vy:", sapo.vy.toFixed(1), "jumping:", sapo.jumping, "obstaculos:", obstaculos.length);
 
-  atualizarJogo();  // ← mantenha só ESSA chamada aqui
+  atualizarJogo();  // ÚNICA chamada aqui — não duplique!
 
-  if (verificarColisao()) {
-    // Flash sempre acontece
-    let flashDuration = DURACAO_FLASH_CORACOES;
-    if (vidas === 1) {
-      flashDuration = DURACAO_FLASH_CORACOES * 2.5;  // mais tempo na última
-    }
-    flashCoracoes = flashDuration;
+  if (verificarColisao() && !piscandoSapo) {  // evita colisões múltiplas no piscar
+    // Inicia piscar/invencibilidade
     piscandoSapo = true;
     tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
     ultimoTogglePiscada = performance.now();
+
+    let flashDuration = DURACAO_FLASH_CORACOES;
+    if (vidas === 1) {
+      flashDuration = DURACAO_FLASH_CORACOES * 2;  // mais visível na última
+    }
+    flashCoracoes = flashDuration;
 
     vidas--;
 
@@ -788,20 +790,21 @@ function drawCoracoes() {
     failSound.play().catch(() => {});
 
     if (vidas > 0) {
+      // Reset normal (1ª e 2ª vida)
       sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
       sapo.vy = 0;
       sapo.jumping = false;
       obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
       console.log("Perdeu vida → reset | vidas restantes:", vidas);
     } else {
-      console.log("Última vida perdida! vidas agora =", vidas);
+      // Última vida: força mostrar coração cinza imediatamente
+      console.log("Game Over! vidas agora =", vidas);
 
-      // Força redraw imediato para ver o último coração cinza
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawChao();
       drawSapo();
       atualizarPoeira();
-      drawCoracoes();
+      drawCoracoes();  // ← desenha com vidas=0
 
       setTimeout(() => {
         flashCoracoes = 0;
@@ -818,7 +821,8 @@ function drawCoracoes() {
       }, 1800);
     }
 
-    return;  // sai deste frame
+    // NÃO return aqui nas primeiras vidas — deixa o loop continuar!
+    // Só return na última vida se quiser parar imediatamente (mas não é necessário)
   }
 
   if (pontuacao >= PONTUACAO_VITORIA) {
