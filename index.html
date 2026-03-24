@@ -772,7 +772,7 @@ function drawCoracoes() {
 
   atualizarJogo();  // ÚNICA chamada aqui — não duplique!
 
-  if (verificarColisao() && !piscandoSapo) {  // evita colisões múltiplas no piscar
+    if (verificarColisao() && !piscandoSapo) {
     // Inicia piscar/invencibilidade
     piscandoSapo = true;
     tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
@@ -780,7 +780,7 @@ function drawCoracoes() {
 
     let flashDuration = DURACAO_FLASH_CORACOES;
     if (vidas === 1) {
-      flashDuration = DURACAO_FLASH_CORACOES * 2;  // mais visível na última
+      flashDuration = DURACAO_FLASH_CORACOES * 2;
     }
     flashCoracoes = flashDuration;
 
@@ -789,12 +789,14 @@ function drawCoracoes() {
     failSound.currentTime = 0;
     failSound.play().catch(() => {});
 
+    // === REMOÇÃO DO OBSTÁCULO (agora acontece em TODAS as colisões) ===
+    obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
+
     if (vidas > 0) {
       // Reset normal (1ª e 2ª vida)
       sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
       sapo.vy = 0;
       sapo.jumping = false;
-      obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
       console.log("Perdeu vida → reset | vidas restantes:", vidas);
     } else {
       // Última vida: força mostrar coração cinza imediatamente
@@ -804,23 +806,19 @@ function drawCoracoes() {
       drawChao();
       drawSapo();
       atualizarPoeira();
-      drawCoracoes();  // ← desenha com vidas=0
+      drawCoracoes();
 
       setTimeout(() => {
-      flashCoracoes = 0;
-      gameStarted = false;
-      cancelAnimationFrame(animationFrameId);
+        flashCoracoes = 0;
+        gameStarted = false;
+        cancelAnimationFrame(animationFrameId);
 
-        // ==================== NOVA MÚSICA DE GAME OVER ====================
         const gameOverSound = document.getElementById("gameOverSound");
         if (gameOverSound) {
-        gameOverSound.currentTime = 0;           // reinicia do começo
-        gameOverSound.volume = 0.7;              // ajuste o volume se quiser (0.0 a 1.0)
-        gameOverSound.play().catch(e => {
-        console.log("Erro ao tocar música de Game Over:", e);
-          });
+          gameOverSound.currentTime = 0;
+          gameOverSound.volume = 0.7;
+          gameOverSound.play().catch(e => console.log("Erro ao tocar game over sound:", e));
         }
-        // =================================================================
 
         backgroundMusic.pause();
         backgroundMusic.currentTime = 0;
@@ -833,8 +831,6 @@ function drawCoracoes() {
         canvas.removeEventListener('touchstart', canvasTouchHandler);
       }, 1800);
     }
-    // NÃO return aqui nas primeiras vidas — deixa o loop continuar!
-    // Só return na última vida se quiser parar imediatamente (mas não é necessário)
   }
 
   if (pontuacao >= PONTUACAO_VITORIA) {
