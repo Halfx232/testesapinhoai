@@ -114,6 +114,7 @@
   <audio id="jumpSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
   <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
   <audio id="victorySound" src="Victory.mp3"></audio>
+  <audio id="gameOverSound" src="gameover.mp3" preload="auto"></audio>
   <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -806,11 +807,24 @@ function drawCoracoes() {
       drawCoracoes();  // ← desenha com vidas=0
 
       setTimeout(() => {
-        flashCoracoes = 0;
-        gameStarted = false;
-        cancelAnimationFrame(animationFrameId);
+      flashCoracoes = 0;
+      gameStarted = false;
+      cancelAnimationFrame(animationFrameId);
+
+        // ==================== NOVA MÚSICA DE GAME OVER ====================
+        const gameOverSound = document.getElementById("gameOverSound");
+        if (gameOverSound) {
+        gameOverSound.currentTime = 0;           // reinicia do começo
+        gameOverSound.volume = 0.7;              // ajuste o volume se quiser (0.0 a 1.0)
+        gameOverSound.play().catch(e => {
+        console.log("Erro ao tocar música de Game Over:", e);
+          });
+        }
+        // =================================================================
+
         backgroundMusic.pause();
         backgroundMusic.currentTime = 0;
+
         finalScore.textContent = pontuacao;
         gameOverBanner.classList.add('active');
         positionBanners();
@@ -818,7 +832,6 @@ function drawCoracoes() {
         document.removeEventListener('keydown', handleKeyJump);
         canvas.removeEventListener('touchstart', canvasTouchHandler);
       }, 1800);
-    }
 
     // NÃO return aqui nas primeiras vidas — deixa o loop continuar!
     // Só return na última vida se quiser parar imediatamente (mas não é necessário)
