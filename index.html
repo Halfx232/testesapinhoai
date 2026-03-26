@@ -598,18 +598,20 @@ function resetGame() {
   ctx.restore();
 }
   function drawCoracoes() {
-  const tamanho = 22 * Math.min(scaleX, scaleY);
+  // Tamanho responsivo: maior no mobile
+  let tamanhoBase = isMobile ? 28 : 22;        // ← aumentamos no mobile
+  const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
   const espacamento = tamanho * 1.4;
 
-  // Posição X e Y diferentes para mobile e desktop
+  // Posição X e Y (mantendo o que você já ajustou)
   let xInicio, yPos;
 
   if (isMobile) {
-    xInicio = 250 * scaleX;   // move mais para a direita
-    yPos    = 28 * scaleY;    // desce um pouco
+    xInicio = 250 * scaleX;   // valor que você gostou
+    yPos    = 28 * scaleY;    // desceu um pouco
   } else {
-    xInicio = 160 * scaleX;   // posição original no desktop
-    yPos    = 5 * scaleY;     // valor que você gostou no desktop
+    xInicio = 160 * scaleX;
+    yPos    = 5 * scaleY;     // desktop como estava bom
   }
 
   for (let i = 0; i < 3; i++) {
@@ -640,7 +642,7 @@ function resetGame() {
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.2 / Math.max(scaleX, scaleY);
+    ctx.lineWidth = 1.5 / Math.max(scaleX, scaleY);   // linha um pouco mais grossa
     ctx.stroke();
     ctx.restore();
   }
