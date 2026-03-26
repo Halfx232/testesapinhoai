@@ -598,31 +598,36 @@ function resetGame() {
   ctx.restore();
 }
   function drawCoracoes() {
-  // Tamanho responsivo: maior no mobile
-  let tamanhoBase = isMobile ? 28 : 22;        // ← aumentamos no mobile
-  const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
-  const espacamento = tamanho * 1.4;
+  // Tamanho base diferente para cada plataforma
+  let tamanhoBase = isMobile ? 34 : 22;     // 34 no mobile (aumente se precisar)
+  
+  // Boost extra no mobile para compensar o scale pequeno
+  if (isMobile) {
+    tamanhoBase = tamanhoBase * 1.35;       // ← aumenta ~35% a mais no mobile
+  }
 
-  // Posição X e Y (mantendo o que você já ajustou)
+  const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
+  const espacamento = tamanho * 1.45;       // espaçamento um pouco maior também
+
+  // Posições (mantendo o que você já ajustou)
   let xInicio, yPos;
 
   if (isMobile) {
-    xInicio = 250 * scaleX;   // valor que você gostou
-    yPos    = 28 * scaleY;    // desceu um pouco
+    xInicio = 250 * scaleX;   // sua posição atual
+    yPos    = 28 * scaleY;
   } else {
     xInicio = 160 * scaleX;
-    yPos    = 5 * scaleY;     // desktop como estava bom
+    yPos    = 5 * scaleY;
   }
 
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
 
-    let cor = "#444"; // cinza = morto
+    let cor = "#444";
     if (i < vidas) {
-      cor = "#e53935"; // vermelho = vivo
+      cor = "#e53935";
     }
 
-    // Flash só nos corações vivos
     if (flashCoracoes > 0 && i < vidas) {
       const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
       cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
@@ -642,7 +647,7 @@ function resetGame() {
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.5 / Math.max(scaleX, scaleY);   // linha um pouco mais grossa
+    ctx.lineWidth = 1.8 / Math.max(scaleX, scaleY);
     ctx.stroke();
     ctx.restore();
   }
