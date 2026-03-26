@@ -603,11 +603,11 @@ function resetGame() {
   
   // Boost extra no mobile para compensar o scale pequeno
   if (isMobile) {
-    tamanhoBase = tamanhoBase * 1.55;       // ← aumenta ~35% a mais no mobile
+    tamanhoBase = tamanhoBase * 1.85;       // ← aumenta ~35% a mais no mobile
   }
 
   const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
-  const espacamento = tamanho * 1.65;       // espaçamento um pouco maior também
+  const espacamento = tamanho * 1.45;       // espaçamento um pouco maior também
 
   // Posições (mantendo o que você já ajustou)
   let xInicio, yPos;
