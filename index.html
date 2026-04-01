@@ -597,31 +597,36 @@ function resetGame() {
   ctx.stroke();
   ctx.restore();
 }
-function drawCoracoes() {
-  // Tamanho (você já ajustou com 2.85 e gostou)
-  let tamanhoBase = isMobile ? 34 : 22;
+ function drawCoracoes() {
+  // ==================== AJUSTES MOBILE ====================
+  let tamanhoBase = 22;                    // base desktop (não mexa)
+
   if (isMobile) {
-    tamanhoBase = tamanhoBase * 2.85;   // seu multiplicador atual
+    tamanhoBase = 34;                      // ← Diminua aqui para corações menores no mobile
+    // Exemplo: 32 = um pouco menor | 30 = menor ainda | 28 = bem menor
   }
+
   const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
 
-  // Espaçamento INDEPENDENTE para cada plataforma
+  // Espaçamento (mantendo o que você já ajustou)
   let espacamento;
   if (isMobile) {
-    espacamento = tamanho * 0.6;     // ← ajuste aqui para mobile (teste 1.2 ~ 1.5)
+    espacamento = tamanho * 0.6;           // seu valor atual
   } else {
-    espacamento = tamanho * 1.2;     // ← ajuste aqui para desktop (geralmente maior)
+    espacamento = tamanho * 1.2;
   }
 
-  // Posições (mantendo o que você já configurou)
+  // Posições
   let xInicio, yPos;
   if (isMobile) {
     xInicio = 250 * scaleX;
-    yPos    = 28 * scaleY;
+    yPos    = 20 * scaleY;                 // ← SUBA aqui para subir os corações no mobile
+    // Exemplo: 18 = sobe mais | 20 = sobe médio | 24 = desce um pouco
   } else {
     xInicio = 160 * scaleX;
-    yPos    = 5 * scaleY;
+    yPos    = 5 * scaleY;                  // desktop continua igual
   }
+  // =======================================================
 
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
