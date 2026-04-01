@@ -597,23 +597,26 @@ function resetGame() {
   ctx.stroke();
   ctx.restore();
 }
-  function drawCoracoes() {
-  // Tamanho base diferente para cada plataforma
-  let tamanhoBase = isMobile ? 34 : 22;     // 34 no mobile (aumente se precisar)
-  
-  // Boost extra no mobile para compensar o scale pequeno
+function drawCoracoes() {
+  // Tamanho (você já ajustou com 2.85 e gostou)
+  let tamanhoBase = isMobile ? 34 : 22;
   if (isMobile) {
-    tamanhoBase = tamanhoBase * 2.85;       // ← aumenta ~35% a mais no mobile
+    tamanhoBase = tamanhoBase * 2.85;   // seu multiplicador atual
+  }
+  const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
+
+  // Espaçamento INDEPENDENTE para cada plataforma
+  let espacamento;
+  if (isMobile) {
+    espacamento = tamanho * 1.35;     // ← ajuste aqui para mobile (teste 1.2 ~ 1.5)
+  } else {
+    espacamento = tamanho * 1.55;     // ← ajuste aqui para desktop (geralmente maior)
   }
 
-  const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
-  const espacamento = tamanho * 0.85;       // espaçamento um pouco maior também
-
-  // Posições (mantendo o que você já ajustou)
+  // Posições (mantendo o que você já configurou)
   let xInicio, yPos;
-
   if (isMobile) {
-    xInicio = 250 * scaleX;   // sua posição atual
+    xInicio = 250 * scaleX;
     yPos    = 28 * scaleY;
   } else {
     xInicio = 160 * scaleX;
