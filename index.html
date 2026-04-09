@@ -292,6 +292,9 @@ if (muteBtn) {
     const DURACAO_FLASH_CORACOES = 1200;   // mesmo tempo do flash
     let animationFrameId;
 
+    // Nova variável para controlar o Game Over
+    let gameOverTriggered = false;
+
     function unlockAudio() {
   if (audioUnlocked) return;
 
@@ -486,6 +489,7 @@ function resetGame() {
   piscandoSapo = false;
   flashCoracoes = 0;
   tempoPiscadaSapo = 0;
+  gameOverTriggered = false;   // ← ADICIONE ESTA LINHA
 
   ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
   sapo = { 
@@ -724,7 +728,10 @@ function resetGame() {
       }
       obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
       tempo++;
-      pontuacao++;
+      // Só aumenta pontuação se o jogo ainda não acabou
+      if (!gameOverTriggered) {
+        pontuacao++;
+      }
       if (tempo % 1500 === 0) {
         faseAtual++;
         intervaloObstaculo = Math.max(80, intervaloObstaculo - 5);
@@ -822,20 +829,44 @@ function resetGame() {
       sapo.vy = 0;
       sapo.jumping = false;
       console.log("Perdeu vida → reset | vidas restantes:", vidas);
-    } else {
-      // Última vida: força mostrar coração cinza imediatamente
+          } else {
+      // Última vida perdida → GAME OVER IMEDIATO
       console.log("Game Over! vidas agora =", vidas);
 
+      // PARA A PONTUAÇÃO IMEDIATAMENTE
+      gameOverTriggered = true;
+
+      // Desenha o último frame "congelado" (sem aumentar mais a pontuação)
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawChao();
       drawSapo();
       atualizarPoeira();
       drawCoracoes();
 
+      // Pequeno delay só para o jogador ver o último frame + flash dos corações
       setTimeout(() => {
         flashCoracoes = 0;
         gameStarted = false;
         cancelAnimationFrame(animationFrameId);
+
+        const gameOverSound = document.getElementById("gameOverSound");
+        if (gameOverSound) {
+          gameOverSound.currentTime = 0;
+          gameOverSound.volume = 0.7;
+          gameOverSound.play().catch(e => console.log("Erro ao tocar game over sound:", e));
+        }
+
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+
+        finalScore.textContent = pontuacao;   // pontuação já congelada
+        gameOverBanner.classList.add('active');
+        positionBanners();
+
+        document.removeEventListener('keydown', handleKeyJump);
+        canvas.removeEventListener('touchstart', canvasTouchHandler);
+      }, 800);   // reduzi um pouco o delay (fica mais responsivo)
+    }
 
         const gameOverSound = document.getElementById("gameOverSound");
         if (gameOverSound) {
