@@ -269,8 +269,9 @@ if (muteBtn) {
     };
 
     const PONTUACAO_VITORIA = 6000;
-    const GRAVIDADE = 0.5;
-    const GAME_SPEED = 1.5;  // ← Ajuste da velocidade do Jogo.
+    const GRAVIDADE = 0.65;        // ← aumentado um pouco (queda mais natural)
+    const GAME_SPEED = 1.0;        // ← voltamos para 1.0 (evita lentidão geral)
+    const PULO_FORCA = -14.5;      // ← Nova constante: força do pulo (quanto mais negativo = mais alto)
     const BASE_WIDTH = 800;
     const BASE_HEIGHT = 400;
     let ALTURA_CHAO = isMobile ? 150 : 300;
@@ -434,13 +435,17 @@ function positionBanners() {
       });
     }
 
-    function handleJump() {
+        function handleJump() {
       if (gameStarted && !sapo.jumping) {
-        sapo.vy = -12 * scaleY; 
+        sapo.vy = PULO_FORCA * scaleY;   // ← usa a nova constante
         sapo.jumping = true;
+        
         jumpSound.currentTime = 0;
         jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
-        console.log('Sapo pulou!');
+        
+        console.log('Sapo pulou! vy =', sapo.vy.toFixed(2));
+
+        // Efeito de poeira (mantido)
         for (let i = 0; i < 10; i++) {
           poeira.push({
             x: sapo.x + 15 * scaleX + Math.random() * 10 * scaleX,
@@ -690,7 +695,7 @@ function resetGame() {
       canvas.style.background = coresFase[fase].fundo;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawChao();
-      sapo.vy += GRAVIDADE * scaleY * GAME_SPEED;
+      sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
       // Segurança: se sapo sair muito pra baixo ou pra cima, força reset
       if (sapo.y < -100 * scaleY || sapo.y > canvas.height + 100 * scaleY) {
