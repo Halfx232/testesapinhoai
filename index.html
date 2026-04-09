@@ -795,115 +795,96 @@ function resetGame() {
       animationFrameId = requestAnimationFrame(gameLoop);
     }   // ← fechou aqui corretamente
 
-    function gameLoop() {
-  if (!gameStarted) return;
+        function gameLoop() {
+      if (!gameStarted) return;
 
-  // Log (pode remover depois de testar)
-  console.log("Frame:", tempo, "| sapo y:", sapo.y.toFixed(1), "vy:", sapo.vy.toFixed(1), "jumping:", sapo.jumping, "obstaculos:", obstaculos.length);
+      atualizarJogo();  // ÚNICA chamada aqui
 
-  atualizarJogo();  // ÚNICA chamada aqui — não duplique!
+      if (verificarColisao() && !piscandoSapo) {
+        // Inicia piscar/invencibilidade
+        piscandoSapo = true;
+        tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
+        ultimoTogglePiscada = performance.now();
 
-    if (verificarColisao() && !piscandoSapo) {
-    // Inicia piscar/invencibilidade
-    piscandoSapo = true;
-    tempoPiscadaSapo = DURACAO_PISCADA_SAPO;
-    ultimoTogglePiscada = performance.now();
+        let flashDuration = DURACAO_FLASH_CORACOES;
+        if (vidas === 1) {
+          flashDuration = DURACAO_FLASH_CORACOES * 2;
+        }
+        flashCoracoes = flashDuration;
 
-    let flashDuration = DURACAO_FLASH_CORACOES;
-    if (vidas === 1) {
-      flashDuration = DURACAO_FLASH_CORACOES * 2;
-    }
-    flashCoracoes = flashDuration;
+        vidas--;
 
-    vidas--;
+        failSound.currentTime = 0;
+        failSound.play().catch(() => {});
 
-    failSound.currentTime = 0;
-    failSound.play().catch(() => {});
+        // Remove o obstáculo que colidiu
+        obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
 
-    // === REMOÇÃO DO OBSTÁCULO (agora acontece em TODAS as colisões) ===
-    obstaculos = obstaculos.filter(obs => obs.x > sapo.x + sapo.width + 20 * scaleX);
+        if (vidas > 0) {
+          // Reset normal (1ª e 2ª vida)
+          sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+          sapo.vy = 0;
+          sapo.jumping = false;
+          console.log("Perdeu vida → reset | vidas restantes:", vidas);
+        } else {
+          // ====================== ÚLTIMA VIDA - GAME OVER ======================
+          console.log("Game Over! vidas agora =", vidas);
 
-    if (vidas > 0) {
-      // Reset normal (1ª e 2ª vida)
-      sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-      sapo.vy = 0;
-      sapo.jumping = false;
-      console.log("Perdeu vida → reset | vidas restantes:", vidas);
-          } else {
-      // Última vida perdida → GAME OVER IMEDIATO
-      console.log("Game Over! vidas agora =", vidas);
+          // PARA A PONTUAÇÃO IMEDIATAMENTE
+          gameOverTriggered = true;
 
-      // PARA A PONTUAÇÃO IMEDIATAMENTE
-      gameOverTriggered = true;
+          // Desenha o último frame congelado
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          drawChao();
+          drawSapo();
+          atualizarPoeira();
+          drawCoracoes();
 
-      // Desenha o último frame "congelado" (sem aumentar mais a pontuação)
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawChao();
-      drawSapo();
-      atualizarPoeira();
-      drawCoracoes();
+          // Pequeno delay só para ver o flash e o último frame
+          setTimeout(() => {
+            flashCoracoes = 0;
+            gameStarted = false;
+            cancelAnimationFrame(animationFrameId);
 
-      // Pequeno delay só para o jogador ver o último frame + flash dos corações
-      setTimeout(() => {
-        flashCoracoes = 0;
+            const gameOverSound = document.getElementById("gameOverSound");
+            if (gameOverSound) {
+              gameOverSound.currentTime = 0;
+              gameOverSound.volume = 0.7;
+              gameOverSound.play().catch(e => console.log("Erro ao tocar game over sound:", e));
+            }
+
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0;
+
+            finalScore.textContent = pontuacao;
+            gameOverBanner.classList.add('active');
+            positionBanners();
+
+            // Remove controles
+            document.removeEventListener('keydown', handleKeyJump);
+            canvas.removeEventListener('touchstart', canvasTouchHandler);
+          }, 800);
+        }
+      }
+
+      // Vitória
+      if (pontuacao >= PONTUACAO_VITORIA) {
         gameStarted = false;
         cancelAnimationFrame(animationFrameId);
-
-        const gameOverSound = document.getElementById("gameOverSound");
-        if (gameOverSound) {
-          gameOverSound.currentTime = 0;
-          gameOverSound.volume = 0.7;
-          gameOverSound.play().catch(e => console.log("Erro ao tocar game over sound:", e));
-        }
-
+        victorySound.play().catch(e => console.log("Erro ao tocar som:", e));
         backgroundMusic.pause();
         backgroundMusic.currentTime = 0;
-
-        finalScore.textContent = pontuacao;   // pontuação já congelada
-        gameOverBanner.classList.add('active');
+        victoryScore.textContent = pontuacao;
+        victoryBanner.classList.add('active');
         positionBanners();
-
         document.removeEventListener('keydown', handleKeyJump);
         canvas.removeEventListener('touchstart', canvasTouchHandler);
-      }, 800);   // reduzi um pouco o delay (fica mais responsivo)
+        return;
+      }
+
+      animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-        const gameOverSound = document.getElementById("gameOverSound");
-        if (gameOverSound) {
-          gameOverSound.currentTime = 0;
-          gameOverSound.volume = 0.7;
-          gameOverSound.play().catch(e => console.log("Erro ao tocar game over sound:", e));
-        }
-
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-
-        finalScore.textContent = pontuacao;
-        gameOverBanner.classList.add('active');
-        positionBanners();
-
-        document.removeEventListener('keydown', handleKeyJump);
-        canvas.removeEventListener('touchstart', canvasTouchHandler);
-      }, 1800);
-    }
-  }
-
-  if (pontuacao >= PONTUACAO_VITORIA) {
-    gameStarted = false;
-    cancelAnimationFrame(animationFrameId);
-    victorySound.play().catch(e => console.log("Erro ao tocar som:", e));
-    backgroundMusic.pause();
-    backgroundMusic.currentTime = 0;
-    victoryScore.textContent = pontuacao;
-    victoryBanner.classList.add('active');
-    positionBanners();
-    document.removeEventListener('keydown', handleKeyJump);
-    canvas.removeEventListener('touchstart', canvasTouchHandler);
-    return;
-  }
-
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
     //Parte da previsão do tempo
   
     const weatherElement = document.getElementById("weather");
