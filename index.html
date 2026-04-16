@@ -269,9 +269,11 @@ if (muteBtn) {
     };
 
     const PONTUACAO_VITORIA = 6000;
-    const GRAVIDADE = 0.85;        // ← aumentado um pouco (queda mais natural)
-    const GAME_SPEED = 2.0;        // ← voltamos para 1.0 (evita lentidão geral)
-    const PULO_FORCA = -14.8;      // ← Nova constante: força do pulo (quanto mais negativo = mais alto)
+    const GRAVIDADE = 0.82;           // ← Gravidade (controla altura e sensação de peso)
+    const GAME_SPEED = 1.0;           // ← Velocidade geral do jogo (obstáculos, fases, etc)
+    const PULO_SPEED = 1.35;          // ← NOVA VARIÁVEL: Velocidade específica do pulo (quanto maior = subida mais rápida)
+    const PULO_FORCA_BASE = -19;      // ← Força base do pulo (não mexa muito aqui)
+    
     const BASE_WIDTH = 800;
     const BASE_HEIGHT = 400;
     let ALTURA_CHAO = isMobile ? 150 : 300;
@@ -435,17 +437,19 @@ function positionBanners() {
       });
     }
 
-        function handleJump() {
+      function handleJump() {
       if (gameStarted && !sapo.jumping) {
-        sapo.vy = PULO_FORCA * scaleY;   // ← usa a nova constante
+        // Velocidade do pulo agora é independente do GAME_SPEED
+        sapo.vy = PULO_FORCA_BASE * PULO_SPEED * scaleY;
+        
         sapo.jumping = true;
         
         jumpSound.currentTime = 0;
         jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
         
-        console.log('Sapo pulou! vy =', sapo.vy.toFixed(2));
+        console.log(`Pulo! vy = ${sapo.vy.toFixed(2)} | PULO_SPEED = ${PULO_SPEED}`);
 
-        // Efeito de poeira (mantido)
+        // Efeito de poeira
         for (let i = 0; i < 10; i++) {
           poeira.push({
             x: sapo.x + 15 * scaleX + Math.random() * 10 * scaleX,
@@ -695,7 +699,7 @@ function resetGame() {
       canvas.style.background = coresFase[fase].fundo;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawChao();
-      sapo.vy += GRAVIDADE * scaleY;
+      sapo.vy += GRAVIDADE * scaleY;   // ← sem GAME_SPEED
       sapo.y += sapo.vy;
       // Segurança: se sapo sair muito pra baixo ou pra cima, força reset
       if (sapo.y < -100 * scaleY || sapo.y > canvas.height + 100 * scaleY) {
