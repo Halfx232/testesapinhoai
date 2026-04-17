@@ -439,19 +439,16 @@ function positionBanners() {
       });
     }
 
-      function handleJump() {
+         function handleJump() {
       if (gameStarted && !sapo.jumping) {
-        // Velocidade do pulo agora é independente do GAME_SPEED
-        sapo.vy = PULO_FORCA_BASE * PULO_SPEED * scaleY;
-        
+        sapo.vy = PULO_FORCA * scaleY;     // ← sem multiplicador extra
         sapo.jumping = true;
         
         jumpSound.currentTime = 0;
         jumpSound.play().catch(e => console.log("Erro ao tocar som:", e));
         
-        console.log(`Pulo! vy = ${sapo.vy.toFixed(2)} | PULO_SPEED = ${PULO_SPEED}`);
+        console.log('Pulo! vy inicial =', sapo.vy.toFixed(2));
 
-        // Efeito de poeira
         for (let i = 0; i < 10; i++) {
           poeira.push({
             x: sapo.x + 15 * scaleX + Math.random() * 10 * scaleX,
