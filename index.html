@@ -269,21 +269,19 @@ if (muteBtn) {
     };
 
     // === CONFIGURAÇÃO NOVA - JOGO LONGO COM 4 FASES ===
-     const PONTUACAO_VITORIA = 100000;   // Novo objetivo final
-
-    // Pontos por fase (25k cada)
-     const PONTOS_POR_FASE = 25000;
-
-    // Dificuldade por fase (quanto menor o intervaloObstaculo = mais difícil)
-       const DIFICULDADE_FASE = {
-       0: { intervalo: 220, gameSpeed: 1.5, gravidade: 1.1 },   // Primavera - Fácil
-       1: { intervalo: 170, gameSpeed: 1.8, gravidade: 1.2 },   // Verão     - Médio
-       2: { intervalo: 130, gameSpeed: 2.2, gravidade: 1.35 },  // Outono    - Difícil
-       3: { intervalo: 95,  gameSpeed: 2.7, gravidade: 1.55 }   // Inverno   - Expert (bem difícil)
-     };
     
-    const GRAVIDADE = 1.1;           // ← Gravidade (quanto maior = cai mais rápido)
-    const GAME_SPEED = 1.5;           // ← Velocidade dos obstáculos (você gosta assim)
+    const PONTUACAO_VITORIA = 100000;
+    const PONTOS_POR_FASE = 25000;
+
+    const DIFICULDADE_FASE = {
+      0: { intervalo: 220, gameSpeed: 1.5,  gravidade: 1.1 },   // Primavera
+      1: { intervalo: 170, gameSpeed: 1.8,  gravidade: 1.2 },   // Verão
+      2: { intervalo: 130, gameSpeed: 2.2,  gravidade: 1.35 },  // Outono
+      3: { intervalo: 95,  gameSpeed: 2.7,  gravidade: 1.55 }   // Inverno - Expert
+    };
+    
+    let GRAVIDADE = 1.1;           // ← Gravidade (quanto maior = cai mais rápido)
+    let GAME_SPEED = 1.5;           // ← Velocidade dos obstáculos (você gosta assim)
     
     const PULO_FORCA = -17.0;         // ← VELOCIDADE DE SUBIDA (principal ajuste agora)
                                       // quanto mais negativo = subida MAIS RÁPIDA
