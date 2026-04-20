@@ -790,13 +790,17 @@ function resetGame() {
       // Nome da fase atual (canto superior direito) - menor no mobile
       ctx.save();
       ctx.fillStyle = "#000000";
-      ctx.font = isMobile ? "bold 14px Arial" : "bold 16px Arial";
+      
+      // Tamanho da fonte: igual ao Score no desktop, menor no mobile
+      ctx.font = isMobile ? "bold 14px Arial" : "bold 19px Arial";
       
       const faseY = isMobile ? 18 : 25;
       const faseX = canvas.width - (isMobile ? 105 : 125);
       
-      // Alteração: sem .toUpperCase() → fica em minúsculo
-      const nomeFase = getFaseAtual();   // ← mudou aqui
+      // Primeira letra maiúscula + resto em minúsculo
+      let nomeFase = getFaseAtual();
+      nomeFase = nomeFase.charAt(0).toUpperCase() + nomeFase.slice(1);
+      
       ctx.fillText(nomeFase, faseX, faseY);
       ctx.restore();
 
