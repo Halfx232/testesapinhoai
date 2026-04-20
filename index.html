@@ -795,7 +795,8 @@ function resetGame() {
       const faseY = isMobile ? 18 : 25;
       const faseX = canvas.width - (isMobile ? 105 : 125);
       
-      const nomeFase = getFaseAtual().toUpperCase();
+      // Alteração: sem .toUpperCase() → fica em minúsculo
+      const nomeFase = getFaseAtual();   // ← mudou aqui
       ctx.fillText(nomeFase, faseX, faseY);
       ctx.restore();
 
