@@ -779,20 +779,24 @@ function resetGame() {
       // ==================== DESENHO DA UI ====================
             // ==================== SCORE - AJUSTADO PARA MOBILE ====================
       ctx.save();
-      
-      // Texto preto direto (sem fundo branco nem borda)
       ctx.fillStyle = "#000000";
       ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
-      ctx.fillText("Score: " + pontuacao, 10, 27);
       
+      // Posição Y: mais alto no mobile
+      const scoreY = isMobile ? 22 : 27;
+      ctx.fillText("Score: " + pontuacao, 10, scoreY);
       ctx.restore();
 
       // Nome da fase atual (canto superior direito) - menor no mobile
       ctx.save();
       ctx.fillStyle = "#000000";
       ctx.font = isMobile ? "bold 14px Arial" : "bold 16px Arial";
+      
+      const faseY = isMobile ? 22 : 25;
+      const faseX = canvas.width - (isMobile ? 105 : 125);
+      
       const nomeFase = getFaseAtual().toUpperCase();
-      ctx.fillText(nomeFase, canvas.width - (isMobile ? 110 : 125), 25);
+      ctx.fillText(nomeFase, faseX, faseY);
       ctx.restore();
 
       // Desenha elementos visuais
