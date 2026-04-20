@@ -780,19 +780,10 @@ function resetGame() {
             // ==================== SCORE - AJUSTADO PARA MOBILE ====================
       ctx.save();
       
-      // Fundo semi-transparente (melhor no mobile e em fundos claros)
-      ctx.fillStyle = isMobile ? "rgba(255, 255, 255, 0.85)" : "#FFFFFF";
-      ctx.fillRect(5, 5, 155, 32);
-
-      // Borda fina preta
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(5, 5, 155, 32);
-
-      // Texto preto - menor no mobile
+      // Texto preto direto (sem fundo branco nem borda)
       ctx.fillStyle = "#000000";
-      ctx.font = isMobile ? "bold 16px Arial" : "bold 19px Arial";
-      ctx.fillText("Score: " + pontuacao, 12, 27);
+      ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
+      ctx.fillText("Score: " + pontuacao, 10, 27);
       
       ctx.restore();
 
