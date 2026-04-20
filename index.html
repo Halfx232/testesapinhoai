@@ -710,7 +710,7 @@ function resetGame() {
       poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0.05);
     }
 
-      function atualizarJogo() {
+             function atualizarJogo() {
       if (!gameStarted) return;
 
       const fase = getFaseAtual();
@@ -735,7 +735,7 @@ function resetGame() {
         sapo.jumping = false;
       }
 
-      // Desenho dos obstáculos
+      // Cria obstáculos
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
         let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
         let cor = cores[Math.floor(Math.random() * cores.length)];
@@ -748,6 +748,7 @@ function resetGame() {
         });
       }
 
+      // Move obstáculos
       for (let i = 0; i < obstaculos.length; i++) {
         let obs = obstaculos[i];
         obs.x -= 3.5 * scaleX * GAME_SPEED;
@@ -762,7 +763,7 @@ function resetGame() {
         pontuacao++;
       }
 
-      // === MUDANÇA DE FASE ===
+      // Mudança de fase
       if (pontuacao > 0 && pontuacao % 25000 === 0 && faseAtual < 3) {
         const proximaFase = Math.floor(pontuacao / 25000);
         if (proximaFase > faseAtual) {
@@ -771,23 +772,21 @@ function resetGame() {
           intervaloObstaculo = config.intervalo;
           GAME_SPEED = config.gameSpeed;
           GRAVIDADE = config.gravidade;
-
           console.log(`=== FASE ALTERADA PARA ${fases[faseAtual].toUpperCase()} ===`);
         }
       }
 
       // ==================== DESENHO DA UI ====================
-      // Score (branco com sombra preta para ficar visível em todas as fases)
+      // Score com sombra para ficar visível
       ctx.save();
       ctx.fillStyle = "#000";
       ctx.font = "bold 20px Arial";
       ctx.fillText("Score: " + pontuacao, 12, 27);
-
       ctx.fillStyle = "#FFFFFF";
       ctx.fillText("Score: " + pontuacao, 10, 25);
       ctx.restore();
 
-      // Nome da fase atual (canto direito)
+      // Nome da fase (canto superior direito)
       ctx.save();
       ctx.fillStyle = "#000";
       ctx.font = "bold 16px Arial";
@@ -795,12 +794,12 @@ function resetGame() {
       ctx.fillText(nomeFase, canvas.width - 125, 25);
       ctx.restore();
 
-      // Desenha sapo, poeira e corações
+      // Desenha elementos visuais
       drawSapo();
       atualizarPoeira();
       drawCoracoes();
 
-      // Atualiza timers de piscada e flash
+      // Atualiza timers
       if (piscandoSapo) {
         tempoPiscadaSapo -= 16.7;
         if (tempoPiscadaSapo <= 0) piscandoSapo = false;
@@ -809,9 +808,6 @@ function resetGame() {
         flashCoracoes -= 16.7;
       }
     }
-
-  drawCoracoes();  // ← desenha os 3 corações
-}
     
     function drawObstaculo(obs) {
       ctx.save();
