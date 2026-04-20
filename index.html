@@ -710,90 +710,105 @@ function resetGame() {
       poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0.05);
     }
 
-    function atualizarJogo() {
+      function atualizarJogo() {
       if (!gameStarted) return;
+
       const fase = getFaseAtual();
       canvas.style.background = coresFase[fase].fundo;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawChao();
-      sapo.vy += GRAVIDADE * scaleY;   // ← sem GAME_SPEED
+
+      // Física do sapo
+      sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
-      // Segurança: se sapo sair muito pra baixo ou pra cima, força reset
+
+      // Segurança de posição
       if (sapo.y < -100 * scaleY || sapo.y > canvas.height + 100 * scaleY) {
-      sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
-      sapo.vy = 0;
-      sapo.jumping = false;
-      console.log("Sapo saiu da tela → reset forçado");
-   }
+        sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+        sapo.vy = 0;
+        sapo.jumping = false;
+      }
       if (sapo.y > ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY) {
         sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
         sapo.vy = 0;
         sapo.jumping = false;
       }
-      try {
-      // Removido o retângulo cinza
-      ctx.fillStyle = "#fff";                // texto branco
-      ctx.font = "bold 18px Arial";
-      ctx.fillText("Score: " + pontuacao, 10, 25);  // posição ajustada pra ficar bonito sem fundo
 
-      drawCoracoes();
-    } catch (err) {
-      console.error("Erro ao desenhar UI:", err);
-  }
-      drawSapo();
-      atualizarPoeira();
+      // Desenho dos obstáculos
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
         let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
         let cor = cores[Math.floor(Math.random() * cores.length)];
-        obstaculos.push({ x: BASE_WIDTH * scaleX, y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, width: 30 * scaleX, height: 30 * scaleY, color: cor });
+        obstaculos.push({ 
+          x: BASE_WIDTH * scaleX, 
+          y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, 
+          width: 30 * scaleX, 
+          height: 30 * scaleY, 
+          color: cor 
+        });
       }
+
       for (let i = 0; i < obstaculos.length; i++) {
         let obs = obstaculos[i];
         obs.x -= 3.5 * scaleX * GAME_SPEED;
         drawObstaculo(obs);
       }
       obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
-            tempo++;
 
-      // Só aumenta pontuação se o jogo ainda não acabou
+      tempo++;
+
+      // Aumenta pontuação
       if (!gameOverTriggered) {
-        
         pontuacao++;
       }
 
-      // === MUDANÇA DE FASE COM AUMENTO DE DIFICULDADE ===
+      // === MUDANÇA DE FASE ===
       if (pontuacao > 0 && pontuacao % 25000 === 0 && faseAtual < 3) {
         const proximaFase = Math.floor(pontuacao / 25000);
-        
         if (proximaFase > faseAtual) {
           faseAtual = proximaFase;
-          
-          // Aplica nova dificuldade da fase
           const config = DIFICULDADE_FASE[faseAtual];
           intervaloObstaculo = config.intervalo;
           GAME_SPEED = config.gameSpeed;
           GRAVIDADE = config.gravidade;
 
           console.log(`=== FASE ALTERADA PARA ${fases[faseAtual].toUpperCase()} ===`);
-          console.log(`Intervalo: ${intervaloObstaculo} | Speed: ${GAME_SPEED} | Gravidade: ${GRAVIDADE}`);
         }
       }
 
-       // Mostra nome da fase atual
-        ctx.fillStyle = "#000";
-        ctx.font = "bold 16px Arial";
-        const nomeFase = getFaseAtual().toUpperCase();
-        ctx.fillText(nomeFase, canvas.width - 120, 25);
+      // ==================== DESENHO DA UI ====================
+      // Score (branco com sombra preta para ficar visível em todas as fases)
+      ctx.save();
+      ctx.fillStyle = "#000";
+      ctx.font = "bold 20px Arial";
+      ctx.fillText("Score: " + pontuacao, 12, 27);
 
-       // ← Adicione aqui os timers e corações
-  if (piscandoSapo) {
-    tempoPiscadaSapo -= 16.7;  // ~60fps
-    if (tempoPiscadaSapo <= 0) piscandoSapo = false;
-  }
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText("Score: " + pontuacao, 10, 25);
+      ctx.restore();
 
-  if (flashCoracoes > 0) {
-    flashCoracoes -= 16.7;
-  }
+      // Nome da fase atual (canto direito)
+      ctx.save();
+      ctx.fillStyle = "#000";
+      ctx.font = "bold 16px Arial";
+      const nomeFase = getFaseAtual().toUpperCase();
+      ctx.fillText(nomeFase, canvas.width - 125, 25);
+      ctx.restore();
+
+      // Desenha sapo, poeira e corações
+      drawSapo();
+      atualizarPoeira();
+      drawCoracoes();
+
+      // Atualiza timers de piscada e flash
+      if (piscandoSapo) {
+        tempoPiscadaSapo -= 16.7;
+        if (tempoPiscadaSapo <= 0) piscandoSapo = false;
+      }
+      if (flashCoracoes > 0) {
+        flashCoracoes -= 16.7;
+      }
+    }
 
   drawCoracoes();  // ← desenha os 3 corações
 }
