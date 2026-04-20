@@ -268,7 +268,19 @@ if (muteBtn) {
       inverno: { fundo: "#e0f7fa", chao: "#4dd0e1" }
     };
 
-    const PONTUACAO_VITORIA = 6000;
+    // === CONFIGURAÇÃO NOVA - JOGO LONGO COM 4 FASES ===
+     const PONTUACAO_VITORIA = 100000;   // Novo objetivo final
+
+    // Pontos por fase (25k cada)
+     const PONTOS_POR_FASE = 25000;
+
+    // Dificuldade por fase (quanto menor o intervaloObstaculo = mais difícil)
+       const DIFICULDADE_FASE = {
+       0: { intervalo: 220, gameSpeed: 1.5, gravidade: 1.1 },   // Primavera - Fácil
+       1: { intervalo: 170, gameSpeed: 1.8, gravidade: 1.2 },   // Verão     - Médio
+       2: { intervalo: 130, gameSpeed: 2.2, gravidade: 1.35 },  // Outono    - Difícil
+       3: { intervalo: 95,  gameSpeed: 2.7, gravidade: 1.55 }   // Inverno   - Expert (bem difícil)
+     };
     
     const GRAVIDADE = 1.1;           // ← Gravidade (quanto maior = cai mais rápido)
     const GAME_SPEED = 1.5;           // ← Velocidade dos obstáculos (você gosta assim)
@@ -497,9 +509,10 @@ function resetGame() {
   piscandoSapo = false;
   flashCoracoes = 0;
   tempoPiscadaSapo = 0;
-  gameOverTriggered = false;   // ← ADICIONE ESTA LINHA
+  gameOverTriggered = false;
 
   ALTURA_CHAO = isMobile ? canvas.height : BASE_HEIGHT;
+
   sapo = { 
     x: BASE_WIDTH * 0.2 * scaleX, 
     y: ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY, 
@@ -508,12 +521,18 @@ function resetGame() {
     vy: 0, 
     jumping: false 
   };
+
   obstaculos = [];
   poeira = [];
   tempo = 0;
-  intervaloObstaculo = 220;
   faseAtual = 0;
   pontuacao = 0;
+
+  // Configuração inicial da primeira fase
+  intervaloObstaculo = DIFICULDADE_FASE[0].intervalo;
+  GAME_SPEED = DIFICULDADE_FASE[0].gameSpeed;   // ← vai ser variável agora
+  GRAVIDADE = DIFICULDADE_FASE[0].gravidade;    // ← também variável
+
   gameOverBanner.classList.remove('active');
   victoryBanner.classList.remove('active');
   startBanner.classList.add('active');
@@ -522,6 +541,7 @@ function resetGame() {
   backgroundMusic.pause();
   backgroundMusic.currentTime = 0;
 
+  // Reset de listeners (manter como estava)
   startBanner.removeEventListener('click', startGameHandler);
   startBanner.removeEventListener('touchstart', startGameHandler);
   document.removeEventListener('keydown', startGameHandler);
@@ -735,18 +755,37 @@ function resetGame() {
         drawObstaculo(obs);
       }
       obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
-      tempo++;
+            tempo++;
+
       // Só aumenta pontuação se o jogo ainda não acabou
       if (!gameOverTriggered) {
+        
         pontuacao++;
       }
-      if (tempo % 1500 === 0) {
-        faseAtual++;
-        intervaloObstaculo = Math.max(80, intervaloObstaculo - 5);
+
+      // === MUDANÇA DE FASE COM AUMENTO DE DIFICULDADE ===
+      if (pontuacao > 0 && pontuacao % 25000 === 0 && faseAtual < 3) {
+        const proximaFase = Math.floor(pontuacao / 25000);
+        
+        if (proximaFase > faseAtual) {
+          faseAtual = proximaFase;
+          
+          // Aplica nova dificuldade da fase
+          const config = DIFICULDADE_FASE[faseAtual];
+          intervaloObstaculo = config.intervalo;
+          GAME_SPEED = config.gameSpeed;
+          GRAVIDADE = config.gravidade;
+
+          console.log(`=== FASE ALTERADA PARA ${fases[faseAtual].toUpperCase()} ===`);
+          console.log(`Intervalo: ${intervaloObstaculo} | Speed: ${GAME_SPEED} | Gravidade: ${GRAVIDADE}`);
+        }
       }
-      ctx.fillStyle = "#000";
-      ctx.font = "bold 18px Arial";
-      ctx.fillText("Score: " + pontuacao, 10, 25);
+
+       // Mostra nome da fase atual
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 16px Arial";
+        const nomeFase = getFaseAtual().toUpperCase();
+        ctx.fillText(nomeFase, canvas.width - 120, 25);
 
        // ← Adicione aqui os timers e corações
   if (piscandoSapo) {
