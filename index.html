@@ -279,6 +279,10 @@ if (muteBtn) {
       2: { intervalo: 130, gameSpeed: 2.2,  gravidade: 1.35 },  // Outono
       3: { intervalo: 95,  gameSpeed: 2.7,  gravidade: 1.55 }   // Inverno - Expert
     };
+    // ==================== NOVAS VARIÁVEIS PARA SEQUÊNCIAS ====================
+    let obstaculoEmSequencia = 0;           // contador de obstáculos na sequência atual
+    let tamanhoSequenciaAtual = 2;          // começa com 2 na fase 1
+    let probabilidadeEmpilhado = 0.25;      // 25% de chance de obstáculo empilhado
     
     let GRAVIDADE = 1.1;           // ← Gravidade (quanto maior = cai mais rápido)
     let GAME_SPEED = 1.5;           // ← Velocidade dos obstáculos (você gosta assim)
@@ -525,6 +529,8 @@ function resetGame() {
   tempo = 0;
   faseAtual = 0;
   pontuacao = 0;
+  obstaculoEmSequencia = 0;
+  tamanhoSequenciaAtual = 2;   // volta pra fase 1
 
   // Configuração inicial da primeira fase
   intervaloObstaculo = DIFICULDADE_FASE[0].intervalo;
@@ -554,6 +560,51 @@ function resetGame() {
   positionBanners();
 }
 
+        // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO ====================
+    function criarObstaculo() {
+      const fase = faseAtual;
+      const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
+
+      const ehEmpilhado = Math.random() < probabilidadeEmpilhado && fase >= 1;
+
+      if (ehEmpilhado) {
+        // === DOIS OBSTÁCULOS UM EM CIMA DO OUTRO ===
+        const alturaBase = 30 * scaleY;
+        const largura = 32 * scaleX;
+
+        // Obstáculo de baixo (maior)
+        obstaculos.push({
+          x: BASE_WIDTH * scaleX + 20,
+          y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 1.8,
+          width: largura,
+          height: alturaBase * 1.8,
+          color: cor,
+          empilhado: true
+        });
+
+        // Obstáculo de cima (menor, mas pulável)
+        obstaculos.push({
+          x: BASE_WIDTH * scaleX + 20,
+          y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.4,
+          width: largura * 0.9,
+          height: alturaBase * 1.4,
+          color: cor,
+          empilhado: true
+        });
+
+      } else {
+        // Obstáculo normal (único)
+        obstaculos.push({
+          x: BASE_WIDTH * scaleX,
+          y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY,
+          width: 30 * scaleX,
+          height: 30 * scaleY,
+          color: cor,
+          empilhado: false
+        });
+      }
+    }
+    
     function getFaseAtual() {
       return fases[faseAtual % fases.length];
     }
@@ -735,19 +786,29 @@ function resetGame() {
         sapo.jumping = false;
       }
 
-      // Cria obstáculos
+           // ==================== CRIAÇÃO INTELIGENTE DE OBSTÁCULOS ====================
+               
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
-        let cores = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"];
-        let cor = cores[Math.floor(Math.random() * cores.length)];
-        obstaculos.push({ 
-          x: BASE_WIDTH * scaleX, 
-          y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY, 
-          width: 30 * scaleX, 
-          height: 30 * scaleY, 
-          color: cor 
-        });
-      }
+        criarObstaculo();
 
+        obstaculoEmSequencia++;
+
+        // Controla a sequência por fase
+        if (obstaculoEmSequencia >= tamanhoSequenciaAtual) {
+          obstaculoEmSequencia = 0;
+          // Pequena variação aleatória para não ficar robótico
+          tamanhoSequenciaAtual = SEQUENCIA_POR_FASE[faseAtual] + Math.floor(Math.random() * 2) - 1;
+        }
+      }
+               
+         // Configuração de sequência por fase (exatamente como você pediu)
+    const SEQUENCIA_POR_FASE = {
+      0: 2,   // Primavera → 2 obstáculos
+      1: 3,   // Verão     → 3 obstáculos
+      2: 4,   // Outono    → 4 obstáculos
+      3: 5    // Inverno   → 5 obstáculos
+    };
+               
       // Move obstáculos
       for (let i = 0; i < obstaculos.length; i++) {
         let obs = obstaculos[i];
@@ -763,7 +824,8 @@ function resetGame() {
         pontuacao++;
       }
 
-      // Mudança de fase
+             // Mudança de fase
+               
       if (pontuacao > 0 && pontuacao % 25000 === 0 && faseAtual < 3) {
         const proximaFase = Math.floor(pontuacao / 25000);
         if (proximaFase > faseAtual) {
@@ -772,7 +834,12 @@ function resetGame() {
           intervaloObstaculo = config.intervalo;
           GAME_SPEED = config.gameSpeed;
           GRAVIDADE = config.gravidade;
-          console.log(`=== FASE ALTERADA PARA ${fases[faseAtual].toUpperCase()} ===`);
+
+          // Atualiza tamanho da sequência ao mudar de fase
+          tamanhoSequenciaAtual = SEQUENCIA_POR_FASE[faseAtual];
+          obstaculoEmSequencia = 0;
+
+          console.log(`=== FASE ${fases[faseAtual].toUpperCase()} - Sequência: ${tamanhoSequenciaAtual} obstáculos ===`);
         }
       }
 
