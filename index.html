@@ -414,10 +414,14 @@ function positionBanners() {
         ALTURA_CHAO = BASE_HEIGHT;
         canvas.style.margin = '20px auto';
       }
-      if (sapo) {
+      
+             if (sapo) {
         sapo.x = BASE_WIDTH * 0.2 * scaleX;
         sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+        sapo.width = 40 * scaleX;
+        sapo.height = ALTURA_SAPO * scaleY;
       }
+      
       positionBanners();
       console.log('Canvas:', canvas.width, canvas.height, 'Scale:', scaleX, scaleY);
     }
@@ -530,7 +534,7 @@ function resetGame() {
   faseAtual = 0;
   pontuacao = 0;
   obstaculoEmSequencia = 0;
-  tamanhoSequenciaAtual = 2;   // volta pra fase 1
+  tamanhoSequenciaAtual = SEQUENCIA_POR_FASE[0];   // começa com 2 na fase 1
 
   // Configuração inicial da primeira fase
   intervaloObstaculo = DIFICULDADE_FASE[0].intervalo;
@@ -604,6 +608,14 @@ function resetGame() {
         });
       }
     }
+        
+    // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
+    const SEQUENCIA_POR_FASE = {
+      0: 2,   // Primavera → 2 obstáculos seguidos
+      1: 3,   // Verão     → 3 obstáculos seguidos
+      2: 4,   // Outono    → 4 obstáculos seguidos
+      3: 5    // Inverno   → 5 obstáculos seguidos
+    };
     
     function getFaseAtual() {
       return fases[faseAtual % fases.length];
@@ -786,7 +798,7 @@ function resetGame() {
         sapo.jumping = false;
       }
 
-           // ==================== CRIAÇÃO INTELIGENTE DE OBSTÁCULOS ====================
+                 // ==================== CRIAÇÃO INTELIGENTE DE OBSTÁCULOS ====================
                
       if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
         criarObstaculo();
@@ -800,14 +812,6 @@ function resetGame() {
           tamanhoSequenciaAtual = SEQUENCIA_POR_FASE[faseAtual] + Math.floor(Math.random() * 2) - 1;
         }
       }
-               
-         // Configuração de sequência por fase (exatamente como você pediu)
-    const SEQUENCIA_POR_FASE = {
-      0: 2,   // Primavera → 2 obstáculos
-      1: 3,   // Verão     → 3 obstáculos
-      2: 4,   // Outono    → 4 obstáculos
-      3: 5    // Inverno   → 5 obstáculos
-    };
                
       // Move obstáculos
       for (let i = 0; i < obstaculos.length; i++) {
