@@ -270,8 +270,8 @@ if (muteBtn) {
 
     // === CONFIGURAÇÃO NOVA - JOGO LONGO COM 4 FASES ===
     
-    const PONTUACAO_VITORIA = 100000;
-    const PONTOS_POR_FASE = 25000;
+    const PONTUACAO_VITORIA = 10000;
+    const PONTOS_POR_FASE = 2500;
 
     const DIFICULDADE_FASE = {
       0: { intervalo: 220, gameSpeed: 1.5,  gravidade: 1.1 },   // Primavera
@@ -830,8 +830,8 @@ function resetGame() {
 
              // Mudança de fase
                
-      if (pontuacao > 0 && pontuacao % 25000 === 0 && faseAtual < 3) {
-        const proximaFase = Math.floor(pontuacao / 25000);
+      if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
+        const proximaFase = Math.floor(pontuacao / 2500);
         if (proximaFase > faseAtual) {
           faseAtual = proximaFase;
           const config = DIFICULDADE_FASE[faseAtual];
