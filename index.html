@@ -815,83 +815,100 @@ function resetGame() {
       }
                
         // ==================== CRIAÇÃO DE OBSTÁCULOS ====================
-        if (tempo % intervaloObstaculo === 0 && tempo >= 100) {
-        criarObstaculo();
-      }
-               
-      // Move obstáculos
-      for (let i = 0; i < obstaculos.length; i++) {
-        let obs = obstaculos[i];
-        obs.x -= 3.5 * scaleX * GAME_SPEED;
-        drawObstaculo(obs);
-      }
-      obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
+function atualizarJogo() {
+  if (!gameStarted) return;
 
-      tempo++;
+  const fase = getFaseAtual();
+  canvas.style.background = coresFase[fase].fundo;
 
-      // Aumenta pontuação
-      if (!gameOverTriggered) {
-        pontuacao++;
-      }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawChao();
 
-             // Mudança de fase
-               
-      if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
-        const proximaFase = Math.floor(pontuacao / 2500);
-         // Mudança de fase - dentro do if (pontuacao % 2500 === 0 ...
-  if (proximaFase > faseAtual) {
-  faseAtual = proximaFase;
-  const config = DIFICULDADE_FASE[faseAtual];
-  
-  intervaloObstaculo = config.intervalo;
-  GAME_SPEED = config.gameSpeed;
-  GRAVIDADE = config.gravidade;
+  // Física do sapo
+  sapo.vy += GRAVIDADE * scaleY;
+  sapo.y += sapo.vy;
 
-  console.log(`=== FASE ${faseAtual + 1} - ${fases[faseAtual].toUpperCase()} ===`);
-}
+  // Segurança de posição do sapo
+  if (sapo.y < -100 * scaleY || sapo.y > canvas.height + 100 * scaleY) {
+    sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+    sapo.vy = 0;
+    sapo.jumping = false;
+  }
+  if (sapo.y > ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY) {
+    sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
+    sapo.vy = 0;
+    sapo.jumping = false;
+  }
 
-      // ==================== DESENHO DA UI ====================
-            // ==================== SCORE - AJUSTADO PARA MOBILE ====================
-      ctx.save();
-      ctx.fillStyle = "#000000";
-      ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
-      
-      // Posição Y: mais alto no mobile
-      const scoreY = isMobile ? 18 : 27;
-      ctx.fillText("Score: " + pontuacao, 10, scoreY);
-      ctx.restore();
+  // ==================== CRIAÇÃO DE OBSTÁCULOS ====================
+  if (tempo % intervaloObstaculo === 0 && tempo >= 100) {
+    criarObstaculo();
+  }
 
-      // Nome da fase atual (canto superior direito) - menor no mobile
-      ctx.save();
-      ctx.fillStyle = "#000000";
-      
-      // Tamanho da fonte: igual ao Score no desktop, menor no mobile
-      ctx.font = isMobile ? "bold 14px Arial" : "bold 19px Arial";
-      
-      const faseY = isMobile ? 18 : 25;
-      const faseX = canvas.width - (isMobile ? 105 : 125);
-      
-      // Primeira letra maiúscula + resto em minúsculo
-      let nomeFase = getFaseAtual();
-      nomeFase = nomeFase.charAt(0).toUpperCase() + nomeFase.slice(1);
-      
-      ctx.fillText(nomeFase, faseX, faseY);
-      ctx.restore();
+  // Move obstáculos
+  for (let i = 0; i < obstaculos.length; i++) {
+    let obs = obstaculos[i];
+    obs.x -= 3.5 * scaleX * GAME_SPEED;
+    drawObstaculo(obs);
+  }
+  obstaculos = obstaculos.filter(obs => obs.x + obs.width > 0);
 
-      // Desenha elementos visuais
-      drawSapo();
-      atualizarPoeira();
-      drawCoracoes();
+  tempo++;
 
-      // Atualiza timers
-      if (piscandoSapo) {
-        tempoPiscadaSapo -= 16.7;
-        if (tempoPiscadaSapo <= 0) piscandoSapo = false;
-      }
-      if (flashCoracoes > 0) {
-        flashCoracoes -= 16.7;
-      }
+  // Aumenta pontuação
+  if (!gameOverTriggered) {
+    pontuacao++;
+  }
+
+  // ==================== MUDANÇA DE FASE ====================
+  if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
+    const proximaFase = Math.floor(pontuacao / 2500);
+    if (proximaFase > faseAtual) {
+      faseAtual = proximaFase;
+      const config = DIFICULDADE_FASE[faseAtual];
+
+      intervaloObstaculo = config.intervalo;
+      GAME_SPEED = config.gameSpeed;
+      GRAVIDADE = config.gravidade;
+
+      console.log(`=== FASE ${faseAtual + 1} - ${fases[faseAtual].toUpperCase()} ===`);
     }
+  }
+
+  // ==================== DESENHO DA UI ====================
+  // Score
+  ctx.save();
+  ctx.fillStyle = "#000000";
+  ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
+  const scoreY = isMobile ? 18 : 27;
+  ctx.fillText("Score: " + pontuacao, 10, scoreY);
+  ctx.restore();
+
+  // Nome da fase
+  ctx.save();
+  ctx.fillStyle = "#000000";
+  ctx.font = isMobile ? "bold 14px Arial" : "bold 19px Arial";
+  const faseY = isMobile ? 18 : 25;
+  const faseX = canvas.width - (isMobile ? 105 : 125);
+  let nomeFase = getFaseAtual();
+  nomeFase = nomeFase.charAt(0).toUpperCase() + nomeFase.slice(1);
+  ctx.fillText(nomeFase, faseX, faseY);
+  ctx.restore();
+
+  // Desenha elementos
+  drawSapo();
+  atualizarPoeira();
+  drawCoracoes();
+
+  // Timers
+  if (piscandoSapo) {
+    tempoPiscadaSapo -= 16.7;
+    if (tempoPiscadaSapo <= 0) piscandoSapo = false;
+  }
+  if (flashCoracoes > 0) {
+    flashCoracoes -= 16.7;
+  }
+}
     
     function drawObstaculo(obs) {
       ctx.save();
