@@ -564,53 +564,60 @@ function resetGame() {
   positionBanners();
 }
 
-    // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO ====================
+     // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO ====================
     
   function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
-  // Chance de obstáculo empilhado (a partir da fase 2)
-  const chanceEmpilhado = (faseAtual >= 1) ? 0.25 : 0;   // 25% de chance
+  // Chance de obstáculo EMPILHADO (a partir da fase 2)
+  const chanceEmpilhado = (faseAtual >= 1) ? 0.22 : 0;
 
   if (Math.random() < chanceEmpilhado) {
-    // ==================== OBSTÁCULO EMPILHADO (DUAS PARTES) ====================
+    // ==================== OBSTÁCULO DUPLAMENTE EMPILHADO ====================
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
 
-    // Bloco de baixo
+    // Bloco inferior
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 30,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 1.9,
+      x: BASE_WIDTH * scaleX + 35,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 1.95,
       width: largura,
-      height: alturaBase * 1.9,
+      height: alturaBase * 1.95,
       color: cor,
       empilhado: true
     });
 
-    // Bloco de cima (menor)
+    // Bloco superior (menor e mais alto)
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 30,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.4,
-      width: largura * 0.82,
-      height: alturaBase * 1.4,
+      x: BASE_WIDTH * scaleX + 35,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.5,
+      width: largura * 0.85,
+      height: alturaBase * 1.45,
       color: cor,
       empilhado: true
     });
 
-    return; // sai da função após criar o empilhado
+    return;
   }
 
-  // ==================== SEQUÊNCIA DE OBSTÁCULOS (2 a 5) ====================
+  // ==================== SEQUÊNCIA DE OBSTÁCULOS ====================
+    
   const quantidade = SEQUENCIA_POR_FASE[faseAtual];
 
+  // Espaçamento maior entre os blocos (principal ajuste!)
+  let espacoEntreBlocos = 82 * scaleX;        // ← Aumentado (era 68)
+
+  // Na fase 1 podemos deixar um pouco mais apertado, mas ainda jogável
+  if (faseAtual === 0) espacoEntreBlocos = 78 * scaleX;
+
   for (let i = 0; i < quantidade; i++) {
-    const offsetX = i * 68 * scaleX;   // espaço entre os blocos da sequência
+    const offsetX = i * espacoEntreBlocos;
 
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 35 + offsetX,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - 32 * scaleY,
+      x: BASE_WIDTH * scaleX + 40 + offsetX,     // posição inicial um pouco mais à direita
+      y: ALTURA_CHAO - ESPESSURA_CHAO - 33 * scaleY,
       width: 30 * scaleX,
-      height: 32 * scaleY,
+      height: 33 * scaleY,
       color: cor,
       empilhado: false
     });
@@ -831,20 +838,17 @@ function resetGame() {
                
       if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
         const proximaFase = Math.floor(pontuacao / 2500);
-        if (proximaFase > faseAtual) {
-          faseAtual = proximaFase;
-          const config = DIFICULDADE_FASE[faseAtual];
-          intervaloObstaculo = config.intervalo;
-          GAME_SPEED = config.gameSpeed;
-          GRAVIDADE = config.gravidade;
+         // Mudança de fase - dentro do if (pontuacao % 2500 === 0 ...
+  if (proximaFase > faseAtual) {
+  faseAtual = proximaFase;
+  const config = DIFICULDADE_FASE[faseAtual];
+  
+  intervaloObstaculo = config.intervalo;
+  GAME_SPEED = config.gameSpeed;
+  GRAVIDADE = config.gravidade;
 
-          // Atualiza tamanho da sequência ao mudar de fase
-          tamanhoSequenciaAtual = SEQUENCIA_POR_FASE[faseAtual];
-          obstaculoEmSequencia = 0;
-
-         console.log(`=== FASE ALTERADA PARA ${fases[faseAtual].toUpperCase()} | Sequência: ${tamanhoSequenciaAtual} obstáculos ===`);
-        }
-      }
+  console.log(`=== FASE ${faseAtual + 1} - ${fases[faseAtual].toUpperCase()} ===`);
+}
 
       // ==================== DESENHO DA UI ====================
             // ==================== SCORE - AJUSTADO PARA MOBILE ====================
