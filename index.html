@@ -282,7 +282,8 @@ if (muteBtn) {
     // ==================== NOVAS VARIÁVEIS PARA SEQUÊNCIAS ====================
     let obstaculoEmSequencia = 0;           // contador de obstáculos na sequência atual
     let probabilidadeEmpilhado = 0.25;      // 25% de chance de obstáculo empilhado
-    
+    let tamanhoSequenciaAtual = 2;
+    let contadorSequencia = 0;
     let GRAVIDADE = 1.1;           // ← Gravidade (quanto maior = cai mais rápido)
     let GAME_SPEED = 1.5;           // ← Velocidade dos obstáculos (você gosta assim)
     
@@ -565,69 +566,56 @@ function resetGame() {
 
     // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO ====================
     
-    function criarObstaculo() {
-      const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
+  function criarObstaculo() {
+  const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
-      // Chance de vir sequência de obstáculos juntos
-      const chanceSequencia = 0.48;     // ~48% de chance de vir sequência
+  // Chance de obstáculo empilhado (a partir da fase 2)
+  const chanceEmpilhado = (faseAtual >= 1) ? 0.25 : 0;   // 25% de chance
 
-      // Chance de vir obstáculo duplo empilhado (só a partir da fase 2)
-      const chanceEmpilhado = (faseAtual >= 1) ? 0.22 : 0;
+  if (Math.random() < chanceEmpilhado) {
+    // ==================== OBSTÁCULO EMPILHADO (DUAS PARTES) ====================
+    const largura = 28 * scaleX;
+    const alturaBase = 26 * scaleY;
 
-      if (Math.random() < chanceEmpilhado) {
-        // ==================== OBSTÁCULO DUplo EMPILHADO ====================
-        const alturaBase = 26 * scaleY;
-        const largura = 28 * scaleX;
+    // Bloco de baixo
+    obstaculos.push({
+      x: BASE_WIDTH * scaleX + 30,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 1.9,
+      width: largura,
+      height: alturaBase * 1.9,
+      color: cor,
+      empilhado: true
+    });
 
-        obstaculos.push({
-          x: BASE_WIDTH * scaleX + 25,
-          y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 1.85,
-          width: largura,
-          height: alturaBase * 1.85,
-          color: cor,
-          empilhado: true
-        });
+    // Bloco de cima (menor)
+    obstaculos.push({
+      x: BASE_WIDTH * scaleX + 30,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.4,
+      width: largura * 0.82,
+      height: alturaBase * 1.4,
+      color: cor,
+      empilhado: true
+    });
 
-        obstaculos.push({
-          x: BASE_WIDTH * scaleX + 25,
-          y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.3,
-          width: largura * 0.85,
-          height: alturaBase * 1.3,
-          color: cor,
-          empilhado: true
-        });
+    return; // sai da função após criar o empilhado
+  }
 
-      } 
-      else if (Math.random() < chanceSequencia) {
-        // ==================== SEQUÊNCIA DE OBSTÁCULOS (2, 3, 4 ou 5) ====================
-        const quantidade = SEQUENCIA_POR_FASE[faseAtual];
+  // ==================== SEQUÊNCIA DE OBSTÁCULOS (2 a 5) ====================
+  const quantidade = SEQUENCIA_POR_FASE[faseAtual];
 
-        for (let i = 0; i < quantidade; i++) {
-          const offsetX = i * 72 * scaleX;   // Distância entre obstáculos da sequência
+  for (let i = 0; i < quantidade; i++) {
+    const offsetX = i * 68 * scaleX;   // espaço entre os blocos da sequência
 
-          obstaculos.push({
-            x: BASE_WIDTH * scaleX + 30 + offsetX,
-            y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY,
-            width: 30 * scaleX,
-            height: 30 * scaleY,
-            color: cor,
-            empilhado: false
-          });
-        }
-      } 
-      else {
-        // ==================== OBSTÁCULO ÚNICO NORMAL ====================
-        
-        obstaculos.push({
-          x: BASE_WIDTH * scaleX + 20,
-          y: ALTURA_CHAO - ESPESSURA_CHAO - 30 * scaleY,
-          width: 30 * scaleX,
-          height: 30 * scaleY,
-          color: cor,
-          empilhado: false
-        });
-      }
-    }
+    obstaculos.push({
+      x: BASE_WIDTH * scaleX + 35 + offsetX,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - 32 * scaleY,
+      width: 30 * scaleX,
+      height: 32 * scaleY,
+      color: cor,
+      empilhado: false
+    });
+  }
+}
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
    
@@ -818,21 +806,10 @@ function resetGame() {
         sapo.vy = 0;
         sapo.jumping = false;
       }
-
-     // ==================== CRIAÇÃO INTELIGENTE DE OBSTÁCULOS ====================
                
-             if (tempo % intervaloObstaculo === 0 && tempo >= 120) {
-           criarObstaculo();
-          }
-
-        obstaculoEmSequencia++;
-
-        // Controla a sequência por fase
-        if (obstaculoEmSequencia >= tamanhoSequenciaAtual) {
-          obstaculoEmSequencia = 0;
-          // Pequena variação aleatória para não ficar robótico
-          tamanhoSequenciaAtual = SEQUENCIA_POR_FASE[faseAtual] + Math.floor(Math.random() * 2) - 1;
-        }
+        // ==================== CRIAÇÃO DE OBSTÁCULOS ====================
+        if (tempo % intervaloObstaculo === 0 && tempo >= 100) {
+        criarObstaculo();
       }
                
       // Move obstáculos
