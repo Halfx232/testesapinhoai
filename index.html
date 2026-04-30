@@ -789,7 +789,7 @@ function resetGame() {
       poeira = poeira.filter(p => p.raio > 0.2 * scaleX && p.alpha > 0.05);
     }
 
-    function atualizarJogo() {
+         function atualizarJogo() {
       if (!gameStarted) return;
 
       const fase = getFaseAtual();
@@ -802,7 +802,7 @@ function resetGame() {
       sapo.vy += GRAVIDADE * scaleY;
       sapo.y += sapo.vy;
 
-      // Segurança de posição do sapo
+      // Segurança de posição
       if (sapo.y < -100 * scaleY || sapo.y > canvas.height + 100 * scaleY) {
         sapo.y = ALTURA_CHAO - ESPESSURA_CHAO - SAPO_OFFSET_VISUAL * scaleY;
         sapo.vy = 0;
@@ -813,12 +813,12 @@ function resetGame() {
         sapo.vy = 0;
         sapo.jumping = false;
       }
-               
-      // ==================== CRIAÇÃO DE OBSTÁCULOS ====================
+
+      // Criação de obstáculos
       if (tempo % intervaloObstaculo === 0 && tempo >= 100) {
         criarObstaculo();
       }
-               
+
       // Move obstáculos
       for (let i = 0; i < obstaculos.length; i++) {
         let obs = obstaculos[i];
@@ -829,18 +829,17 @@ function resetGame() {
 
       tempo++;
 
-      // Aumenta pontuação
+      // Pontuação
       if (!gameOverTriggered) {
         pontuacao++;
       }
 
-      // ==================== MUDANÇA DE FASE ====================
+      // Mudança de fase
       if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
         const proximaFase = Math.floor(pontuacao / 2500);
         if (proximaFase > faseAtual) {
           faseAtual = proximaFase;
           const config = DIFICULDADE_FASE[faseAtual];
-
           intervaloObstaculo = config.intervalo;
           GAME_SPEED = config.gameSpeed;
           GRAVIDADE = config.gravidade;
@@ -849,39 +848,32 @@ function resetGame() {
         }
       }
 
-      // ==================== DESENHO DA UI ====================
-      // Score
+      // UI
       ctx.save();
       ctx.fillStyle = "#000000";
       ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
-      const scoreY = isMobile ? 18 : 27;
-      ctx.fillText("Score: " + pontuacao, 10, scoreY);
+      ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
       ctx.restore();
 
-      // Nome da fase
       ctx.save();
       ctx.fillStyle = "#000000";
       ctx.font = isMobile ? "bold 14px Arial" : "bold 19px Arial";
-      const faseY = isMobile ? 18 : 25;
       const faseX = canvas.width - (isMobile ? 105 : 125);
       let nomeFase = getFaseAtual();
       nomeFase = nomeFase.charAt(0).toUpperCase() + nomeFase.slice(1);
-      ctx.fillText(nomeFase, faseX, faseY);
+      ctx.fillText(nomeFase, faseX, isMobile ? 18 : 25);
       ctx.restore();
 
-      // Desenha elementos visuais
       drawSapo();
       atualizarPoeira();
       drawCoracoes();
 
-      // Atualiza timers
+      // Timers
       if (piscandoSapo) {
         tempoPiscadaSapo -= 16.7;
         if (tempoPiscadaSapo <= 0) piscandoSapo = false;
       }
-      if (flashCoracoes > 0) {
-        flashCoracoes -= 16.7;
-      }
+      if (flashCoracoes > 0) flashCoracoes -= 16.7;
     }
     
     function drawObstaculo(obs) {
