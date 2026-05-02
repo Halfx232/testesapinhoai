@@ -564,84 +564,55 @@ function resetGame() {
   positionBanners();
 }
     
-   // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO (VERSÃO ATUALIZADA) ====================
+       // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO CORRIGIDA ====================
     
- function criarObstaculo() {
+function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
-  // Chance de vir obstáculo EMPILHADO (a partir da fase 2)
-  
-  const chanceEmpilhado = (faseAtual >= 1) ? 0.25 : 0;
-
-  // Chance de vir sequência (quanto maior a fase, maior a chance)
-  const chanceSequencia = 0.45 + (faseAtual * 0.08);   // Fase 1: ~45%, Fase 4: ~70%
-
-  if (Math.random() < chanceEmpilhado) {
-    
-    // ==================== OBSTÁCULO EMPILHADO ====================
-    
+  // === CHANCE DE OBSTÁCULO EMPILHADO (a partir da fase 2) ===
+  if (faseAtual >= 1 && Math.random() < 0.25) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
 
+    // Bloco de baixo
     obstaculos.push({
       x: BASE_WIDTH * scaleX + 40,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 1.95,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 2.0,
       width: largura,
-      height: alturaBase * 1.95,
-      color: cor,
-      empilhado: true
+      height: alturaBase * 2.0,
+      color: cor
     });
 
+    // Bloco de cima
     obstaculos.push({
       x: BASE_WIDTH * scaleX + 40,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.55,
-      width: largura * 0.82,
-      height: alturaBase * 1.45,
-      color: cor,
-      empilhado: true
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.8,
+      width: largura * 0.85,
+      height: alturaBase * 1.6,
+      color: cor
     });
 
     return;
   }
 
-  if (Math.random() < chanceSequencia) {
-    
-    // ==================== SEQUÊNCIA DE OBSTÁCULOS ====================
-    
-    const quantidade = SEQUENCIA_POR_FASE[faseAtual];
+  // === DECIDE SE VAI SER SEQUÊNCIA OU OBSTÁCULO ÚNICO ===
+  const quantidade = (Math.random() < 0.5) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-    // ESPAÇAMENTO MAIOR - esse é o principal ajuste que você pediu
-    
-    let espacoEntreBlocos = 10 * scaleX;   // ← Aumentado significativamente
+  // === ESPAÇAMENTO - AQUI É ONDE VAMOS FORÇAR A MUDANÇA ===
+  let espaco = 110 * scaleX;                    // Valor base
 
-    if (faseAtual === 0) espacoEntreBlocos = 92 * scaleX;   // Fase 1 um pouco mais apertada
-    else if (faseAtual === 1) espacoEntreBlocos = 102 * scaleX;
-    else if (faseAtual === 2) espacoEntreBlocos = 108 * scaleX;
-    else espacoEntreBlocos = 115 * scaleX;  // Fase 4 bem espaçado
+  if (faseAtual === 0) espaco = 95 * scaleX;
+  else if (faseAtual === 1) espaco = 115 * scaleX;
+  else if (faseAtual === 2) espaco = 125 * scaleX;
+  else espaco = 135 * scaleX;
 
-    for (let i = 0; i < quantidade; i++) {
-      const offsetX = i * espacoEntreBlocos;
-
-      obstaculos.push({
-        x: BASE_WIDTH * scaleX + 45 + offsetX,
-        y: ALTURA_CHAO - ESPESSURA_CHAO - 34 * scaleY,
-        width: 30 * scaleX,
-        height: 34 * scaleY,
-        color: cor,
-        empilhado: false
-      });
-    }
-  } 
-  else {
-    // ==================== OBSTÁCULO ÚNICO NORMAL ====================
-    
+  for (let i = 0; i < quantidade; i++) {
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 45,
+      x: BASE_WIDTH * scaleX + 50 + (i * espaco),   // <--- Aqui está o espaçamento
       y: ALTURA_CHAO - ESPESSURA_CHAO - 34 * scaleY,
       width: 30 * scaleX,
       height: 34 * scaleY,
-      color: cor,
-      empilhado: false
+      color: cor
     });
   }
 }
