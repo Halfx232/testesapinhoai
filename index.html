@@ -564,54 +564,54 @@ function resetGame() {
   positionBanners();
 }
     
-       // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO CORRIGIDA ====================
+      // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO ATUALIZADA ====================
     
 function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
-  // === CHANCE DE OBSTÁCULO EMPILHADO (a partir da fase 2) ===
-  if (faseAtual >= 1 && Math.random() < 0.25) {
+  // Obstáculo empilhado (a partir da fase 2)
+  
+  if (faseAtual >= 1 && Math.random() < 0.23) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
 
-    // Bloco de baixo
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 40,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 2.0,
+      x: BASE_WIDTH * scaleX + 45,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 2.1,
       width: largura,
-      height: alturaBase * 2.0,
+      height: alturaBase * 2.1,
       color: cor
     });
 
-    // Bloco de cima
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 40,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.8,
+      x: BASE_WIDTH * scaleX + 45,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.9,
       width: largura * 0.85,
-      height: alturaBase * 1.6,
+      height: alturaBase * 1.55,
       color: cor
     });
-
     return;
   }
 
-  // === DECIDE SE VAI SER SEQUÊNCIA OU OBSTÁCULO ÚNICO ===
-  const quantidade = (Math.random() < 0.5) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
+  // Decide se é sequência ou único
+  
+  const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // === ESPAÇAMENTO - AQUI É ONDE VAMOS FORÇAR A MUDANÇA ===
-  let espaco = 110 * scaleX;                    // Valor base
+  // ESPAÇAMENTO - Valor grande e direto
+  
+  let espaco = 145 * scaleX;     // ← Aumentado bastante
 
-  if (faseAtual === 0) espaco = 95 * scaleX;
-  else if (faseAtual === 1) espaco = 115 * scaleX;
-  else if (faseAtual === 2) espaco = 125 * scaleX;
-  else espaco = 135 * scaleX;
+  if (faseAtual === 0) espaco = 115 * scaleX;   // Fase 1
+  else if (faseAtual === 1) espaco = 135 * scaleX;
+  else if (faseAtual === 2) espaco = 150 * scaleX;
+  else espaco = 165 * scaleX;                   // Fase 4
 
   for (let i = 0; i < quantidade; i++) {
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 50 + (i * espaco),   // <--- Aqui está o espaçamento
-      y: ALTURA_CHAO - ESPESSURA_CHAO - 34 * scaleY,
-      width: 30 * scaleX,
-      height: 34 * scaleY,
+      x: BASE_WIDTH * scaleX + 55 + (i * espaco),   // <--- Ponto principal
+      y: ALTURA_CHAO - ESPESSURA_CHAO - 35 * scaleY,
+      width: 32 * scaleX,
+      height: 35 * scaleY,
       color: cor
     });
   }
