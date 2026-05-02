@@ -287,7 +287,7 @@ if (muteBtn) {
     let GRAVIDADE = 1.1;           // ← Gravidade (quanto maior = cai mais rápido)
     let GAME_SPEED = 1.5;           // ← Velocidade dos obstáculos (você gosta assim)
     
-    const PULO_FORCA = -16;         // ← VELOCIDADE DE SUBIDA (principal ajuste agora)
+    const PULO_FORCA = -15;         // ← VELOCIDADE DE SUBIDA (principal ajuste agora)
                                       // quanto mais negativo = subida MAIS RÁPIDA
     
     const BASE_WIDTH = 800;
@@ -602,9 +602,9 @@ function criarObstaculo() {
   let espaco = 145 * scaleX;     // ← Aumentado bastante
 
   if (faseAtual === 0) espaco = 270 * scaleX;   // Fase 1
-  else if (faseAtual === 1) espaco = 135 * scaleX;
-  else if (faseAtual === 2) espaco = 150 * scaleX;
-  else espaco = 165 * scaleX;                   // Fase 4
+  else if (faseAtual === 1) espaco = 250 * scaleX;
+  else if (faseAtual === 2) espaco = 235 * scaleX;
+  else espaco = 220 * scaleX;                   // Fase 4
 
   for (let i = 0; i < quantidade; i++) {
     obstaculos.push({
