@@ -116,6 +116,7 @@
   <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
   <audio id="victorySound" src="Victory.mp3"></audio>
   <audio id="gameOverSound" src="gameover.mp3" preload="auto"></audio>
+  <audio id="phaseChangeSound" src="fase.mp3" preload="auto"></audio>
   <audio id="backgroundMusic" src="Musicgame.mp3" loop></audio>  <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -237,6 +238,10 @@
     const backgroundMusic = document.getElementById("backgroundMusic");
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.5;
+    
+    const phaseChangeSound = document.getElementById("phaseChangeSound");
+    phaseChangeSound.volume = 0.7;        // Ajuste o volume como preferir (0.5 ~ 0.8 costuma ficar bom)
+    
 
     let isMuted = false;
 const muteBtn = document.getElementById('mute-btn');
@@ -828,19 +833,27 @@ function criarObstaculo() {
         pontuacao++;
       }
 
-      // Mudança de fase
-      if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
-        const proximaFase = Math.floor(pontuacao / 2500);
-        if (proximaFase > faseAtual) {
-          faseAtual = proximaFase;
-          const config = DIFICULDADE_FASE[faseAtual];
-          intervaloObstaculo = config.intervalo;
-          GAME_SPEED = config.gameSpeed;
-          GRAVIDADE = config.gravidade;
+  // Mudança de fase
+if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
+  const proximaFase = Math.floor(pontuacao / 2500);
+  if (proximaFase > faseAtual) {
+    faseAtual = proximaFase;
+    const config = DIFICULDADE_FASE[faseAtual];
+    intervaloObstaculo = config.intervalo;
+    GAME_SPEED = config.gameSpeed;
+    GRAVIDADE = config.gravidade;
 
-          console.log(`=== FASE ${faseAtual + 1} - ${fases[faseAtual].toUpperCase()} ===`);
-        }
-      }
+    console.log(`=== FASE ${faseAtual + 1} - ${fases[faseAtual].toUpperCase()} ===`);
+
+    // 🔥 Toca o som de mudança de fase
+    if (phaseChangeSound) {
+      phaseChangeSound.currentTime = 0;
+      phaseChangeSound.play().catch(e => {
+        console.log("Erro ao tocar som de fase:", e);
+      });
+    }
+  }
+}
 
       // UI
       ctx.save();
