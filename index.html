@@ -307,6 +307,7 @@ if (muteBtn) {
 
     let gameStarted = false;
     let sapo, obstaculos = [], tempo, intervaloObstaculo, faseAtual, pontuacao;
+    let highScore = 0;                    // ← ADICIONE ESTA LINHA
     let poeira = [];
     let vidas = 3;
     let piscandoSapo = false;
@@ -316,6 +317,7 @@ if (muteBtn) {
     let flashCoracoes = 0;
     const DURACAO_FLASH_CORACOES = 1200;   // mesmo tempo do flash
     let animationFrameId;
+    
 
     // Nova variável para controlar o Game Over
     let gameOverTriggered = false;
@@ -566,6 +568,11 @@ function resetGame() {
   startBanner.addEventListener('touchstart', startGameHandler);
   document.addEventListener('keydown', startGameHandler);
 
+  const savedHighScore = localStorage.getItem('sapinhoHighScore');
+  if (savedHighScore) {
+    highScore = parseInt(savedHighScore);
+  }
+
   resizeCanvas();
   positionBanners();
 }
@@ -768,7 +775,29 @@ function criarObstaculo() {
     ctx.restore();
   }
 }
+function drawUI() {
+  ctx.save();
+  ctx.fillStyle = "#000000";
+  ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
 
+  // Score normal (esquerda)
+  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
+
+  // ==================== RECORDE (lado direito) ====================
+  const recordText = "Record: " + highScore;
+  const textWidth = ctx.measureText(recordText).width;
+  
+  const xRecord = canvas.width - textWidth - 15;
+  const yRecord = isMobile ? 18 : 27;
+
+  // Efeito dourado para destacar o recorde
+  ctx.shadowColor = "rgba(255, 215, 0, 0.9)";
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = "#FFD700";        // cor dourada
+  ctx.fillText(recordText, xRecord, yRecord);
+
+  ctx.restore();
+}
     function atualizarPoeira() {
       ctx.save();
       ctx.scale(scaleX, scaleY);
@@ -831,9 +860,14 @@ function criarObstaculo() {
       // Pontuação
       if (!gameOverTriggered) {
         pontuacao++;
-      }
+      // Atualiza recorde
+     if (pontuacao > highScore) {
+     highScore = pontuacao;
+     localStorage.setItem('sapinhoHighScore', highScore);
+  }
+}
 
-  // Mudança de fase
+    // Mudança de fase
 if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
   const proximaFase = Math.floor(pontuacao / 2500);
   if (proximaFase > faseAtual) {
@@ -856,20 +890,16 @@ if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
 }
 
       // UI
-      ctx.save();
-      ctx.fillStyle = "#000000";
-      ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
-      ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
-      ctx.restore();
+      // ==================== UI (Score + Record + Fase) ====================
+drawUI();                    // ← Score + Record
 
-      ctx.save();
-      ctx.fillStyle = "#000000";
-      ctx.font = isMobile ? "bold 14px Arial" : "bold 19px Arial";
-      const faseX = canvas.width - (isMobile ? 105 : 125);
-      let nomeFase = getFaseAtual();
-      nomeFase = nomeFase.charAt(0).toUpperCase() + nomeFase.slice(1);
-      ctx.fillText(nomeFase, faseX, isMobile ? 18 : 25);
-      ctx.restore();
+// Nome da fase (mantido separado)
+ctx.save();
+ctx.fillStyle = "#000000";
+ctx.font = isMobile ? "bold 14px Arial" : "bold 19px Arial";
+const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
+ctx.fillText(nomeFase, canvas.width - (isMobile ? 105 : 125), isMobile ? 45 : 55);
+ctx.restore();
 
       drawSapo();
       atualizarPoeira();
@@ -882,6 +912,33 @@ if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
       }
       if (flashCoracoes > 0) flashCoracoes -= 16.7;
     }
+
+  function drawUI() {
+  // Score normal (já existe)
+  ctx.save();
+  ctx.fillStyle = "#000000";
+  ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
+  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
+  ctx.restore();
+
+  // ==================== RECORDE (LADO DIREITO) ====================
+  ctx.save();
+  ctx.fillStyle = "#000000";
+  ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
+  
+  const recordText = "Record: " + highScore;
+  const textWidth = ctx.measureText(recordText).width;
+  
+  const xRecord = canvas.width - textWidth - 15;
+  const yRecord = isMobile ? 18 : 27;
+
+  // Efeito de sombra para destacar
+  ctx.shadowColor = "rgba(255, 215, 0, 0.8)";
+  ctx.shadowBlur = 8;
+  
+  ctx.fillText(recordText, xRecord, yRecord);
+  ctx.restore();
+}
     
     function drawObstaculo(obs) {
       ctx.save();
