@@ -914,29 +914,32 @@ ctx.restore();
     }
 
   function drawUI() {
-  // Score normal (já existe)
   ctx.save();
   ctx.fillStyle = "#000000";
   ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
-  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
-  ctx.restore();
 
-  // ==================== RECORDE (LADO DIREITO) ====================
-  ctx.save();
-  ctx.fillStyle = "#000000";
-  ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
-  
+  // Score (lado esquerdo)
+  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
+
+  // ==================== RECORDE AO LADO DOS CORAÇÕES ====================
   const recordText = "Record: " + highScore;
   const textWidth = ctx.measureText(recordText).width;
-  
-  const xRecord = canvas.width - textWidth - 15;
-  const yRecord = isMobile ? 18 : 27;
 
-  // Efeito de sombra para destacar
-  ctx.shadowColor = "rgba(255, 215, 0, 0.8)";
-  ctx.shadowBlur = 8;
-  
+  let xRecord, yRecord;
+
+  if (isMobile) {
+    xRecord = 270 + 110;           // Depois dos corações (ajuste o 110 se precisar)
+    yRecord = 52;                  // Mesma altura dos corações no mobile
+  } else {
+    xRecord = 160 + 130;           // Depois dos corações no desktop
+    yRecord = 52;                  // Mesma altura dos corações
+  }
+
+  ctx.shadowColor = "rgba(255, 215, 0, 0.9)";
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = "#FFD700";
   ctx.fillText(recordText, xRecord, yRecord);
+
   ctx.restore();
 }
     
@@ -962,8 +965,8 @@ ctx.restore();
       return false;
     }
 
-        function iniciarJogo() {
-      if (gameStarted) return;
+  function iniciarJogo() {
+    if (gameStarted) return;
       gameStarted = true;
       // Adicionar listeners de JOGO
       document.addEventListener('keydown', handleKeyJump);
