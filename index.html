@@ -775,25 +775,28 @@ function criarObstaculo() {
     ctx.restore();
   }
 }
-function drawUI() {
+ function drawUI() {
   ctx.save();
-  ctx.fillStyle = "#000000";
+  ctx.fillStyle = "#000000";           // Preto igual ao Score
   ctx.font = isMobile ? "bold 17px Arial" : "bold 19px Arial";
 
-  // Score normal (esquerda)
+  // Score (lado esquerdo)
   ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
 
-  // ==================== RECORDE (lado direito) ====================
+  // ==================== RECORDE AO LADO DOS CORAÇÕES ====================
   const recordText = "Record: " + highScore;
   const textWidth = ctx.measureText(recordText).width;
-  
-  const xRecord = canvas.width - textWidth - 15;
-  const yRecord = isMobile ? 18 : 27;
 
-  // Efeito dourado para destacar o recorde
-  ctx.shadowColor = "rgba(255, 215, 0, 0.9)";
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = "#FFD700";
+  let xRecord, yRecord;
+
+  if (isMobile) {
+    xRecord = 270 + 125;           // Depois dos corações (ajuste o 125 se precisar)
+    yRecord = 28;                  // Subido - mesma altura dos corações
+  } else {
+    xRecord = 160 + 145;           // Depois dos corações no desktop
+    yRecord = 28;                  // Subido
+  }
+
   ctx.fillText(recordText, xRecord, yRecord);
 
   ctx.restore();
@@ -893,12 +896,15 @@ if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
       // ==================== UI (Score + Record + Fase) ====================
 drawUI();                    // ← Score + Record
 
-// Nome da fase (mantido separado)
+ // Nome da fase (subido também)
 ctx.save();
 ctx.fillStyle = "#000000";
-ctx.font = isMobile ? "bold 14px Arial" : "bold 19px Arial";
+ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
+
 const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
-ctx.fillText(nomeFase, canvas.width - (isMobile ? 105 : 125), isMobile ? 45 : 55);
+const faseX = canvas.width - (isMobile ? 105 : 130);
+
+ctx.fillText(nomeFase, faseX, isMobile ? 28 : 28);   // Subido para mesma altura
 ctx.restore();
 
       drawSapo();
