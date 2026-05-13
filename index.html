@@ -713,44 +713,31 @@ function criarObstaculo() {
   ctx.restore();
 }
     
- function drawCoracoes() {
-  // ==================== AJUSTES MOBILE ====================
-  let tamanhoBase = 22;                    // base desktop (não mexa)
+  function drawCoracoes() {
+  let tamanhoBase = 22;
 
   if (isMobile) {
-    tamanhoBase = 65;                      // ← Diminua aqui para corações menores no mobile
-    // Exemplo: 32 = um pouco menor | 30 = menor ainda | 28 = bem menor
+    tamanhoBase = 65;   // um pouco menor
   }
 
   const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
 
-  // Espaçamento (mantendo o que você já ajustou)
-  let espacamento;
-  if (isMobile) {
-    espacamento = tamanho * 0.7;           // seu valor atual
-  } else {
-    espacamento = tamanho * 1.4;
-  }
+  let espacamento = isMobile ? tamanho * 0.65 : tamanho * 1.4;
 
-  // Posições
   let xInicio, yPos;
   if (isMobile) {
-    xInicio = 270 * scaleX;
-    yPos    = 5 * scaleY;                 // ← SUBA aqui para subir os corações no mobile
-    // Exemplo: 18 = sobe mais | 20 = sobe médio | 24 = desce um pouco
+    xInicio = 195 * scaleX;     // ← MOVEMOS BASTANTE PARA ESQUERDA
+    yPos    = 5 * scaleY;
   } else {
     xInicio = 160 * scaleX;
-    yPos    = 5 * scaleY;                  // desktop continua igual
+    yPos    = 5 * scaleY;
   }
-  // =======================================================
 
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
 
     let cor = "#444";
-    if (i < vidas) {
-      cor = "#e53935";
-    }
+    if (i < vidas) cor = "#e53935";
 
     if (flashCoracoes > 0 && i < vidas) {
       const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
@@ -898,22 +885,18 @@ if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
       // ==================== UI (Score + Record + Fase) ====================
 drawUI();                    // ← Score + Record
 
-  // Nome da fase
+    // Nome da fase
 ctx.save();
 ctx.fillStyle = "#000000";
 ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
 
 const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
-const faseX = canvas.width - (isMobile ? 105 : 130);
+const faseX = canvas.width - (isMobile ? 98 : 130);
 
-ctx.fillText(nomeFase, faseX, isMobile ? 20 : 28);   // Desci um pouco no mobile
+ctx.fillText(nomeFase, faseX, isMobile ? 38 : 28);
 ctx.restore();
 
-      drawSapo();
-      atualizarPoeira();
-      drawCoracoes();
-
-      // Timers
+   // Timers
       if (piscandoSapo) {
         tempoPiscadaSapo -= 16.7;
         if (tempoPiscadaSapo <= 0) piscandoSapo = false;
