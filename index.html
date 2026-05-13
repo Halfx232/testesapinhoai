@@ -775,27 +775,31 @@ function criarObstaculo() {
     ctx.restore();
   }
 }
-function drawUI() {
+ function drawUI() {
   ctx.save();
   ctx.fillStyle = "#000000";
   ctx.font = isMobile ? "bold 16px Arial" : "bold 19px Arial";
 
-  // Score (esquerda)
+  // Score (lado esquerdo)
   ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
 
-  // ==================== RECORDE - AO LADO DOS CORAÇÕES ====================
+  // ==================== RECORDE - DEPOIS DOS CORAÇÕES ====================
   const recordText = "Record: " + highScore;
   const textWidth = ctx.measureText(recordText).width;
 
   let xRecord, yRecord;
 
   if (isMobile) {
-    xRecord = canvas.width - textWidth - 12;   // Alinhado à direita com margem
-    yRecord = 38;                              // Mesma altura dos corações
+    xRecord = 270 + 135;      // ← Aumente ou diminua este número (135) para mover mais para esquerda/direita
+    yRecord = 38;             // Mesma altura dos corações
   } else {
-    xRecord = 160 + 155;                       // Desktop
+    xRecord = 160 + 155;      // Desktop (deixe assim)
     yRecord = 28;
   }
+
+  ctx.fillText(recordText, xRecord, yRecord);
+  ctx.restore();
+}
 
   ctx.fillText(recordText, xRecord, yRecord);
   ctx.restore();
@@ -895,15 +899,15 @@ if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
       // ==================== UI (Score + Record + Fase) ====================
 drawUI();                    // ← Score + Record
 
-     // Nome da fase
+ // Nome da fase
 ctx.save();
 ctx.fillStyle = "#000000";
 ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
 
 const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
-const faseX = canvas.width - (isMobile ? 100 : 130);
+const faseX = canvas.width - (isMobile ? 95 : 130);   // Empurrado mais para direita
 
-ctx.fillText(nomeFase, faseX, isMobile ? 38 : 28);   // Subido no mobile
+ctx.fillText(nomeFase, faseX, isMobile ? 38 : 28);
 ctx.restore();
 
       drawSapo();
