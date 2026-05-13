@@ -712,12 +712,13 @@ function criarObstaculo() {
   ctx.stroke();
   ctx.restore();
 }
+    
  function drawCoracoes() {
   // ==================== AJUSTES MOBILE ====================
   let tamanhoBase = 22;                    // base desktop (não mexa)
 
   if (isMobile) {
-    tamanhoBase = 70;                      // ← Diminua aqui para corações menores no mobile
+    tamanhoBase = 65;                      // ← Diminua aqui para corações menores no mobile
     // Exemplo: 32 = um pouco menor | 30 = menor ainda | 28 = bem menor
   }
 
@@ -775,25 +776,26 @@ function criarObstaculo() {
     ctx.restore();
   }
 }
- function drawUI() {
+
+function drawUI() {
   ctx.save();
   ctx.fillStyle = "#000000";
-  ctx.font = isMobile ? "bold 16px Arial" : "bold 19px Arial";
 
-  // Score (lado esquerdo)
+  // Fonte menor no mobile
+  ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
+
+  // Score
   ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
 
-  // ==================== RECORDE - DEPOIS DOS CORAÇÕES ====================
+  // Record
   const recordText = "Record: " + highScore;
-  const textWidth = ctx.measureText(recordText).width;
 
   let xRecord, yRecord;
-
   if (isMobile) {
-    xRecord = 270 + 135;      // ← Aumente ou diminua este número (135) para mover mais para esquerda/direita
-    yRecord = 38;             // Mesma altura dos corações
+    xRecord = 270 + 105;     // Depois dos corações (ajuste 105 se precisar)
+    yRecord = 38;
   } else {
-    xRecord = 160 + 155;      // Desktop (deixe assim)
+    xRecord = 160 + 155;
     yRecord = 28;
   }
 
