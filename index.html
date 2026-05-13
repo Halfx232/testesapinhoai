@@ -713,21 +713,44 @@ function criarObstaculo() {
   ctx.restore();
 }
     
-function drawCoracoes() {
-  let tamanhoBase = 22;
-  if (isMobile) tamanhoBase = 58;   // menor no mobile
+  function drawCoracoes() {
+  // ==================== AJUSTES MOBILE ====================
+  let tamanhoBase = 22;                    // base desktop (não mexa)
+
+  if (isMobile) {
+    tamanhoBase = 65;                      // ← Diminua aqui para corações menores no mobile
+    // Exemplo: 32 = um pouco menor | 30 = menor ainda | 28 = bem menor
+  }
 
   const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
-  let espacamento = isMobile ? tamanho * 0.68 : tamanho * 1.4;
 
-  let xInicio = isMobile ? 175 * scaleX : 160 * scaleX;  // ← mais à esquerda
-  let yPos = 5 * scaleY;
+  // Espaçamento (mantendo o que você já ajustou)
+  let espacamento;
+  if (isMobile) {
+    espacamento = tamanho * 0.7;           // seu valor atual
+  } else {
+    espacamento = tamanho * 1.4;
+  }
+
+  // Posições
+  let xInicio, yPos;
+  if (isMobile) {
+    xInicio = 270 * scaleX;
+    yPos    = 5 * scaleY;                 // ← SUBA aqui para subir os corações no mobile
+    // Exemplo: 18 = sobe mais | 20 = sobe médio | 24 = desce um pouco
+  } else {
+    xInicio = 160 * scaleX;
+    yPos    = 5 * scaleY;                  // desktop continua igual
+  }
+  // =======================================================
 
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
 
     let cor = "#444";
-    if (i < vidas) cor = "#e53935";
+    if (i < vidas) {
+      cor = "#e53935";
+    }
 
     if (flashCoracoes > 0 && i < vidas) {
       const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
@@ -752,24 +775,6 @@ function drawCoracoes() {
     ctx.stroke();
     ctx.restore();
   }
-}
-
-  function drawUI() {
-  ctx.save();
-  ctx.fillStyle = "#000000";
-  ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
-
-  // Score
-  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
-
-  // Record
-  const recordText = "Record: " + highScore;
-
-  let xRecord = isMobile ? (270 + 98) : (160 + 155);   // ajuste o 98 se precisar
-  let yRecord = isMobile ? 38 : 28;
-
-  ctx.fillText(recordText, xRecord, yRecord);
-  ctx.restore();
 }
     
     function atualizarPoeira() {
