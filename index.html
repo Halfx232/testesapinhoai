@@ -606,71 +606,66 @@ return;  // não desenha nessa frame → efeito piscar
   ctx.stroke();
   ctx.restore();
 }
- function drawCoracoes() {
-  // ==================== AJUSTES MOBILE ====================
-  let tamanhoBase = 22;                    // base desktop (não mexa)  if (isMobile) {
-    tamanhoBase = 70;                      // ← Diminua aqui para corações menores no mobile
-    // Exemplo: 32 = um pouco menor | 30 = menor ainda | 28 = bem menor
-  }  const tamanho = tamanhoBase * Math.min(scaleX, scaleY);  // Espaçamento (mantendo o que você já ajustou)
-  let espacamento;
-  if (isMobile) {
-    espacamento = tamanho * 0.7;           // seu valor atual
-  } else {
-    espacamento = tamanho * 1.4;
-  }  // Posições
-  let xInicio, yPos;
-  if (isMobile) {
-    xInicio = 270 * scaleX;
-    yPos    = 5 * scaleY;                 // ← SUBA aqui para subir os corações no mobile
-    // Exemplo: 18 = sobe mais | 20 = sobe médio | 24 = desce um pouco
-  } else {
-    xInicio = 160 * scaleX;
-    yPos    = 5 * scaleY;                  // desktop continua igual
+    
+function drawCoracoes() {
+  let tamanhoBase = 22;
+  if (isMobile) tamanhoBase = 58;
+
+  const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
+  let espacamento = isMobile ? tamanho * 0.68 : tamanho * 1.4;
+
+  let xInicio = isMobile ? 175 * scaleX : 160 * scaleX;
+  let yPos = 5 * scaleY;
+
+  for (let i = 0; i < 3; i++) {
+    const x = xInicio + i * espacamento;
+
+    let cor = "#444";
+    if (i < vidas) cor = "#e53935";
+
+    if (flashCoracoes > 0 && i < vidas) {
+      const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
+      cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
+    }
+
+    ctx.save();
+    ctx.scale(scaleX, scaleY);
+    ctx.fillStyle = cor;
+    ctx.beginPath();
+    const cx = (x / scaleX) + tamanho / 2;
+    const cy = (yPos / scaleY) + tamanho / 4;
+    ctx.moveTo(cx, cy + tamanho * 0.3);
+    ctx.bezierCurveTo(cx, cy, cx - tamanho*0.5, cy, cx - tamanho*0.5, cy + tamanho*0.4);
+    ctx.bezierCurveTo(cx - tamanho*0.5, cy + tamanho*0.8, cx, cy + tamanho*0.9, cx, cy + tamanho*0.6);
+    ctx.bezierCurveTo(cx, cy + tamanho*0.9, cx + tamanho*0.5, cy + tamanho*0.8, cx + tamanho*0.5, cy + tamanho*0.4);
+    ctx.bezierCurveTo(cx + tamanho*0.5, cy, cx, cy, cx, cy + tamanho * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1.8 / Math.max(scaleX, scaleY);
+    ctx.stroke();
+    ctx.restore();
   }
-  // =======================================================  for (let i = 0; i < 3; i++) {
-    const x = xInicio + i * espacamento;let cor = "#444";
-if (i < vidas) {
-  cor = "#e53935";
 }
-
-if (flashCoracoes > 0 && i < vidas) {
-  const pulso = Math.sin(flashCoracoes / 60) * 0.5 + 0.5;
-  cor = `rgb(255, ${Math.floor(80 + 175 * pulso)}, ${Math.floor(80 + 175 * pulso)})`;
-}
-
-ctx.save();
-ctx.scale(scaleX, scaleY);
-ctx.fillStyle = cor;
-ctx.beginPath();
-const cx = (x / scaleX) + tamanho / 2;
-const cy = (yPos / scaleY) + tamanho / 4;
-ctx.moveTo(cx, cy + tamanho * 0.3);
-ctx.bezierCurveTo(cx, cy, cx - tamanho*0.5, cy, cx - tamanho*0.5, cy + tamanho*0.4);
-ctx.bezierCurveTo(cx - tamanho*0.5, cy + tamanho*0.8, cx, cy + tamanho*0.9, cx, cy + tamanho*0.6);
-ctx.bezierCurveTo(cx, cy + tamanho*0.9, cx + tamanho*0.5, cy + tamanho*0.8, cx + tamanho*0.5, cy + tamanho*0.4);
-ctx.bezierCurveTo(cx + tamanho*0.5, cy, cx, cy, cx, cy + tamanho * 0.3);
-ctx.closePath();
-ctx.fill();
-ctx.strokeStyle = "#fff";
-ctx.lineWidth = 1.8 / Math.max(scaleX, scaleY);
-ctx.stroke();
-ctx.restore();  }
-}
+    
  function drawUI() {
   ctx.save();
   ctx.fillStyle = "#000000";
-  ctx.font = isMobile ? "bold 16px Arial" : "bold 19px Arial";  // Score (lado esquerdo)
-  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);  // ==================== RECORDE - DEPOIS DOS CORAÇÕES ====================
+  ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
+
+  // Score
+  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
+
+  // Record
   const recordText = "Record: " + highScore;
-  const textWidth = ctx.measureText(recordText).width;  let xRecord, yRecord;  if (isMobile) {
-    xRecord = 270 + 135;      // ← Aumente ou diminua este número (135) para mover mais para esquerda/direita
-    yRecord = 38;             // Mesma altura dos corações
-  } else {
-    xRecord = 160 + 155;      // Desktop (deixe assim)
-    yRecord = 28;
-  }  ctx.fillText(recordText, xRecord, yRecord);
+  let xRecord = isMobile ? (270 + 105) : (160 + 155);
+  let yRecord = isMobile ? 38 : 28;
+
+  ctx.fillText(recordText, xRecord, yRecord);
   ctx.restore();
-}function atualizarPoeira() {
+}
+
+function atualizarPoeira() {
   ctx.save();
   ctx.scale(scaleX, scaleY);
   for (let i = 0; i < poeira.length; i++) {
@@ -751,16 +746,26 @@ if (phaseChangeSound) {
   phaseChangeSound.play().catch(e => {
     console.log("Erro ao tocar som de fase:", e);
   });
-}  }
-}  // UI
-  // ==================== UI (Score + Record + Fase) ====================drawUI();                    // ← Score + Record  // Nome da fase
-ctx.save();
-ctx.fillStyle = "#000000";
-ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
-const faseX = canvas.width - (isMobile ? 105 : 130);ctx.fillText(nomeFase, faseX, isMobile ? 20 : 28);   // Desci um pouco no mobile
-ctx.restore();  drawSapo();
-  atualizarPoeira();
-  drawCoracoes();
+}  
+  }
+    }  
+  
+  // ==================== UI (Score + Record + Fase) ====================drawUI();                   
+    // ← Score + Record  // Nome da fase
+         drawUI(); 
+
+      // Nome da fase
+      ctx.save();
+      ctx.fillStyle = "#000000";
+      ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
+      const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
+      const faseX = canvas.width - (isMobile ? 105 : 130);
+      ctx.fillText(nomeFase, faseX, isMobile ? 38 : 28);
+      ctx.restore();
+
+      drawSapo();
+      atualizarPoeira();
+      drawCoracoes();
 
   // Timers
   if (piscandoSapo) {
