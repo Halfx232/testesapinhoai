@@ -904,7 +904,7 @@ ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
 const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
 const faseX = canvas.width - (isMobile ? 105 : 130);
 
-ctx.fillText(nomeFase, faseX, isMobile ? 55 : 28);   // Desci um pouco no mobile
+ctx.fillText(nomeFase, faseX, isMobile ? 28 : 28);   // Desci um pouco no mobile
 ctx.restore();
 
       drawSapo();
