@@ -896,15 +896,15 @@ if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
       // ==================== UI (Score + Record + Fase) ====================
 drawUI();                    // ← Score + Record
 
- // Nome da fase
+  // Nome da fase
 ctx.save();
 ctx.fillStyle = "#000000";
 ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
 
 const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
-const faseX = canvas.width - (isMobile ? 95 : 130);   // Empurrado mais para direita
+const faseX = canvas.width - (isMobile ? 105 : 130);
 
-ctx.fillText(nomeFase, faseX, isMobile ? 38 : 28);
+ctx.fillText(nomeFase, faseX, isMobile ? 55 : 28);   // Desci um pouco no mobile
 ctx.restore();
 
       drawSapo();
