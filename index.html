@@ -713,25 +713,15 @@ function criarObstaculo() {
   ctx.restore();
 }
     
-  function drawCoracoes() {
+function drawCoracoes() {
   let tamanhoBase = 22;
-
-  if (isMobile) {
-    tamanhoBase = 65;   // um pouco menor
-  }
+  if (isMobile) tamanhoBase = 58;   // menor no mobile
 
   const tamanho = tamanhoBase * Math.min(scaleX, scaleY);
+  let espacamento = isMobile ? tamanho * 0.68 : tamanho * 1.4;
 
-  let espacamento = isMobile ? tamanho * 0.65 : tamanho * 1.4;
-
-  let xInicio, yPos;
-  if (isMobile) {
-    xInicio = 195 * scaleX;     // ← MOVEMOS BASTANTE PARA ESQUERDA
-    yPos    = 5 * scaleY;
-  } else {
-    xInicio = 160 * scaleX;
-    yPos    = 5 * scaleY;
-  }
+  let xInicio = isMobile ? 175 * scaleX : 160 * scaleX;  // ← mais à esquerda
+  let yPos = 5 * scaleY;
 
   for (let i = 0; i < 3; i++) {
     const x = xInicio + i * espacamento;
@@ -764,11 +754,9 @@ function criarObstaculo() {
   }
 }
 
-function drawUI() {
+  function drawUI() {
   ctx.save();
   ctx.fillStyle = "#000000";
-
-  // Fonte menor no mobile
   ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
 
   // Score
@@ -777,14 +765,8 @@ function drawUI() {
   // Record
   const recordText = "Record: " + highScore;
 
-  let xRecord, yRecord;
-  if (isMobile) {
-    xRecord = 270 + 105;     // Depois dos corações (ajuste 105 se precisar)
-    yRecord = 38;
-  } else {
-    xRecord = 160 + 155;
-    yRecord = 28;
-  }
+  let xRecord = isMobile ? (270 + 98) : (160 + 155);   // ajuste o 98 se precisar
+  let yRecord = isMobile ? 38 : 28;
 
   ctx.fillText(recordText, xRecord, yRecord);
   ctx.restore();
@@ -885,13 +867,13 @@ if (pontuacao > 0 && pontuacao % 2500 === 0 && faseAtual < 3) {
       // ==================== UI (Score + Record + Fase) ====================
 drawUI();                    // ← Score + Record
 
-    // Nome da fase
+  // Nome da fase
 ctx.save();
 ctx.fillStyle = "#000000";
 ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
 
 const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
-const faseX = canvas.width - (isMobile ? 98 : 130);
+const faseX = canvas.width - (isMobile ? 105 : 130);
 
 ctx.fillText(nomeFase, faseX, isMobile ? 38 : 28);
 ctx.restore();
