@@ -783,22 +783,14 @@ function criarObstaculo() {
   ctx.fillStyle = "#000000";
   ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
 
-  // Score (lado esquerdo)
+  // Score
   ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 27);
 
-  // ==================== RECORDE - DEPOIS DOS CORAÇÕES ====================
+  // Record
   const recordText = "Record: " + highScore;
-  const textWidth = ctx.measureText(recordText).width;
 
-  let xRecord, yRecord;
-
-  if (isMobile) {
-    xRecord = 270 + -70;      // ← Ajuste este número (115) para mover o Record para esquerda/direita
-    yRecord = 19;             // Mesma altura dos corações e Score
-  } else {
-    xRecord = 160 + 145;
-    yRecord = 28;
-  }
+  let xRecord = isMobile ? (270 - 70) : (160 + 145);
+  let yRecord = isMobile ? 19 : 28;
 
   ctx.fillText(recordText, xRecord, yRecord);
   ctx.restore();
