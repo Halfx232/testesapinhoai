@@ -781,16 +781,16 @@ function criarObstaculo() {
  function drawUI() {
   ctx.save();
   ctx.fillStyle = "#000000";
-  ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
+  ctx.font = isMobile ? "bold 13px Arial" : "bold 19px Arial";
 
   // Score
-  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 18 : 28);
+  ctx.fillText("Score: " + pontuacao, 10, isMobile ? 17 : 28);
 
   // Record
   const recordText = "Record: " + highScore;
 
   let xRecord = isMobile ? (270 - 80) : (160 + 145);
-  let yRecord = isMobile ? 19 : 28;
+  let yRecord = isMobile ? 17 : 28;
 
   ctx.fillText(recordText, xRecord, yRecord);
   ctx.restore();
@@ -893,12 +893,12 @@ drawUI();                    // ← Score + Record
    // Nome da fase
 ctx.save();
 ctx.fillStyle = "#000000";
-ctx.font = isMobile ? "bold 15px Arial" : "bold 19px Arial";
+ctx.font = isMobile ? "bold 13px Arial" : "bold 19px Arial";
 
 const nomeFase = getFaseAtual().charAt(0).toUpperCase() + getFaseAtual().slice(1);
-const faseX = canvas.width - (isMobile ? 80 : 125);   // Empurrado mais para a direita
+const faseX = canvas.width - (isMobile ? 72 : 125);   // Empurrado mais para a direita
 
-ctx.fillText(nomeFase, faseX, isMobile ? 19 : 28);
+ctx.fillText(nomeFase, faseX, isMobile ? 17 : 28);
 ctx.restore();
 
       drawSapo();
