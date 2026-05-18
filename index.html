@@ -569,9 +569,9 @@ function resetGame() {
   startBanner.addEventListener('touchstart', startGameHandler);
   document.addEventListener('keydown', startGameHandler);
 
+  // ==================== CARREGAMENTO DO RECORDE ====================
   const savedHighScore = localStorage.getItem('sapinhoHighScore');
-  if (savedHighScore) {
-    highScore = parseInt(savedHighScore);
+  highScore = savedHighScore ? parseInt(savedHighScore) : 0;
   }
 
   resizeCanvas();
