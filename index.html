@@ -584,54 +584,58 @@ function resetGame() {
 function criarObstaculo() {
  const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
- // === OBSTÁCULO EMPILHADO (duplo) - Mais espaço depois dele ===
- if (faseAtual >= 2 && Math.random() < 0.20) { // Reduzi um pouco a chance e só a partir da fase 3
- const largura = 28 * scaleX;
- const alturaBase = 26 * scaleY;
- const posX = BASE_WIDTH * scaleX + 45;
+       // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO AJUSTADA ====================
+    
+function criarObstaculo() {
+  const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
- obstaculos.push({
- x: posX,
- y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 2.1,
- width: largura,
- height: alturaBase * 2.1,
- color: cor
- });
+  // === OBSTÁCULO EMPILHADO (duplo) - Volta a aparecer na fase 2 ===
+  if (faseAtual >= 1 && Math.random() < 0.21) {     // Fase 2 em diante
+    const largura = 28 * scaleX;
+    const alturaBase = 26 * scaleY;
+    const posX = BASE_WIDTH * scaleX + 45;
 
- obstaculos.push({
- x: posX,
- y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.9,
- width: largura * 0.85,
- height: alturaBase * 1.55,
- color : cor
- });
+    obstaculos.push({
+      x: posX,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 2.1,
+      width: largura,
+      height: alturaBase * 2.1,
+      color: cor
+    });
 
- return; // Sai da função (próximo obstáculo virá mais longe)
- }
+    obstaculos.push({
+      x: posX,
+      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.9,
+      width: largura * 0.85,
+      height: alturaBase * 1.55,
+      color: cor
+    });
 
- // === OBSTÁCULOS NORMAIS ===
- const quantidade = (Math.random() < 0.45) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
+    return; // Dá mais espaço depois do empilhado
+  }
 
- // ESPAÇAMENTO POR FASE (mais generoso nas fases difíceis)
- let espaco = 170 * scaleX; // base
+  // === OBSTÁCULOS NORMAIS (sequências) ===
+  const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
- if (faseAtual === 0) espaco = 260 * scaleX; // Primavera - fácil
- else if (faseAtual === 1) espaco = 235 * scaleX; // Verão
- else if (faseAtual === 2) espaco = 245 * scaleX; // Outono - Aumentado
- else espaco = 255 * scaleX; // Inverno - Bem espaçado
+  // ESPAÇAMENTO POR FASE - Ajustado para evitar blocos no meio
+  let espaco = 180 * scaleX;
 
- // Posição inicial
- let posicaoInicial = BASE_WIDTH * scaleX + 55;
+  if (faseAtual === 0) espaco = 260 * scaleX;     // Primavera
+  else if (faseAtual === 1) espaco = 235 * scaleX; // Verão
+  else if (faseAtual === 2) espaco = 252 * scaleX; // Outono - Aumentado
+  else espaco = 260 * scaleX;                      // Inverno
 
- for (let i = 0; i < quantidade; i++) {
- obstaculos.push({
- x: posicaoInicial + (i * espaco),
- y: ALTURA_CHAO - ESPESSURA_CHAO - 35 * scaleY,
- width: 32 * scaleX,
- height: 35 * scaleY,
- color: cor
- });
- }
+  let posicaoInicial = BASE_WIDTH * scaleX + 55;
+
+  for (let i = 0; i < quantidade; i++) {
+    obstaculos.push({
+      x: posicaoInicial + (i * espaco),
+      y: ALTURA_CHAO - ESPESSURA_CHAO - 35 * scaleY,
+      width: 32 * scaleX,
+      height: 35 * scaleY,
+      color: cor
+    });
+  }
 }
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
