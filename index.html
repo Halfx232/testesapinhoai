@@ -276,8 +276,8 @@ if (muteBtn) {
 
     // === CONFIGURAÇÃO NOVA - JOGO LONGO COM 4 FASES ===
     
-    const PONTUACAO_VITORIA = 2560;
-    const PONTOS_POR_FASE = 640;
+    const PONTUACAO_VITORIA = 5120;
+    const PONTOS_POR_FASE = 1280;
     
     // === DIFICULDADE DAS FASES (Fase 4 mais jogável) ===
     const DIFICULDADE_FASE = {
@@ -869,8 +869,8 @@ function criarObstaculo() {
 }
 
     // Mudança de fase
-if (pontuacao > 0 && pontuacao % 640 === 0 && faseAtual < 3) {
-  const proximaFase = Math.floor(pontuacao / 640);
+if (pontuacao > 0 && pontuacao % 1280 === 0 && faseAtual < 3) {
+  const proximaFase = Math.floor(pontuacao / 1280);
   if (proximaFase > faseAtual) {
     faseAtual = proximaFase;
     const config = DIFICULDADE_FASE[faseAtual];
