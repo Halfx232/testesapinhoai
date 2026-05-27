@@ -579,8 +579,10 @@ function resetGame() {
   positionBanners();
 }
     
-             // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO SEPARADA ====================
+                   // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - SEPARAÇÃO FORTE ====================
     
+let ultimoEraEmpilhado = false;   // Variável de controle
+
 function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
@@ -588,7 +590,7 @@ function criarObstaculo() {
   if (faseAtual >= 1 && Math.random() < 0.20) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
-    const posX = BASE_WIDTH * scaleX + 80;   // um pouco mais à direita
+    const posX = BASE_WIDTH * scaleX + 70;
 
     obstaculos.push({
       x: posX,
@@ -606,19 +608,26 @@ function criarObstaculo() {
       color: cor
     });
 
-    return; // Sai da função → próximo obstáculo virá mais longe
+    ultimoEraEmpilhado = true;
+    return;
   }
 
-  // === OBSTÁCULOS NORMAIS (só estes podem vir juntos) ===
+  // === OBSTÁCULOS NORMAIS ===
   const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // ESPAÇAMENTO POR FASE
+  // ESPAÇAMENTO - Maior se o anterior foi empilhado
   let espaco = 180 * scaleX;
 
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 235 * scaleX;
-  else if (faseAtual === 2) espaco = 252 * scaleX;
-  else espaco = 270 * scaleX;          // ← Fase 4 com mais espaço
+  else if (faseAtual === 2) espaco = 255 * scaleX;
+  else espaco = 265 * scaleX;                    // Fase 4
+
+  // Se o último foi empilhado, dá MUITO mais espaço
+  if (ultimoEraEmpilhado) {
+    espaco = Math.max(espaco, 340 * scaleX);   // Espaçamento forte após duplo
+    ultimoEraEmpilhado = false;
+  }
 
   let posicaoInicial = BASE_WIDTH * scaleX + 55;
 
@@ -631,7 +640,7 @@ function criarObstaculo() {
       color: cor
     });
   }
-}     
+}   
        
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
