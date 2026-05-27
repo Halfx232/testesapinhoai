@@ -579,17 +579,16 @@ function resetGame() {
   positionBanners();
 }
     
-            
-       // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO AJUSTADA ====================
+             // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO SEPARADA ====================
     
 function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
-  // === OBSTÁCULO EMPILHADO (duplo) - Volta a aparecer na fase 2 ===
-  if (faseAtual >= 1 && Math.random() < 0.21) {     // Fase 2 em diante
+  // === OBSTÁCULO EMPILHADO (duplo) ===
+  if (faseAtual >= 1 && Math.random() < 0.20) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
-    const posX = BASE_WIDTH * scaleX + 45;
+    const posX = BASE_WIDTH * scaleX + 80;   // um pouco mais à direita
 
     obstaculos.push({
       x: posX,
@@ -607,19 +606,19 @@ function criarObstaculo() {
       color: cor
     });
 
-    return; // Dá mais espaço depois do empilhado
+    return; // Sai da função → próximo obstáculo virá mais longe
   }
 
-  // === OBSTÁCULOS NORMAIS (sequências) ===
+  // === OBSTÁCULOS NORMAIS (só estes podem vir juntos) ===
   const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // ESPAÇAMENTO POR FASE - Ajustado para evitar blocos no meio
+  // ESPAÇAMENTO POR FASE
   let espaco = 180 * scaleX;
 
-  if (faseAtual === 0) espaco = 260 * scaleX;     // Primavera
-  else if (faseAtual === 1) espaco = 235 * scaleX; // Verão
-  else if (faseAtual === 2) espaco = 252 * scaleX; // Outono - Aumentado
-  else espaco = 260 * scaleX;                      // Inverno
+  if (faseAtual === 0) espaco = 260 * scaleX;
+  else if (faseAtual === 1) espaco = 235 * scaleX;
+  else if (faseAtual === 2) espaco = 252 * scaleX;
+  else espaco = 270 * scaleX;          // ← Fase 4 com mais espaço
 
   let posicaoInicial = BASE_WIDTH * scaleX + 55;
 
@@ -632,7 +631,8 @@ function criarObstaculo() {
       color: cor
     });
   }
-}
+}     
+       
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
    
