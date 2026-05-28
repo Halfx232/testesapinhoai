@@ -579,7 +579,7 @@ function resetGame() {
   positionBanners();
 }
     
-        // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - ESPAÇAMENTO FORTE ====================
+              // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - AJUSTE FORTE NA FASE 3 ====================
     
 let ultimoEraEmpilhado = false;
 
@@ -587,10 +587,10 @@ function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
   // === OBSTÁCULO EMPILHADO (duplo) ===
-  if (faseAtual >= 1 && Math.random() < 0.20) {
+  if (faseAtual >= 1 && Math.random() < 0.19) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
-    const posX = BASE_WIDTH * scaleX + 100;
+    const posX = BASE_WIDTH * scaleX + 110;
 
     obstaculos.push({
       x: posX,
@@ -615,17 +615,17 @@ function criarObstaculo() {
   // === OBSTÁCULOS NORMAIS ===
   const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // ESPAÇAMENTO ENTRE BLOCOS NORMAIS (principal ajuste agora)
-  let espaco = 195 * scaleX;
+  // ESPAÇAMENTO - Bem maior na fase 3
+  let espaco = 200 * scaleX;
 
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 240 * scaleX;
-  else if (faseAtual === 2) espaco = 275 * scaleX;   // Fase 3 - aumentado
-  else espaco = 285 * scaleX;                        // Fase 4 - aumentado
+  else if (faseAtual === 2) espaco = 295 * scaleX;   // ← Fase 3 bem espaçada
+  else espaco = 280 * scaleX;                        // Fase 4
 
-  // Espaçamento ainda maior se veio logo após um empilhado
+  // Espaçamento gigante após bloco duplo
   if (ultimoEraEmpilhado) {
-    espaco = 450 * scaleX;
+    espaco = 460 * scaleX;
     ultimoEraEmpilhado = false;
   }
 
@@ -640,7 +640,7 @@ function criarObstaculo() {
       color: cor
     });
   }
-} 
+}
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
    
