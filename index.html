@@ -579,18 +579,21 @@ function resetGame() {
   positionBanners();
 }
     
-  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - COPIANDO LÓGICA DA FASE 2 ====================
+             // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO ESTÁVEL ====================
     
 let ultimoEraEmpilhado = false;
+let cooldownGrupo = 0;
 
 function criarObstaculo() {
+  if (tempo < cooldownGrupo) return;
+
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
-  // === OBSTÁCULO EMPILHADO (duplo) - igual fase 2 ===
-  if (faseAtual >= 1 && Math.random() < 0.21) {
+  // === OBSTÁCULO EMPILHADO (duplo) ===
+  if (faseAtual >= 1 && Math.random() < 0.20) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
-    const posX = BASE_WIDTH * scaleX + 120;
+    const posX = BASE_WIDTH * scaleX + 130;
 
     obstaculos.push({
       x: posX,
@@ -609,24 +612,23 @@ function criarObstaculo() {
     });
 
     ultimoEraEmpilhado = true;
+    cooldownGrupo = tempo + 50;
     return;
   }
 
   // === OBSTÁCULOS NORMAIS ===
   let quantidade = 1;
-
   if (faseAtual === 0) quantidade = 2;
-  else if (faseAtual === 1) quantidade = 3;     // Fase 2 - igual ao que estava bom
+  else if (faseAtual === 1) quantidade = 3;     // Fase 2 - como estava bom
   else if (faseAtual === 2) quantidade = 4;     // Fase 3
   else if (faseAtual === 3) quantidade = 5;     // Fase 4
 
-  // ESPAÇAMENTO - Copiado da fase 2 + aumento progressivo
+  // ESPAÇAMENTO
   let espaco = 235 * scaleX;
-
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 235 * scaleX;
-  else if (faseAtual === 2) espaco = 310 * scaleX;   // Fase 3
-  else espaco = 300 * scaleX;                        // Fase 4
+  else if (faseAtual === 2) espaco = 310 * scaleX;
+  else espaco = 300 * scaleX;
 
   if (ultimoEraEmpilhado) {
     espaco = 460 * scaleX;
@@ -644,6 +646,8 @@ function criarObstaculo() {
       color: cor
     });
   }
+
+  cooldownGrupo = tempo + 32;   // controla o ritmo dos grupos
 }
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
