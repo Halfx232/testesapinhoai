@@ -579,13 +579,18 @@ function resetGame() {
   positionBanners();
 }
     
-             // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - CONTROLE DE SEQUÊNCIA ====================
+  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - CONTROLE FORTE FASE 3 ====================
     
 let ultimoEraEmpilhado = false;
-let tempoUltimoGrupo = 0;        // Novo controle
+let cooldownProximoGrupo = 0;   // Novo controle principal
 
 function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
+
+  // Bloqueia criação se ainda estiver no cooldown
+  if (tempo < cooldownProximoGrupo) {
+    return;
+  }
 
   // === OBSTÁCULO EMPILHADO (duplo) ===
   if (faseAtual >= 1 && Math.random() < 0.18) {
@@ -610,30 +615,24 @@ function criarObstaculo() {
     });
 
     ultimoEraEmpilhado = true;
-    tempoUltimoGrupo = tempo;
+    cooldownProximoGrupo = tempo + 55;   // cooldown após duplo
     return;
   }
 
-  // === CONTROLE PARA EVITAR BLOCOS NO MEIO DA SEQUÊNCIA ===
-  if (tempo - tempoUltimoGrupo < 35 && faseAtual >= 2) {
-    return;   // ← Impede criação de novo obstáculo muito cedo após um grupo
-  }
-
   // === OBSTÁCULOS NORMAIS ===
-  let quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
+  let quantidade = (Math.random() < 0.45) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // Força sequência completa nas fases difíceis
-  if (faseAtual === 2 && Math.random() < 0.70) quantidade = SEQUENCIA_POR_FASE[2];
-  if (faseAtual === 3 && Math.random() < 0.65) quantidade = SEQUENCIA_POR_FASE[3];
+  // Força sequência cheia na fase 3 e 4
+  if (faseAtual === 2) quantidade = SEQUENCIA_POR_FASE[2];     // sempre 4 na fase 3
+  if (faseAtual === 3) quantidade = SEQUENCIA_POR_FASE[3];     // sempre 5 na fase 4
 
   // ESPAÇAMENTO
   let espaco = 215 * scaleX;
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 255 * scaleX;
-  else if (faseAtual === 2) espaco = 380 * scaleX;   // Fase 3 (seu ajuste)
-  else espaco = 360 * scaleX;                        // Fase 4 (seu ajuste)
+  else if (faseAtual === 2) espaco = 380 * scaleX;   // Fase 3
+  else espaco = 360 * scaleX;                        // Fase 4
 
-  // Após empilhado
   if (ultimoEraEmpilhado) {
     espaco = 530 * scaleX;
     ultimoEraEmpilhado = false;
@@ -651,7 +650,8 @@ function criarObstaculo() {
     });
   }
 
-  tempoUltimoGrupo = tempo;
+  // Define cooldown para o próximo grupo
+  cooldownProximoGrupo = tempo + 38;   // Ajuste este número se precisar
 }
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
