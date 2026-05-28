@@ -579,7 +579,7 @@ function resetGame() {
   positionBanners();
 }
     
-  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO REFORÇADA ====================
+        // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - ESPAÇAMENTO FORTE ====================
     
 let ultimoEraEmpilhado = false;
 
@@ -615,17 +615,17 @@ function criarObstaculo() {
   // === OBSTÁCULOS NORMAIS ===
   const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // ESPAÇAMENTO BASE POR FASE
-  let espaco = 190 * scaleX;
+  // ESPAÇAMENTO ENTRE BLOCOS NORMAIS (principal ajuste agora)
+  let espaco = 195 * scaleX;
 
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 240 * scaleX;
-  else if (faseAtual === 2) espaco = 265 * scaleX;   // Fase 3 reforçada
-  else espaco = 275 * scaleX;                        // Fase 4
+  else if (faseAtual === 2) espaco = 275 * scaleX;   // Fase 3 - aumentado
+  else espaco = 285 * scaleX;                        // Fase 4 - aumentado
 
-  // === SEPARAÇÃO MUITO FORTE APÓS EMPILHADO ===
+  // Espaçamento ainda maior se veio logo após um empilhado
   if (ultimoEraEmpilhado) {
-    espaco = 430 * scaleX;      // ← Aumentado bastante
+    espaco = 450 * scaleX;
     ultimoEraEmpilhado = false;
   }
 
@@ -640,7 +640,7 @@ function criarObstaculo() {
       color: cor
     });
   }
-} 
+}
        
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
