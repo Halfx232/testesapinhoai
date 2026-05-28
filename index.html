@@ -579,7 +579,7 @@ function resetGame() {
   positionBanners();
 }
     
-             // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - ESPAÇAMENTO MAIOR ====================
+                   // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - SEPARAÇÃO REFORÇADA ====================
     
 let ultimoEraEmpilhado = false;
 
@@ -590,7 +590,7 @@ function criarObstaculo() {
   if (faseAtual >= 1 && Math.random() < 0.18) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
-    const posX = BASE_WIDTH * scaleX + 120;
+    const posX = BASE_WIDTH * scaleX + 130;   // mais afastado
 
     obstaculos.push({
       x: posX,
@@ -615,17 +615,17 @@ function criarObstaculo() {
   // === OBSTÁCULOS NORMAIS ===
   const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // ESPAÇAMENTO ENTRE BLOCOS NORMAIS - AUMENTADO
-  let espaco = 205 * scaleX;
+  // ESPAÇAMENTO ENTRE BLOCOS NORMAIS
+  let espaco = 210 * scaleX;
 
   if (faseAtual === 0) espaco = 260 * scaleX;
-  else if (faseAtual === 1) espaco = 255 * scaleX;   // Fase 2 - aumentado
-  else if (faseAtual === 2) espaco = 305 * scaleX;   // Fase 3 - bem espaçado
-  else espaco = 290 * scaleX;                        // Fase 4
+  else if (faseAtual === 1) espaco = 255 * scaleX;
+  else if (faseAtual === 2) espaco = 310 * scaleX;   // Fase 3
+  else espaco = 300 * scaleX;                        // Fase 4
 
-  // Espaçamento gigante após duplo
+  // === SEPARAÇÃO MUITO MAIOR APÓS O BLOCO DUplo ===
   if (ultimoEraEmpilhado) {
-    espaco = 480 * scaleX;
+    espaco = 520 * scaleX;     // ← Aumentado bastante
     ultimoEraEmpilhado = false;
   }
 
