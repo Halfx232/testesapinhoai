@@ -579,7 +579,7 @@ function resetGame() {
   positionBanners();
 }
     
-                    // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - BASEADA NA FASE 2 ====================
+  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - COPIANDO LÓGICA DA FASE 2 ====================
     
 let ultimoEraEmpilhado = false;
 
@@ -615,22 +615,21 @@ function criarObstaculo() {
   // === OBSTÁCULOS NORMAIS ===
   let quantidade = 1;
 
-  if (faseAtual === 0) quantidade = 2;           // Fase 1
-  else if (faseAtual === 1) quantidade = 3;      // Fase 2 (igual ao que estava bom)
-  else if (faseAtual === 2) quantidade = 4;      // Fase 3 - sempre 4
-  else if (faseAtual === 3) quantidade = 5;      // Fase 4 - sempre 5
+  if (faseAtual === 0) quantidade = 2;
+  else if (faseAtual === 1) quantidade = 3;     // Fase 2 - igual ao que estava bom
+  else if (faseAtual === 2) quantidade = 4;     // Fase 3
+  else if (faseAtual === 3) quantidade = 5;     // Fase 4
 
-  // ESPAÇAMENTO (baseado no que funciona na fase 2)
+  // ESPAÇAMENTO - Copiado da fase 2 + aumento progressivo
   let espaco = 235 * scaleX;
 
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 235 * scaleX;
-  else if (faseAtual === 2) espaco = 305 * scaleX;   // Fase 3
-  else espaco = 295 * scaleX;                        // Fase 4
+  else if (faseAtual === 2) espaco = 310 * scaleX;   // Fase 3
+  else espaco = 300 * scaleX;                        // Fase 4
 
-  // Mais espaço após o duplo
   if (ultimoEraEmpilhado) {
-    espaco = 450 * scaleX;
+    espaco = 460 * scaleX;
     ultimoEraEmpilhado = false;
   }
 
