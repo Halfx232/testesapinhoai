@@ -579,21 +579,18 @@ function resetGame() {
   positionBanners();
 }
     
-  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO LIMPA FASE 3 ====================
+              // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO SIMPLES E ESTÁVEL ====================
     
 let ultimoEraEmpilhado = false;
-let cooldownProximoGrupo = 0;
 
 function criarObstaculo() {
-  if (tempo < cooldownProximoGrupo) return;
-
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
   // === OBSTÁCULO EMPILHADO (duplo) ===
-  if (faseAtual >= 1 && Math.random() < 0.17) {
+  if (faseAtual >= 1 && Math.random() < 0.20) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
-    const posX = BASE_WIDTH * scaleX + 150;
+    const posX = BASE_WIDTH * scaleX + 120;
 
     obstaculos.push({
       x: posX,
@@ -612,27 +609,28 @@ function criarObstaculo() {
     });
 
     ultimoEraEmpilhado = true;
-    cooldownProximoGrupo = tempo + 65;
     return;
   }
 
   // === OBSTÁCULOS NORMAIS ===
-  let quantidade = SEQUENCIA_POR_FASE[faseAtual];   // Sempre sequência completa
+  let quantidade = 1;
 
-  // Reduz um pouco na fase 1 e 2
-  if (faseAtual <= 1 && Math.random() < 0.35) {
-    quantidade = 1;
-  }
+  if (faseAtual === 0) quantidade = 2;
+  else if (faseAtual === 1) quantidade = SEQUENCIA_POR_FASE[1];   // Fase 2 (igual ao que estava bom)
+  else if (faseAtual === 2) quantidade = 4;                       // Fase 3 - sempre 4
+  else if (faseAtual === 3) quantidade = 5;                       // Fase 4 - sempre 5
 
-  // ESPAÇAMENTO
-  let espaco = 220 * scaleX;
+  // ESPAÇAMENTO (baseado no que estava bom na fase 2)
+  let espaco = 235 * scaleX;
+
   if (faseAtual === 0) espaco = 260 * scaleX;
-  else if (faseAtual === 1) espaco = 255 * scaleX;
-  else if (faseAtual === 2) espaco = 390 * scaleX;   // Fase 3 - bem espaçada
-  else espaco = 365 * scaleX;                        // Fase 4
+  else if (faseAtual === 1) espaco = 235 * scaleX;
+  else if (faseAtual === 2) espaco = 295 * scaleX;   // Fase 3
+  else espaco = 285 * scaleX;                        // Fase 4
 
+  // Mais espaço após empilhado
   if (ultimoEraEmpilhado) {
-    espaco = 550 * scaleX;
+    espaco = 420 * scaleX;
     ultimoEraEmpilhado = false;
   }
 
@@ -646,15 +644,6 @@ function criarObstaculo() {
       height: 35 * scaleY,
       color: cor
     });
-  }
-
-  // Cooldown maior na fase 3
-  if (faseAtual === 2) {
-    cooldownProximoGrupo = tempo + 48;
-  } else if (faseAtual === 3) {
-    cooldownProximoGrupo = tempo + 45;
-  } else {
-    cooldownProximoGrupo = tempo + 38;
   }
 }
         
