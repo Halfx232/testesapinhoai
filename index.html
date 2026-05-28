@@ -579,7 +579,7 @@ function resetGame() {
   positionBanners();
 }
     
-  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - CORREÇÃO FINAL NAS SEQUÊNCIAS ====================
+  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - FOCO NA FASE 3 ====================
     
 let ultimoEraEmpilhado = false;
 
@@ -590,7 +590,7 @@ function criarObstaculo() {
   if (faseAtual >= 1 && Math.random() < 0.18) {
     const largura = 28 * scaleX;
     const alturaBase = 26 * scaleY;
-    const posX = BASE_WIDTH * scaleX + 130;
+    const posX = BASE_WIDTH * scaleX + 140;
 
     obstaculos.push({
       x: posX,
@@ -615,22 +615,25 @@ function criarObstaculo() {
   // === OBSTÁCULOS NORMAIS ===
   let quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // Reduzimos a chance de bloco único nas fases difíceis
-  if (faseAtual >= 2 && Math.random() < 0.35) {
-    quantidade = SEQUENCIA_POR_FASE[faseAtual];   // força sequência completa
+  // FORÇA SEQUÊNCIA COMPLETA NA FASE 3 (reduz blocos isolados)
+  if (faseAtual === 2 && Math.random() < 0.65) {
+    quantidade = SEQUENCIA_POR_FASE[2];   // força 4 blocos
+  }
+  if (faseAtual === 3 && Math.random() < 0.60) {
+    quantidade = SEQUENCIA_POR_FASE[3];   // força 5 blocos
   }
 
-  // ESPAÇAMENTO ENTRE BLOCOS NORMAIS
+  // ESPAÇAMENTO
   let espaco = 215 * scaleX;
 
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 255 * scaleX;
-  else if (faseAtual === 2) espaco = 320 * scaleX;   // Fase 3 - bem maior
-  else espaco = 305 * scaleX;                        // Fase 4
+  else if (faseAtual === 2) espaco = 335 * scaleX;   // ← Fase 3 bem espaçada
+  else espaco = 310 * scaleX;                        // Fase 4
 
-  // Espaçamento gigante após duplo
+  // Após duplo
   if (ultimoEraEmpilhado) {
-    espaco = 520 * scaleX;
+    espaco = 530 * scaleX;
     ultimoEraEmpilhado = false;
   }
 
