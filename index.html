@@ -579,9 +579,10 @@ function resetGame() {
   positionBanners();
 }
     
-  // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - FOCO NA FASE 3 ====================
+             // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - CONTROLE DE SEQUÊNCIA ====================
     
 let ultimoEraEmpilhado = false;
+let tempoUltimoGrupo = 0;        // Novo controle
 
 function criarObstaculo() {
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
@@ -609,29 +610,30 @@ function criarObstaculo() {
     });
 
     ultimoEraEmpilhado = true;
+    tempoUltimoGrupo = tempo;
     return;
+  }
+
+  // === CONTROLE PARA EVITAR BLOCOS NO MEIO DA SEQUÊNCIA ===
+  if (tempo - tempoUltimoGrupo < 35 && faseAtual >= 2) {
+    return;   // ← Impede criação de novo obstáculo muito cedo após um grupo
   }
 
   // === OBSTÁCULOS NORMAIS ===
   let quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // FORÇA SEQUÊNCIA COMPLETA NA FASE 3 (reduz blocos isolados)
-  if (faseAtual === 2 && Math.random() < 0.65) {
-    quantidade = SEQUENCIA_POR_FASE[2];   // força 4 blocos
-  }
-  if (faseAtual === 3 && Math.random() < 0.60) {
-    quantidade = SEQUENCIA_POR_FASE[3];   // força 5 blocos
-  }
+  // Força sequência completa nas fases difíceis
+  if (faseAtual === 2 && Math.random() < 0.70) quantidade = SEQUENCIA_POR_FASE[2];
+  if (faseAtual === 3 && Math.random() < 0.65) quantidade = SEQUENCIA_POR_FASE[3];
 
   // ESPAÇAMENTO
   let espaco = 215 * scaleX;
-
   if (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 255 * scaleX;
-  else if (faseAtual === 2) espaco = 380 * scaleX;   // ← Fase 3 bem espaçada
-  else espaco = 360 * scaleX;                        // Fase 4
+  else if (faseAtual === 2) espaco = 380 * scaleX;   // Fase 3 (seu ajuste)
+  else espaco = 360 * scaleX;                        // Fase 4 (seu ajuste)
 
-  // Após duplo
+  // Após empilhado
   if (ultimoEraEmpilhado) {
     espaco = 530 * scaleX;
     ultimoEraEmpilhado = false;
@@ -648,6 +650,8 @@ function criarObstaculo() {
       color: cor
     });
   }
+
+  tempoUltimoGrupo = tempo;
 }
         
        // ==================== CONFIGURAÇÃO DE SEQUÊNCIA POR FASE ====================
