@@ -579,55 +579,74 @@ function resetGame() {
   positionBanners();
 }
     
-        // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO - VERSÃO ATUALIZADA ====================
-    
+        // ==================== FUNÇÃO PARA CRIAR OBSTÁCULO ====================
+
+// Distâncias mínimas de segurança entre o último obstáculo e o novo spawn
+// (em pixels base, sem scaleX — multiplicamos abaixo)
+const DIST_MINIMA_NORMAL    = 290;   // após bloco único ou sequência
+const DIST_MINIMA_EMPILHADO = 360;   // empilhado precisa de mais "respiro"
+
 function criarObstaculo() {
+
+  // ── Ponto de spawn base (borda direita da tela) ──────────────────────
+  const xSpawn = BASE_WIDTH * scaleX;
+
+  // ── Checa o obstáculo mais à direita já existente ────────────────────
+  // (inclui x + width para pegar a borda direita real do bloco)
+  const xMaisADireita = obstaculos.reduce(
+    (max, obs) => Math.max(max, obs.x + obs.width),
+    0
+  );
+
+  // ── Decide PRIMEIRO o tipo, para usar a distância correta ────────────
+  const seraEmpilhado = faseAtual >= 1 && Math.random() < 0.23;
+
+  const distMinima = (seraEmpilhado ? DIST_MINIMA_EMPILHADO : DIST_MINIMA_NORMAL) * scaleX;
+
+  // ── Guarda de segurança: só cria se houver espaço suficiente ─────────
+  if (xMaisADireita > xSpawn - distMinima) return;
+
+  // ── Cor aleatória ─────────────────────────────────────────────────────
   const cor = ["#d32f2f", "#fbc02d", "#7b1fa2", "#00796b"][Math.floor(Math.random() * 4)];
 
-  // Obstáculo empilhado (a partir da fase 2)
-  
-  if (faseAtual >= 1 && Math.random() < 0.23) {
-    const largura = 28 * scaleX;
+  // ── Obstáculo empilhado ───────────────────────────────────────────────
+  if (seraEmpilhado) {
+    const largura    = 28 * scaleX;
     const alturaBase = 26 * scaleY;
 
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 45,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 2.1,
-      width: largura,
+      x:      xSpawn + 45,
+      y:      ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 2.1,
+      width:  largura,
       height: alturaBase * 2.1,
-      color: cor
+      color:  cor
     });
-
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 45,
-      y: ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.9,
-      width: largura * 0.85,
+      x:      xSpawn + 45,
+      y:      ALTURA_CHAO - ESPESSURA_CHAO - alturaBase * 3.9,
+      width:  largura * 0.85,
       height: alturaBase * 1.55,
-      color: cor
+      color:  cor
     });
     return;
   }
 
-  // Decide se é sequência ou único
-  
-  const quantidade = (Math.random() < 0.48) ? SEQUENCIA_POR_FASE[faseAtual] : 1;
+  // ── Sequência ou bloco único ──────────────────────────────────────────
+  const quantidade = Math.random() < 0.48 ? SEQUENCIA_POR_FASE[faseAtual] : 1;
 
-  // ESPAÇAMENTO - Valor grande e direto
-  
-  let espaco = 145 * scaleX;     // ← Aumentado bastante
-
-  if (faseAtual === 0) espaco = 260 * scaleX;   // Fase 1
+  let espaco;
+  if      (faseAtual === 0) espaco = 260 * scaleX;
   else if (faseAtual === 1) espaco = 240 * scaleX;
   else if (faseAtual === 2) espaco = 225 * scaleX;
-  else espaco = 210 * scaleX;                   // Fase 4
+  else                      espaco = 210 * scaleX;
 
   for (let i = 0; i < quantidade; i++) {
     obstaculos.push({
-      x: BASE_WIDTH * scaleX + 55 + (i * espaco),   // <--- Ponto principal
-      y: ALTURA_CHAO - ESPESSURA_CHAO - 35 * scaleY,
-      width: 32 * scaleX,
+      x:      xSpawn + 55 + (i * espaco),
+      y:      ALTURA_CHAO - ESPESSURA_CHAO - 35 * scaleY,
+      width:  32 * scaleX,
       height: 35 * scaleY,
-      color: cor
+      color:  cor
     });
   }
 }
